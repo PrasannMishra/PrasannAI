@@ -1,0 +1,7 @@
+proper response formating , as it is markdown, it should be properly visible as in git preview for readme file 
+
+on clearing prompt , previous response shols also get clear.
+
+create chatting app that uses history and context until chat is closed.
+
+create a prompt builder that can be sent from UI, as same api can be used by different applications

@@ -3,7 +3,16 @@ export class BaseProvider {
         this.config = config;
     }
 
+    getModel(options = {}) {
+        return options.model || this.model || null;
+    }
+
     async generateText(prompt, options = {}) {
         throw new Error('generateText must be implemented by a provider');
+    }
+
+    async generateChat(messages, options = {}) {
+        const prompt = Array.isArray(messages) ? messages.map((message) => `${message.role}: ${message.content}`).join('\n') : '';
+        return this.generateText(prompt, options);
     }
 }

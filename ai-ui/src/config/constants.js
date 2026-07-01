@@ -13,9 +13,10 @@ export const INPUT_CONSTRAINTS = {
 };
 
 export const API_CONFIG = {
-    endpoint: '/generate',
+    baseUrl: (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, ''),
+    endpoint: '/chat',
     method: 'POST',
-    timeout: 30000, // 30 seconds
+    timeout: Number(import.meta.env.VITE_API_TIMEOUT || 300000),
 };
 
 export const UI_TEXT = {

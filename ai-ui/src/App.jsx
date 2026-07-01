@@ -1,32 +1,38 @@
 import { useState } from 'react';
-import { Header } from './components/Header/Header.jsx';
-import { PromptForm } from './components/PromptForm/PromptForm.jsx';
-import { ResponseSection } from './components/ResponseSection/ResponseSection.jsx';
+import { ChatMessages } from './components/ChatMessages/ChatMessages.jsx';
+import { ChatComposer } from './components/ChatComposer/ChatComposer.jsx';
+import { ConversationList } from './components/ConversationList/ConversationList.jsx';
 import { ErrorBox } from './components/ErrorBox/ErrorBox.jsx';
 import { LoadingState } from './components/LoadingState/LoadingState.jsx';
-import { EmptyState } from './components/EmptyState/EmptyState.jsx';
 import { useGenerateResponse } from './hooks/useGenerateResponse.js';
 import { DEFAULT_PROVIDER, DEFAULT_MODEL } from './config/providers.js';
 import { DEFAULT_SETTINGS } from './config/constants.js';
+import { FaAngleDoubleRight } from "react-icons/fa";
 import './styles/globals.css';
 
 export default function App() {
-    // Form state
-    const [prompt, setPrompt] = useState('');
     const [provider, setProvider] = useState(DEFAULT_PROVIDER);
     const [model, setModel] = useState(DEFAULT_MODEL);
     const [maxTokens, setMaxTokens] = useState(DEFAULT_SETTINGS.maxTokens);
     const [temperature, setTemperature] = useState(DEFAULT_SETTINGS.temperature);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    // Response state
-    const { response, error, loading, responseRef, handleSubmit: generateResponse } = useGenerateResponse();
+    const {
+        conversations,
+        activeConversationId,
+        messages,
+        error,
+        loading,
+        responseRef,
+        handleSubmit,
+        selectConversation,
+        createConversation,
+        clearConversation,
+    } = useGenerateResponse();
 
-    /**
-     * Handle form submission
-     */
-    const handleSubmit = (event) => {
-        generateResponse(event, {
-            prompt,
+    const sendMessage = (message) => {
+        handleSubmit({
+            message,
             provider,
             model,
             maxTokens,
@@ -35,18 +41,56 @@ export default function App() {
     };
 
     return (
-        <div className="app-container">
-            {/* Header */}
-            <Header />
+        <div className="app-wrapper">
+            {!sidebarOpen && <div style={{ marginTop: '10px' }} className="sidebar-toggle-tooltip" onClick={() => setSidebarOpen(!sidebarOpen)}><FaAngleDoubleRight /></div>}
+            <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+                <div className="sidebar-header">
+                    <button className="new-chat-btn" onClick={createConversation}>
+                        <span>✎</span> New chat
+                    </button>
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                        ☰
+                    </button>
 
-            {/* Main Content Grid */}
-            <div className="content-grid">
-                {/* Left Column: Form */}
-                <div className="form-column">
-                    <div className="card">
-                        <PromptForm
-                            prompt={prompt}
-                            onPromptChange={setPrompt}
+                </div>
+
+                <nav className="sidebar-nav">
+                    <ConversationList
+                        conversations={conversations}
+                        activeConversationId={activeConversationId}
+                        onSelectConversation={selectConversation}
+                        onNewConversation={createConversation}
+                        onClearConversation={clearConversation}
+                    />
+                </nav>
+
+                <div className="sidebar-footer">
+                    <div className="user-profile">
+                        <div className="avatar">PM</div>
+                        <div className="user-info">
+                            <p className="user-name">Prasann Mishra</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <main className="main-content">
+                <header className="main-header">
+                    <h1>PrasannAI</h1>
+                    <div className="header-actions">
+                        <button className="icon-btn">⇧</button>
+                        <button className="icon-btn">⋯</button>
+                    </div>
+                </header>
+
+                <div className="chat-container">
+                    <ChatMessages messages={messages} loading={loading} />
+
+                    {error && <ErrorBox error={error} />}
+
+                    <div ref={responseRef} className="composer-wrapper">
+                        <ChatComposer
+                            onSend={sendMessage}
+                            loading={loading}
                             provider={provider}
                             onProviderChange={setProvider}
                             model={model}
@@ -55,23 +99,10 @@ export default function App() {
                             onMaxTokensChange={setMaxTokens}
                             temperature={temperature}
                             onTemperatureChange={setTemperature}
-                            loading={loading}
-                            onSubmit={handleSubmit}
                         />
                     </div>
                 </div>
-
-                {/* Right Column: Response */}
-                <div className="response-column">
-                    {error && <div className="card"><ErrorBox error={error} /></div>}
-
-                    {loading && <div className="card"><LoadingState /></div>}
-
-                    {response && <div className="card"><ResponseSection response={response} responseRef={responseRef} /></div>}
-
-                    {!response && !error && !loading && <div className="card"><EmptyState /></div>}
-                </div>
-            </div>
+            </main>
         </div>
     );
 }

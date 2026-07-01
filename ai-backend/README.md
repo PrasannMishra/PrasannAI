@@ -6,7 +6,8 @@ This folder contains the AI backend for the PrasannAI project.
 
 - Provides a provider-based abstraction for model inference
 - Supports local Ollama models, Anthropic cloud, and OpenAI-compatible local servers
-- Exposes both CLI and REST-style interfaces
+- Exposes both CLI and REST-style interfaces for single prompts and chat-style conversations
+- Uses a service layer and provider interface to keep the backend extensible and maintainable
 
 ## Setup
 
@@ -70,6 +71,14 @@ Then call the API:
 curl -X POST http://127.0.0.1:3000/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Summarize this text", "provider":"ollama", "model":"qwen2.5:3b"}'
+```
+
+Chat-style requests are also supported:
+
+```bash
+curl -X POST http://127.0.0.1:3000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"system","content":"You are a helpful assistant."},{"role":"user","content":"Explain caching simply."}],"provider":"ollama"}'
 ```
 
 ## Supported Providers

@@ -1,0 +1,743 @@
+# AI Learning Hub - Product Requirement Document (v1)
+
+## Vision
+
+Build a local-first Learning Management System (LMS) where all learning content is stored as MDX files.
+
+The application should require **zero code changes** when adding a new lesson.
+
+Adding a lesson should only involve copying a new folder into the `content/` directory.
+
+The application should automatically:
+
+* Detect the lesson
+* Index it
+* Display it in the dashboard
+* Add it to search
+* Update progress
+* Link it to projects
+* Show it in the roadmap
+
+No backend is required for Version 1.
+
+---
+
+# Primary Goals
+
+1. Local-first
+2. Git-friendly
+3. Offline capable
+4. Zero database
+5. Zero backend
+6. AI-ready architecture
+7. Production-quality UI
+8. Easily extensible
+
+---
+
+# Tech Stack
+
+Framework:
+React + Vite + TypeScript
+
+Routing:
+React Router
+
+Styling:
+Tailwind CSS
+
+Markdown:
+MDX
+
+Syntax Highlighting:
+Shiki (preferred) or Prism
+
+Icons:
+Lucide React
+
+State:
+Zustand
+
+Search:
+FlexSearch or MiniSearch
+
+Persistence:
+LocalStorage
+
+Charts:
+Recharts
+
+Animations:
+Framer Motion
+
+---
+
+# Folder Structure
+
+project/
+
+src/
+
+components/
+
+pages/
+
+hooks/
+
+utils/
+
+types/
+
+content/
+
+day-001/
+
+lesson.mdx
+
+assets/
+
+day-002/
+
+lesson.mdx
+
+assets/
+
+projects/
+
+project-pr-reviewer/
+
+project.mdx
+
+assets/
+
+resources/
+
+glossary/
+
+---
+
+# Lesson Structure
+
+Each lesson contains:
+
+lesson.mdx
+
+assets/
+
+images
+
+diagrams
+
+code
+
+pdf
+
+downloads
+
+---
+
+# Front Matter
+
+Every lesson must begin with front matter.
+
+Required fields:
+
+day
+
+title
+
+description
+
+difficulty
+
+estimatedTime
+
+status
+
+topics
+
+prerequisites
+
+resources
+
+assignment
+
+project
+
+interviewLevel
+
+tags
+
+summary
+
+Example:
+
+day: 5
+
+title: Context Engineering
+
+difficulty: Intermediate
+
+estimatedTime: 2 Hours
+
+topics:
+
+Context
+
+Prompt Engineering
+
+assignment: true
+
+project: AI PR Reviewer
+
+status: completed
+
+---
+
+# Dashboard
+
+Dashboard displays:
+
+Overall Progress
+
+Completed Days
+
+Current Day
+
+Remaining Days
+
+Recent Lessons
+
+Projects
+
+Interview Progress
+
+Difficulty Breakdown
+
+Estimated Remaining Hours
+
+Quick Resume Button
+
+Search Bar
+
+Today's Lesson
+
+---
+
+# Lesson Page
+
+Each lesson page should support:
+
+Table of Contents
+
+Sticky Sidebar
+
+Breadcrumb
+
+Reading Progress
+
+Previous Lesson
+
+Next Lesson
+
+Estimated Time
+
+Difficulty Badge
+
+Tags
+
+Related Lessons
+
+Resources
+
+Assignments
+
+Interview Questions
+
+Downloads
+
+Copy Code Buttons
+
+Syntax Highlighting
+
+Mermaid Diagrams
+
+Callout Boxes
+
+Image Zoom
+
+Dark Mode
+
+---
+
+# Sidebar
+
+Grouped by:
+
+Introduction
+
+Core AI
+
+LLMs
+
+Prompt Engineering
+
+Context Engineering
+
+RAG
+
+Embeddings
+
+Agents
+
+MCP
+
+Projects
+
+Interview Preparation
+
+Architecture
+
+Cheat Sheets
+
+Resources
+
+---
+
+# Search
+
+Global search should search:
+
+Titles
+
+Headings
+
+Content
+
+Code Blocks
+
+Assignments
+
+Projects
+
+Resources
+
+Tags
+
+Topics
+
+Search should be instant.
+
+---
+
+# Progress Tracking
+
+Store locally.
+
+Track:
+
+Completed Lessons
+
+Reading Percentage
+
+Bookmarks
+
+Favorites
+
+Last Opened Lesson
+
+Quiz Scores
+
+Assignments Completed
+
+---
+
+# Bookmarks
+
+User can bookmark:
+
+Entire lessons
+
+Code snippets
+
+Headings
+
+Projects
+
+Assignments
+
+---
+
+# Notes
+
+Each lesson supports personal notes.
+
+Stored locally.
+
+Markdown editor.
+
+Autosave.
+
+---
+
+# Code Blocks
+
+Support:
+
+Copy Button
+
+Line Numbers
+
+Language Detection
+
+Collapsible Blocks
+
+---
+
+# Mermaid
+
+Render Mermaid diagrams automatically.
+
+---
+
+# Assignments
+
+Every lesson supports assignments.
+
+Assignment card contains:
+
+Title
+
+Description
+
+Difficulty
+
+Estimated Time
+
+Status
+
+Solution Link
+
+---
+
+# Projects
+
+Dedicated Projects page.
+
+Each project contains:
+
+Overview
+
+Architecture
+
+Lessons Used
+
+Tech Stack
+
+GitHub Link
+
+Status
+
+Progress
+
+---
+
+# Resources
+
+Dedicated resources page.
+
+Books
+
+Videos
+
+Blogs
+
+Official Docs
+
+Grouped by topic.
+
+---
+
+# Glossary
+
+Dedicated glossary.
+
+Alphabetical.
+
+Searchable.
+
+---
+
+# Cheat Sheets
+
+Dedicated page.
+
+Prompt Engineering
+
+Git
+
+React
+
+Node
+
+Python
+
+Claude
+
+Ollama
+
+Docker
+
+FastAPI
+
+---
+
+# Interview Preparation
+
+Dedicated page.
+
+Questions by:
+
+Topic
+
+Difficulty
+
+Company
+
+Behavioral
+
+System Design
+
+Coding
+
+---
+
+# Theme
+
+Dark
+
+Light
+
+System
+
+---
+
+# Settings
+
+Theme
+
+Font Size
+
+Reading Width
+
+Animations
+
+Reset Progress
+
+Export Progress
+
+Import Progress
+
+---
+
+# Export
+
+Export:
+
+Markdown
+
+PDF
+
+Progress JSON
+
+Bookmarks JSON
+
+---
+
+# Architecture
+
+Version 1
+
+React
+
+↓
+
+MDX Content
+
+↓
+
+Search Index
+
+↓
+
+Local Storage
+
+No backend.
+
+---
+
+# Future Version 2
+
+NestJS Backend
+
+↓
+
+Authentication
+
+↓
+
+Cloud Sync
+
+↓
+
+AI Tutor
+
+↓
+
+Progress Sync
+
+---
+
+# Future Version 3
+
+AI Assistant
+
+RAG
+
+Semantic Search
+
+Quiz Generator
+
+Interview Generator
+
+Revision Planner
+
+Personal Tutor
+
+Claude Support
+
+OpenAI Support
+
+Ollama Support
+
+---
+
+# Important Rule
+
+The application must never require code changes when adding a new lesson.
+
+Adding:
+
+content/day-042/lesson.mdx
+
+should automatically make it available everywhere.
+
+The application architecture must be content-driven, not route-driven.
+
+
+# AI Learning Hub - Development Milestones
+
+The project should be built incrementally in well-defined milestones rather than attempting to implement everything at once.
+
+---
+
+# Milestone 1 (Estimated: 2–3 Days)
+
+## Objective
+
+Build the foundation of the learning portal.
+
+## Features
+
+- React + Vite + TypeScript setup
+- Tailwind CSS integration
+- MDX rendering support
+- Auto-discover lessons from the `content/` directory
+- Dashboard
+- Sidebar navigation
+- Lesson page
+- Dark / Light mode
+- Search functionality
+- Progress tracking (LocalStorage)
+
+## Deliverable
+
+A fully functional documentation portal capable of automatically rendering lessons from MDX files.
+
+---
+
+# Milestone 2
+
+## Objective
+
+Enhance the portal with learning management features.
+
+## Features
+
+- Personal Notes
+- Bookmarks
+- Resources Library
+- Projects section
+- Cheat Sheets
+- Interview Preparation section
+
+## Deliverable
+
+A complete personal learning management system (LMS) for tracking knowledge and resources.
+
+---
+
+# Milestone 3
+
+## Objective
+
+Improve usability and presentation.
+
+## Features
+
+- Export functionality (Markdown / PDF / Progress)
+- Mermaid diagram rendering
+- Learning analytics
+- UI/UX polish
+- Performance optimizations
+
+## Deliverable
+
+A polished, production-quality learning portal.
+
+---
+
+# Milestone 4 (Around Day 40–50 of the AI Engineering Roadmap)
+
+## Objective
+
+Transform the learning portal into an AI-powered learning assistant.
+
+## Features
+
+- Local RAG (Retrieval-Augmented Generation) over MDX lessons
+- AI Tutor powered by Ollama
+- "Ask My Course" feature
+- Semantic Search
+- Revision Generator
+- Quiz Generator
+
+## Deliverable
+
+An AI-powered learning platform capable of answering questions based on the user's own course material and generating personalized revision content.
+
+---
+
+# Future Enhancements (Optional)
+
+- Claude integration
+- OpenAI integration
+- Multiple AI provider support
+- Cloud synchronization
+- User authentication
+- Team learning support
+- AI-generated flashcards
+- Daily revision planner
+- Interview simulator
+- Architecture diagram generator
+- Learning streaks and achievements

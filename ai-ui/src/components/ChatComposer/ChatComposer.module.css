@@ -1,0 +1,118 @@
+.composer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.5rem 1rem 2rem;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.inputShell {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-end;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 999px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    transition: all 0.25s;
+}
+
+.inputShell:focus-within {
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.input {
+    flex: 1;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    padding: 0.5rem 0;
+    font: inherit;
+    resize: none;
+    min-height: 52px;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+
+.input:focus {
+    outline: none;
+}
+
+.sendButton {
+    border: none;
+    border-radius: 999px;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.sendButton:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+}
+
+.sendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.controlsRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+}
+
+.controlGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.controlLabel {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.select,
+.inputField {
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 0.7rem;
+    padding: 0.6rem 0.7rem;
+    font: inherit;
+    background: white;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .inputShell {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sendButton {
+        width: 100%;
+        border-radius: 0.875rem;
+    }
+
+    .controlsRow {
+        grid-template-columns: 1fr;
+    }
+}

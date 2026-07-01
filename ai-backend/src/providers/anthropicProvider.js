@@ -16,7 +16,7 @@ export class AnthropicProvider extends BaseProvider {
 
     async generateText(prompt, options = {}) {
         const response = await this.client.messages.create({
-            model: options.model || this.model,
+            model: this.getModel(options),
             max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
             temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
             messages: [
@@ -25,6 +25,24 @@ export class AnthropicProvider extends BaseProvider {
                     content: typeof prompt === 'string' ? prompt : JSON.stringify(prompt),
                 },
             ],
+            ...options.requestOptions,
+        });
+
+        return response.content
+            .filter((part) => part.type === 'text')
+            .map((part) => part.text)
+            .join('');
+    }
+
+    async generateChat(messages, options = {}) {
+        const response = await this.client.messages.create({
+            model: this.getModel(options),
+            max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
+            temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
+            messages: Array.isArray(messages) ? messages.map((message) => ({
+                role: message.role === 'assistant' ? 'assistant' : 'user',
+                content: typeof message.content === 'string' ? message.content : JSON.stringify(message.content ?? ''),
+            })) : [{ role: 'user', content: String(messages ?? '') }],
             ...options.requestOptions,
         });
 

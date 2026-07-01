@@ -15,7 +15,7 @@ export class OllamaProvider extends BaseProvider {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: options.model || this.model,
+                model: this.getModel(options),
                 prompt: typeof prompt === 'string' ? prompt : JSON.stringify(prompt),
                 stream: false,
                 ...options.requestBody,
@@ -34,5 +34,33 @@ export class OllamaProvider extends BaseProvider {
         }
 
         throw new Error('Ollama response did not contain text content');
+    }
+
+    async generateChat(messages, options = {}) {
+        const response = await fetch(`${this.baseUrl}/api/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: this.getModel(options),
+                messages: Array.isArray(messages) ? messages : [{ role: 'user', content: String(messages ?? '') }],
+                stream: false,
+                ...options.requestBody,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorBody = await response.text();
+            throw new Error(`Ollama chat request failed (${response.status}): ${errorBody}`);
+        }
+
+        const data = await response.json();
+
+        if (typeof data.message?.content === 'string') {
+            return data.message.content;
+        }
+
+        return this.generateText(messages.map((message) => `${message.role}: ${message.content}`).join('\n'), options);
     }
 }
