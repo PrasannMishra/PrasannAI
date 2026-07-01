@@ -10,6 +10,7 @@
 
 .inputShell {
     display: flex;
+    height: 65px;
     gap: 0.8rem;
     align-items: flex-end;
     padding: 0.8rem 1.2rem;
@@ -37,6 +38,7 @@
     background: transparent;
     color: var(--text);
     font-size: 0.95rem;
+    height: 100%;
 }
 
 .input:focus {

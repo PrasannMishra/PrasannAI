@@ -40,6 +40,16 @@ export function useGenerateResponse() {
         setError('');
     };
 
+    const deleteAllConversations = () => {
+        setConversations([]);
+        setActiveConversationId(null);
+        setError('');
+    };
+
+    const deleteConversation = (conversationId) => {
+        setConversations((current) => current.filter((conversation) => conversation.id !== conversationId));
+    };
+
     const handleSubmit = async (params) => {
         const trimmedPrompt = params.message?.trim();
         if (!trimmedPrompt) {
@@ -108,6 +118,8 @@ export function useGenerateResponse() {
         selectConversation,
         createConversation,
         clearConversation,
+        deleteAllConversations,
+        deleteConversation,
         setMessages: (nextMessages) => setConversations((current) => current.map((conversation) => conversation.id === activeConversationId
             ? { ...conversation, messages: nextMessages, title: buildConversationTitle(nextMessages) }
             : conversation)),

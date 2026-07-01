@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ChatMessages } from './components/ChatMessages/ChatMessages.jsx';
 import { ChatComposer } from './components/ChatComposer/ChatComposer.jsx';
 import { ConversationList } from './components/ConversationList/ConversationList.jsx';
@@ -16,6 +16,8 @@ export default function App() {
     const [maxTokens, setMaxTokens] = useState(DEFAULT_SETTINGS.maxTokens);
     const [temperature, setTemperature] = useState(DEFAULT_SETTINGS.temperature);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    // 1. Create a ref for the scrollable container
+    const chatContainerRef = useRef(null);
 
     const {
         conversations,
@@ -28,7 +30,19 @@ export default function App() {
         selectConversation,
         createConversation,
         clearConversation,
+        deleteAllConversations,
+        deleteConversation,
     } = useGenerateResponse();
+
+    // 2. Define the scroll function
+    const scrollToTop = () => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: 0,
+                behavior: 'smooth', // Smooth scrolling animation
+            });
+        }
+    };
 
     const sendMessage = (message) => {
         handleSubmit({
@@ -43,7 +57,7 @@ export default function App() {
     return (
         <div className="app-wrapper">
             {!sidebarOpen && <div style={{ marginTop: '10px' }} className="sidebar-toggle-tooltip" onClick={() => setSidebarOpen(!sidebarOpen)}><FaAngleDoubleRight /></div>}
-            <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+            {sidebarOpen && <aside className="sidebar open">
                 <div className="sidebar-header">
                     <button className="new-chat-btn" onClick={createConversation}>
                         <span>✎</span> New chat
@@ -61,6 +75,8 @@ export default function App() {
                         onSelectConversation={selectConversation}
                         onNewConversation={createConversation}
                         onClearConversation={clearConversation}
+                        onDeleteAllConversations={deleteAllConversations}
+                        onDeleteConversation={deleteConversation}
                     />
                 </nav>
 
@@ -72,35 +88,33 @@ export default function App() {
                         </div>
                     </div>
                 </div>
-            </aside>
+            </aside>}
             <main className="main-content">
                 <header className="main-header">
                     <h1>PrasannAI</h1>
                     <div className="header-actions">
-                        <button className="icon-btn">⇧</button>
+                        <button className="icon-btn" onClick={scrollToTop}>⇧</button>
                         <button className="icon-btn">⋯</button>
                     </div>
                 </header>
 
-                <div className="chat-container">
+                <div className="chat-container" ref={chatContainerRef}>
                     <ChatMessages messages={messages} loading={loading} />
-
                     {error && <ErrorBox error={error} />}
-
-                    <div ref={responseRef} className="composer-wrapper">
-                        <ChatComposer
-                            onSend={sendMessage}
-                            loading={loading}
-                            provider={provider}
-                            onProviderChange={setProvider}
-                            model={model}
-                            onModelChange={setModel}
-                            maxTokens={maxTokens}
-                            onMaxTokensChange={setMaxTokens}
-                            temperature={temperature}
-                            onTemperatureChange={setTemperature}
-                        />
-                    </div>
+                </div>
+                <div ref={responseRef} style={{ width: '100%' }}>
+                    <ChatComposer
+                        onSend={sendMessage}
+                        loading={loading}
+                        provider={provider}
+                        onProviderChange={setProvider}
+                        model={model}
+                        onModelChange={setModel}
+                        maxTokens={maxTokens}
+                        onMaxTokensChange={setMaxTokens}
+                        temperature={temperature}
+                        onTemperatureChange={setTemperature}
+                    />
                 </div>
             </main>
         </div>

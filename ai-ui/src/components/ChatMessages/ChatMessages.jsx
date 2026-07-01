@@ -2,6 +2,7 @@ import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer.jsx';
 import styles from './ChatMessages.module.css';
 
 export function ChatMessages({ messages, loading }) {
+    console.log('ChatMessages messages:', loading, messages);
     return (
         <div className={styles.messages}>
             {messages.length === 0 && (
@@ -12,24 +13,25 @@ export function ChatMessages({ messages, loading }) {
                 </div>
             )}
 
-            {messages.map((message, index) => (
-                <div
-                    key={`${message.role}-${index}`}
-                    className={`${styles.messageRow} ${message.role === 'user' ? styles.userRow : styles.assistantRow}`}
-                >
-                    <div className={`${styles.bubble} ${message.role === 'user' ? styles.userBubble : styles.assistantBubble}`}>
-                        <div className={styles.roleLabel}>{message.role === 'user' ? 'You' : 'Assistant'}</div>
-                        <div className={styles.content}>
-                            {message.role === 'assistant' ? (
-                                <MarkdownRenderer content={message.content} />
-                            ) : (
-                                message.content
-                            )}
+            {messages.map((message, index) =>
+                message.content && (
+                    <div
+                        key={`${message.role}-${index}`}
+                        className={`${styles.messageRow} ${message.role === 'user' ? styles.userRow : styles.assistantRow}`}
+                    >
+                        <div className={`${styles.bubble} ${message.role === 'user' ? styles.userBubble : styles.assistantBubble}`}>
+                            <div className={styles.roleLabel}>{message.role === 'user' ? 'You' : 'Assistant'}</div>
+                            <div className={styles.content}>
+                                {message.role === 'assistant' ? (
+                                    <MarkdownRenderer content={message.content} />
+                                ) : (
+                                    message.content
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
-
+                )
+            )}
             {loading && (
                 <div className={`${styles.messageRow} ${styles.assistantRow}`}>
                     <div className={`${styles.bubble} ${styles.assistantBubble}`}>

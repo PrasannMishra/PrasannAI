@@ -1,6 +1,7 @@
 import styles from './ConversationList.module.css';
+import { MdDeleteForever } from "react-icons/md";
 
-export function ConversationList({ conversations, activeConversationId, onSelectConversation, onNewConversation, onClearConversation }) {
+export function ConversationList({ conversations, activeConversationId, onSelectConversation, onNewConversation, onClearConversation, onDeleteConversation }) {
     return (
         <div className={styles.list}>
             <div className={styles.header}>
@@ -15,14 +16,23 @@ export function ConversationList({ conversations, activeConversationId, onSelect
                     className={`${styles.item} ${conversation.id === activeConversationId ? styles.active : ''}`}
                     onClick={() => onSelectConversation(conversation.id)}
                 >
-                    <span className={styles.title}>{conversation.title}</span>
+                    <span className={styles.title}>
+                        <div style={{ display: "flex", alignItems: "center", width: '100%' }}>
+                            <div>{conversation.title}</div>
+                            <MdDeleteForever style={{ marginLeft: 'auto' }} size={20} onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteConversation(conversation.id);
+                            }} />
+                        </div>
+
+                    </span>
                     <span className={styles.meta}>{conversation.messages.length} messages</span>
                 </button>
             ))}
 
             {activeConversationId && (
                 <button type="button" className={styles.clearButton} onClick={onClearConversation}>
-                    Clear chat
+                    Clear chats
                 </button>
             )}
         </div>
