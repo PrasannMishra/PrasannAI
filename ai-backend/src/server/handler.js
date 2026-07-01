@@ -2,6 +2,7 @@ import { loadConfig } from '../config.js';
 import { createModelProvider } from '../modelFactory.js';
 import { generateCompletion } from '../services/aiService.js';
 import { sendJson, getCorsHeaders, readJsonBody, buildRequestPayload } from './utils.js';
+import { handleStreamingRequest } from './streaming.js';
 
 /**
  * HTTP request handler
@@ -22,8 +23,25 @@ export async function handleRequest(req, res, config, opts) {
     if (req.method === 'GET' && url.pathname === '/') {
         sendJson(res, 200, {
             status: 'ok',
-            message: 'POST /generate or /chat with JSON payloads',
+            message: 'POST /generate or /chat with JSON payloads. Add /stream suffix for streaming responses.',
         }, corsHeaders);
+        return;
+    }
+
+    // Handle streaming endpoints
+    const streamingEndpoints = ['/generate/stream', '/chat/stream', '/complete/stream', '/stream'];
+    if (req.method === 'POST' && streamingEndpoints.includes(url.pathname)) {
+        try {
+            const parsed = await readJsonBody(req);
+            const requestConfig = loadConfig({ provider: parsed.provider || opts.provider });
+            const provider = createModelProvider(requestConfig);
+            const payload = buildRequestPayload(parsed, config.defaults);
+
+            await handleStreamingRequest(req, res, requestConfig, provider, payload, corsHeaders);
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json', ...corsHeaders });
+            res.end(JSON.stringify({ error: err.message || 'Internal server error' }));
+        }
         return;
     }
 

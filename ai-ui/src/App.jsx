@@ -44,6 +44,17 @@ export default function App() {
         }
     };
 
+    const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+            setTimeout(() => {
+                chatContainerRef.current.scrollTo({
+                    top: chatContainerRef.current.scrollHeight + 20,
+                    behavior: 'smooth',
+                });
+            }, 1500); // 0ms delay is enough to let the DOM update
+        }
+    };
+
     const sendMessage = (message) => {
         handleSubmit({
             message,
@@ -105,6 +116,7 @@ export default function App() {
                 <div ref={responseRef} style={{ width: '100%' }}>
                     <ChatComposer
                         onSend={sendMessage}
+                        scrollToBottom={scrollToBottom}
                         loading={loading}
                         provider={provider}
                         onProviderChange={setProvider}

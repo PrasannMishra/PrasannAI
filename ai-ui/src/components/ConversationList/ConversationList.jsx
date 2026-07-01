@@ -32,7 +32,7 @@ export function ConversationList({ conversations, activeConversationId, onSelect
 
             {activeConversationId && (
                 <button type="button" className={styles.clearButton} onClick={onClearConversation}>
-                    Clear chats
+                    Clear chats messages
                 </button>
             )}
         </div>

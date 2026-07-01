@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { generateResponse } from '../services/aiService.js';
+import { generateResponse, generateResponseStream } from '../services/aiService.js';
 import { buildConversationTitle, createEmptyConversation, loadStoredConversations, saveStoredConversations } from '../utils/storage.js';
 
 export function useGenerateResponse() {
@@ -12,6 +12,7 @@ export function useGenerateResponse() {
     const [activeConversationId, setActiveConversationId] = useState(() => loadStoredConversations()[0]?.id || null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [useStreaming, setUseStreaming] = useState(true); // Enable streaming by default
     const responseRef = useRef(null);
 
     const activeConversation = conversations.find((conversation) => conversation.id === activeConversationId) || conversations[0] || createEmptyConversation();
@@ -71,37 +72,67 @@ export function useGenerateResponse() {
             : conversation));
 
         try {
-            const result = await generateResponse({
-                ...params,
-                messages: nextMessages,
-            });
+            if (useStreaming) {
+                // Use streaming response
+                let fullContent = '';
 
-            if (!result.success) {
-                setError(result.error);
-                setConversations((current) => current.map((conversation) => conversation.id === activeConversationId
-                    ? { ...conversation, messages: nextMessages, title: buildConversationTitle(nextMessages) }
-                    : conversation));
-            } else {
-                const parts = typeof result.output === 'string' ? result.output.split('') : [];
-                let current = '';
+                const result = await generateResponseStream({
+                    ...params,
+                    messages: nextMessages,
+                    onChunk: (chunk) => {
+                        fullContent += chunk;
+                        setConversations((currentConversations) => currentConversations.map((conversation) => conversation.id === activeConversationId
+                            ? {
+                                ...conversation,
+                                messages: [
+                                    ...nextMessages,
+                                    { ...assistantMessage, content: fullContent },
+                                ],
+                            }
+                            : conversation));
+                    },
+                });
 
-                for (const part of parts) {
-                    current += part;
-                    setConversations((currentConversations) => currentConversations.map((conversation) => conversation.id === activeConversationId
-                        ? {
-                            ...conversation,
-                            messages: [
-                                ...nextMessages,
-                                { ...assistantMessage, content: current },
-                            ],
-                        }
+                if (!result.success) {
+                    setError(result.error);
+                    setConversations((current) => current.map((conversation) => conversation.id === activeConversationId
+                        ? { ...conversation, messages: nextMessages, title: buildConversationTitle(nextMessages) }
                         : conversation));
                 }
+            } else {
+                // Use non-streaming response
+                const result = await generateResponse({
+                    ...params,
+                    messages: nextMessages,
+                });
 
-                setTimeout(() => {
-                    responseRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
+                if (!result.success) {
+                    setError(result.error);
+                    setConversations((current) => current.map((conversation) => conversation.id === activeConversationId
+                        ? { ...conversation, messages: nextMessages, title: buildConversationTitle(nextMessages) }
+                        : conversation));
+                } else {
+                    const parts = typeof result.output === 'string' ? result.output.split('') : [];
+                    let current = '';
+
+                    for (const part of parts) {
+                        current += part;
+                        setConversations((currentConversations) => currentConversations.map((conversation) => conversation.id === activeConversationId
+                            ? {
+                                ...conversation,
+                                messages: [
+                                    ...nextMessages,
+                                    { ...assistantMessage, content: current },
+                                ],
+                            }
+                            : conversation));
+                    }
+                }
             }
+
+            setTimeout(() => {
+                responseRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         } finally {
             setLoading(false);
         }
@@ -113,6 +144,8 @@ export function useGenerateResponse() {
         messages,
         error,
         loading,
+        useStreaming,
+        setUseStreaming,
         responseRef,
         handleSubmit,
         selectConversation,

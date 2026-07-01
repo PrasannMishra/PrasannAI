@@ -2,7 +2,6 @@ import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer.jsx';
 import styles from './ChatMessages.module.css';
 
 export function ChatMessages({ messages, loading }) {
-    console.log('ChatMessages messages:', loading, messages);
     return (
         <div className={styles.messages}>
             {messages.length === 0 && (
@@ -32,14 +31,14 @@ export function ChatMessages({ messages, loading }) {
                     </div>
                 )
             )}
-            {loading && (
+            {/* {loading && (
                 <div className={`${styles.messageRow} ${styles.assistantRow}`}>
                     <div className={`${styles.bubble} ${styles.assistantBubble}`}>
                         <div className={styles.roleLabel}>Assistant</div>
                         <div className={styles.content}>Thinking…</div>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }
