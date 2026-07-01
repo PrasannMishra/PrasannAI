@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './ChatComposer.module.css';
 import ChatSettings from './ChatSettings';
 
 export function ChatComposer({ onSend, scrollToBottom, loading, provider, onProviderChange, model, onModelChange, maxTokens, onMaxTokensChange, temperature, onTemperatureChange }) {
     const [draft, setDraft] = useState('');
     const [showSettings, setShowSettings] = useState(false);
+
+    // useEffect(() => {
+    //     scrollToBottom([0])
+    // })
 
     const handleSubmit = (event) => {
         event.preventDefault();
