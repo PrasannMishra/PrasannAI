@@ -21,6 +21,30 @@ export function ChatComposer({ onSend, scrollToBottom, loading, onStop, provider
         setDraft('');
     };
 
+    const handleKeyDown = (event) => {
+        // Ignore if IME is composing (for Chinese, Japanese, Korean input)
+        if (event.isComposing) {
+            return;
+        }
+
+        // Shift + Enter: allow newline (default behavior)
+        if (event.shiftKey && event.key === 'Enter') {
+            return;
+        }
+
+        // Enter: send message
+        if (event.key === 'Enter') {
+            event.preventDefault();
+
+            // Don't send if loading or if input is empty/whitespace
+            if (loading || !draft.trim()) {
+                return;
+            }
+
+            handleSubmit(event);
+        }
+    };
+
     const handleStop = () => {
         if (onStop) {
             onStop();
@@ -33,6 +57,7 @@ export function ChatComposer({ onSend, scrollToBottom, loading, onStop, provider
                 <textarea
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     rows={4}
                     placeholder="Ask the assistant anything..."
                     className={styles.input}
