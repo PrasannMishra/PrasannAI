@@ -1,7 +1,11 @@
 import styles from './ChatComposer.module.css';
 export default function ChatSettings({ onSend, loading, provider, onProviderChange, model, onModelChange, maxTokens, onMaxTokensChange, temperature, onTemperatureChange }) {
     return (
-        <div>
+        <div className={styles.settingsPanel}>
+            <div className={styles.settingsHeader}>
+                <h3 className={styles.settingsTitle}>Model Settings</h3>
+            </div>
+
             <div className={styles.controlsRow}>
                 <div className={styles.controlGroup}>
                     <label className={styles.controlLabel}>Provider</label>
@@ -14,7 +18,7 @@ export default function ChatSettings({ onSend, loading, provider, onProviderChan
 
                 <div className={styles.controlGroup}>
                     <label className={styles.controlLabel}>Model</label>
-                    <input value={model} onChange={(event) => onModelChange(event.target.value)} className={styles.inputField} />
+                    <input value={model} onChange={(event) => onModelChange(event.target.value)} className={styles.inputField} placeholder="e.g., llama2, gpt-4" />
                 </div>
             </div>
 

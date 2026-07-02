@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import styles from './ChatComposer.module.css';
-import ChatSettings from './ChatSettings';
 
-export function ChatComposer({ onSend, scrollToBottom, loading, onStop, provider, onProviderChange, model, onModelChange, maxTokens, onMaxTokensChange, temperature, onTemperatureChange }) {
+export function ChatComposer({ onSend, scrollToBottom, loading, onStop }) {
     const [draft, setDraft] = useState('');
-    const [showSettings, setShowSettings] = useState(false);
 
     // useEffect(() => {
     //     scrollToBottom([0])
@@ -73,20 +71,6 @@ export function ChatComposer({ onSend, scrollToBottom, loading, onStop, provider
                     </button>
                 )}
             </div>
-            {showSettings && (
-                <ChatSettings
-                    onSend={onSend}
-                    loading={loading}
-                    provider={provider}
-                    onProviderChange={onProviderChange}
-                    model={model}
-                    onModelChange={onModelChange}
-                    maxTokens={maxTokens}
-                    onMaxTokensChange={onMaxTokensChange}
-                    temperature={temperature}
-                    onTemperatureChange={onTemperatureChange}
-                />
-            )}
         </form>
     );
 }

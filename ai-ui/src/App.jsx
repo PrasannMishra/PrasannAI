@@ -3,10 +3,12 @@ import { ChatMessages } from './components/ChatMessages/ChatMessages.jsx';
 import { ChatComposer } from './components/ChatComposer/ChatComposer.jsx';
 import { ConversationList } from './components/ConversationList/ConversationList.jsx';
 import { ErrorBox } from './components/ErrorBox/ErrorBox.jsx';
+import SettingsDrawer from './components/SettingsDrawer/SettingsDrawer.jsx';
 import { useGenerateResponse } from './hooks/useGenerateResponse.js';
 import { DEFAULT_PROVIDER, DEFAULT_MODEL } from './config/providers.js';
 import { DEFAULT_SETTINGS } from './config/constants.js';
 import { FaAngleDoubleRight } from "react-icons/fa";
+import { FaGear } from "react-icons/fa6";
 import './styles/globals.css';
 
 export default function App() {
@@ -15,6 +17,7 @@ export default function App() {
     const [maxTokens, setMaxTokens] = useState(DEFAULT_SETTINGS.maxTokens);
     const [temperature, setTemperature] = useState(DEFAULT_SETTINGS.temperature);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
     const chatContainerRef = useRef(null);
 
     const {
@@ -68,6 +71,10 @@ export default function App() {
             maxTokens,
             temperature,
         });
+    };
+
+    const toggleSettings = () => {
+        setShowSettings(!showSettings);
     };
 
     // Keep chat pinned to bottom when new messages arrive safely
@@ -125,8 +132,21 @@ export default function App() {
                 <header className="main-header">
                     <h1>PrasannAI</h1>
                     <div className="header-actions">
-                        <button className="icon-btn" onClick={scrollToTop}>⇧</button>
-                        <button className="icon-btn">⋯</button>
+                        <div className="model-indicator">
+                            <span className="model-provider">{provider}</span>
+                            <span className="model-separator">•</span>
+                            <span className="model-name">{model}</span>
+                        </div>
+                        <button
+                            className={`icon-btn ${showSettings ? 'active' : ''}`}
+                            onClick={toggleSettings}
+                            title="Settings"
+                        >
+                            <FaGear />
+                        </button>
+                        <button className="icon-btn" onClick={scrollToTop} title="Scroll to top">
+                            ⇧
+                        </button>
                     </div>
                 </header>
 
@@ -152,6 +172,19 @@ export default function App() {
                         onTemperatureChange={setTemperature}
                     />
                 </div>
+
+                <SettingsDrawer
+                    isOpen={showSettings}
+                    onClose={() => setShowSettings(false)}
+                    provider={provider}
+                    onProviderChange={setProvider}
+                    model={model}
+                    onModelChange={setModel}
+                    maxTokens={maxTokens}
+                    onMaxTokensChange={setMaxTokens}
+                    temperature={temperature}
+                    onTemperatureChange={setTemperature}
+                />
             </main>
         </div>
     );
