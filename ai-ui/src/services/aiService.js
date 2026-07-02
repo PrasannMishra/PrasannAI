@@ -21,10 +21,15 @@ export async function generateResponse({
     model,
     maxTokens,
     temperature,
+    signal,
 }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
     console.log('API_CONFIG.baseUrl:', API_CONFIG.baseUrl);
+
+    // Combine external signal with internal controller
+    const combinedSignal = signal ? combineSignals(signal, controller.signal) : controller.signal;
+
     try {
         const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoint}`, {
             method: API_CONFIG.method,
@@ -38,7 +43,7 @@ export async function generateResponse({
                 maxTokens: Number(maxTokens),
                 temperature: Number(temperature),
             }),
-            signal: controller.signal,
+            signal: combinedSignal,
         });
 
         const payload = await response.json();
@@ -53,10 +58,22 @@ export async function generateResponse({
         };
     } catch (error) {
         if (error.name === 'AbortError') {
-            return {
-                success: false,
-                error: 'Request timeout - taking too long to respond',
-            };
+            // Check if this was a user-initiated stop (external signal) or timeout (internal controller)
+            const wasUserInitiated = signal && signal.aborted;
+
+            if (wasUserInitiated) {
+                // User clicked stop - this is not an error
+                return {
+                    success: true,
+                    stopped: true,
+                };
+            } else {
+                // Timeout or other abort
+                return {
+                    success: false,
+                    error: 'Request timeout - taking too long to respond',
+                };
+            }
         }
         return {
             success: false,
@@ -76,6 +93,7 @@ export async function generateResponse({
  * @param {number} params.maxTokens - Maximum tokens in response
  * @param {number} params.temperature - Temperature for response generation
  * @param {Function} params.onChunk - Callback for each chunk received
+ * @param {AbortSignal} params.signal - Abort signal for stopping the stream
  * @returns {Promise<Object>} Response status
  */
 export async function generateResponseStream({
@@ -85,9 +103,13 @@ export async function generateResponseStream({
     maxTokens,
     temperature,
     onChunk,
+    signal,
 }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout * 10); // Longer timeout for streaming
+
+    // Combine external signal with internal controller
+    const combinedSignal = signal ? combineSignals(signal, controller.signal) : controller.signal;
 
     try {
         const response = await fetch(`http://127.0.0.1:8080/chat/stream`, {
@@ -102,7 +124,7 @@ export async function generateResponseStream({
                 maxTokens: Number(maxTokens),
                 temperature: Number(temperature),
             }),
-            signal: controller.signal,
+            signal: combinedSignal,
         });
 
         if (!response.ok) {
@@ -133,6 +155,8 @@ export async function generateResponseStream({
                             onChunk(data.content);
                         } else if (data.type === 'done') {
                             return { success: true };
+                        } else if (data.type === 'stopped') {
+                            return { success: true, stopped: true };
                         }
                     } catch (e) {
                         // Skip invalid JSON lines
@@ -144,10 +168,22 @@ export async function generateResponseStream({
         return { success: true };
     } catch (error) {
         if (error.name === 'AbortError') {
-            return {
-                success: false,
-                error: 'Request timeout - taking too long to respond',
-            };
+            // Check if this was a user-initiated stop (external signal) or timeout (internal controller)
+            const wasUserInitiated = signal && signal.aborted;
+
+            if (wasUserInitiated) {
+                // User clicked stop - this is not an error
+                return {
+                    success: true,
+                    stopped: true,
+                };
+            } else {
+                // Timeout or other abort
+                return {
+                    success: false,
+                    error: 'Request timeout - taking too long to respond',
+                };
+            }
         }
         return {
             success: false,
@@ -156,4 +192,25 @@ export async function generateResponseStream({
     } finally {
         clearTimeout(timeoutId);
     }
+}
+
+/**
+ * Combine multiple abort signals into one
+ * @param {AbortSignal[]} signals - Array of abort signals to combine
+ * @returns {AbortSignal} Combined signal
+ */
+function combineSignals(...signals) {
+    const controller = new AbortController();
+
+    const abort = () => controller.abort();
+
+    for (const signal of signals) {
+        if (signal.aborted) {
+            controller.abort();
+            break;
+        }
+        signal.addEventListener('abort', abort);
+    }
+
+    return controller.signal;
 }

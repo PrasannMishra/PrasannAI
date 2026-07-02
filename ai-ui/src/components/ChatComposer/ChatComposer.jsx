@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './ChatComposer.module.css';
 import ChatSettings from './ChatSettings';
 
-export function ChatComposer({ onSend, scrollToBottom, loading, provider, onProviderChange, model, onModelChange, maxTokens, onMaxTokensChange, temperature, onTemperatureChange }) {
+export function ChatComposer({ onSend, scrollToBottom, loading, onStop, provider, onProviderChange, model, onModelChange, maxTokens, onMaxTokensChange, temperature, onTemperatureChange }) {
     const [draft, setDraft] = useState('');
     const [showSettings, setShowSettings] = useState(false);
 
@@ -21,6 +21,12 @@ export function ChatComposer({ onSend, scrollToBottom, loading, provider, onProv
         setDraft('');
     };
 
+    const handleStop = () => {
+        if (onStop) {
+            onStop();
+        }
+    };
+
     return (
         <form onSubmit={handleSubmit} className={styles.composer}>
             <div className={styles.inputShell}>
@@ -32,9 +38,15 @@ export function ChatComposer({ onSend, scrollToBottom, loading, provider, onProv
                     className={styles.input}
                     disabled={loading}
                 />
-                <button type="submit" className={styles.sendButton} disabled={loading || !draft.trim()}>
-                    {loading ? '⏳' : '➜'}
-                </button>
+                {loading ? (
+                    <button type="button" className={styles.stopButton} onClick={handleStop} title="Stop generation">
+                        ⏹
+                    </button>
+                ) : (
+                    <button type="submit" className={styles.sendButton} disabled={!draft.trim()}>
+                        ➜
+                    </button>
+                )}
             </div>
             {showSettings && (
                 <ChatSettings

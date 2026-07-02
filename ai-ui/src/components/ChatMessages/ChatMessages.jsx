@@ -1,7 +1,7 @@
 import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer.jsx';
 import styles from './ChatMessages.module.css';
 
-export function ChatMessages({ messages, loading }) {
+export function ChatMessages({ messages, loading, onContinue }) {
     return (
         <div className={styles.messages}>
             {messages.length === 0 && (
@@ -19,7 +19,11 @@ export function ChatMessages({ messages, loading }) {
                         className={`${styles.messageRow} ${message.role === 'user' ? styles.userRow : styles.assistantRow}`}
                     >
                         <div className={`${styles.bubble} ${message.role === 'user' ? styles.userBubble : styles.assistantBubble}`}>
-                            <div className={styles.roleLabel}>{message.role === 'user' ? 'You' : 'Assistant'}</div>
+                            <div className={styles.roleLabel}>
+                                {message.role === 'user' ? 'You' : 'Assistant'}
+                                {message.status === 'streaming' && ' (generating...)'}
+                                {message.status === 'stopped' && ' (stopped)'}
+                            </div>
                             <div className={styles.content}>
                                 {message.role === 'assistant' ? (
                                     <MarkdownRenderer content={message.content} />
@@ -27,6 +31,15 @@ export function ChatMessages({ messages, loading }) {
                                     message.content
                                 )}
                             </div>
+                            {message.role === 'assistant' && message.status === 'stopped' && onContinue && (
+                                <button
+                                    className={styles.continueButton}
+                                    onClick={() => onContinue()}
+                                    title="Continue generating from where it stopped"
+                                >
+                                    ▶ Continue Generating
+                                </button>
+                            )}
                         </div>
                     </div>
                 )

@@ -26,8 +26,16 @@ export function sendEventStream(res, corsHeaders) {
     };
 }
 
-export async function handleStreamingRequest(req, res, config, provider, payload, corsHeaders) {
+export async function handleStreamingRequest(req, res, config, provider, payload, corsHeaders, signal) {
     const stream = sendEventStream(res, corsHeaders);
+    let aborted = false;
+
+    // Handle abort signal
+    if (signal) {
+        signal.addEventListener('abort', () => {
+            aborted = true;
+        });
+    }
 
     try {
         let streamGenerator;
@@ -48,8 +56,17 @@ export async function handleStreamingRequest(req, res, config, provider, payload
             model: payload.options?.model || provider.getModel?.(payload.options),
         });
 
-        // Stream chunks
+        // Stream chunks with abort checking
         for await (const chunk of streamGenerator) {
+            if (aborted) {
+                stream.send({
+                    type: 'stopped',
+                    message: 'Stream stopped by user',
+                });
+                stream.done();
+                return;
+            }
+
             if (chunk) {
                 stream.send({
                     type: 'chunk',
@@ -59,8 +76,12 @@ export async function handleStreamingRequest(req, res, config, provider, payload
         }
 
         // Signal completion
-        stream.done();
+        if (!aborted) {
+            stream.done();
+        }
     } catch (err) {
-        stream.error(err);
+        if (!aborted) {
+            stream.error(err);
+        }
     }
 }

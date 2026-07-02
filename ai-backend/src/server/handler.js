@@ -37,7 +37,15 @@ export async function handleRequest(req, res, config, opts) {
             const provider = createModelProvider(requestConfig);
             const payload = buildRequestPayload(parsed, config.defaults);
 
-            await handleStreamingRequest(req, res, requestConfig, provider, payload, corsHeaders);
+            // Create abort controller for this request
+            const abortController = new AbortController();
+
+            // Handle client disconnect
+            req.on('close', () => {
+                abortController.abort();
+            });
+
+            await handleStreamingRequest(req, res, requestConfig, provider, payload, corsHeaders, abortController.signal);
         } catch (err) {
             res.writeHead(500, { 'Content-Type': 'application/json', ...corsHeaders });
             res.end(JSON.stringify({ error: err.message || 'Internal server error' }));

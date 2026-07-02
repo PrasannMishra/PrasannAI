@@ -25,6 +25,8 @@ export default function App() {
         loading,
         responseRef,
         handleSubmit,
+        stopGeneration,
+        continueGeneration,
         selectConversation,
         createConversation,
         clearConversation,
@@ -129,7 +131,7 @@ export default function App() {
                 </header>
 
                 <div className="chat-container" ref={chatContainerRef}>
-                    <ChatMessages messages={messages} loading={loading} />
+                    <ChatMessages messages={messages} loading={loading} onContinue={continueGeneration} />
                     {error && <ErrorBox error={error} />}
                 </div>
 
@@ -138,6 +140,8 @@ export default function App() {
                         onSend={sendMessage}
                         scrollToBottom={scrollToBottom}
                         loading={loading}
+                        onStop={stopGeneration}
+                        onContinue={continueGeneration}
                         provider={provider}
                         onProviderChange={setProvider}
                         model={model}
