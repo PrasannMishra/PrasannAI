@@ -1,13 +1,14 @@
 # Claude-Day1 Backend
 
-This folder contains the AI backend for the PrasannAI project.
+AI backend server for the PrasannAI platform. Uses @ai-platform/ai-core for AI provider management and business logic.
 
 ## What it does
 
 - Provides a provider-based abstraction for model inference
 - Supports local Ollama models, Anthropic cloud, and OpenAI-compatible local servers
 - Exposes both CLI and REST-style interfaces for single prompts and chat-style conversations
-- Uses a service layer and provider interface to keep the backend extensible and maintainable
+- Uses @ai-platform/ai-core for AI provider management and business logic
+- Provides streaming and non-streaming endpoints
 
 ## Setup
 

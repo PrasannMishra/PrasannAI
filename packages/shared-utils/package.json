@@ -1,0 +1,22 @@
+{
+    "name": "@ai-platform/shared-utils",
+    "version": "1.0.0",
+    "description": "Shared utility functions for AI Platform",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "ai",
+        "utils",
+        "shared"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "typescript": "^5.3.3"
+    }
+}

@@ -1,0 +1,29 @@
+{
+    "name": "@ai-platform/ai-sdk",
+    "version": "1.0.0",
+    "description": "Frontend SDK for AI Platform - Type-safe API for AI interactions",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "ai",
+        "sdk",
+        "frontend",
+        "chat"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@ai-platform/shared-types": "1.0.0",
+        "@ai-platform/shared-utils": "1.0.0",
+        "react": "^18.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "@types/react": "^18.3.0",
+        "typescript": "^5.3.3"
+    }
+}

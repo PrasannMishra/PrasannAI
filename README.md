@@ -1,136 +1,380 @@
-# PrasannAI
+# AI Platform
 
-A multi-part AI demo repository with a local AI backend and a simple React UI.
+A modular, reusable AI platform for building AI-powered applications. Extract AI logic into reusable packages that can power multiple applications without duplication.
 
-## Projects
+## 🎯 Objective
 
-- `ai-backend/` — AI backend and provider adapter system
-- `ai-ui/` — React frontend that calls `ai-backend` via the `/generate` endpoint
+Refactor AI logic into reusable packages (ai-core, ai-sdk) that can be used by any application (chat, learning portal, PR reviewer, VS Code extension, CLI, etc.) without duplicating code.
 
-## Root Overview
+## 🏗️ Architecture
 
-`ai-backend` provides a provider-based architecture for generative AI. It supports:
-
-- local models through Ollama
-- cloud models through Anthropic
-- OpenAI-compatible local servers
-- CLI invocation and a REST `/generate` endpoint
-
-`ai-ui` is a small React app that sends prompts to the backend API and displays responses.
-
-## Backend Setup (`ai-backend`)
-
-1. Open the backend folder:
-   ```bash
-   cd ai-backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Copy the environment example:
-   ```bash
-   copy .env.example .env
-   ```
-
-4. Configure your provider in `.env`.
-
-### Local Ollama setup
-
-1. Install Ollama from https://ollama.ai/docs/installation.
-2. Pull the model you want to use:
-   ```bash
-   ollama pull qwen2.5:3b
-   ```
-3. Start the local Ollama server:
-   ```bash
-   ollama serve
-   ```
-4. Configure `.env`:
-   ```env
-   MODEL_PROVIDER=ollama
-   OLLAMA_BASE_URL=http://localhost:11434
-   OLLAMA_MODEL=qwen2.5:3b
-   ```
-
-### Example local model install notes
-
-- `qwen2.5:3b` is an example Ollama model name. Adjust it if you use a different local model.
-- If the model is large, ensure you have enough disk space and RAM before pulling.
-- For Windows, use the Ollama installer or winget if available.
-
-## Running the Backend
-
-### CLI mode
-
-Send a prompt:
-
-```bash
-node src/index.js --prompt "Explain recursion like I'm 10"
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Applications                              │
+│  Chat App │ Learning Portal │ PR Reviewer │ VS Code │ CLI   │
+└─────────────────────────────────────────────────────────────┘
+                          │ uses
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Frontend SDK (ai-sdk)                                      │
+│  AIClient │ useChat Hook │ Streaming │ AbortController      │
+└─────────────────────────────────────────────────────────────┘
+                          │ HTTP/Streaming
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Backend API (ai-backend)                                   │
+│  Express │ Auth │ Validation │ Rate Limiting │ Logging      │
+└─────────────────────────────────────────────────────────────┘
+                          │ uses
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Core Engine (ai-core)                                      │
+│  Providers │ ModelFactory │ AIService │ Business Logic      │
+└─────────────────────────────────────────────────────────────┘
+                          │ uses
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  Shared Packages                                            │
+│  shared-types (Types) │ shared-utils (Utilities)            │
+└─────────────────────────────────────────────────────────────┘
+                          │ calls
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  AI Providers                                               │
+│  Anthropic │ Ollama │ OpenAI │ Gemini                       │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Read a prompt from a file and write output to a file:
+## 📦 Packages
+
+### @ai-platform/shared-types
+**TypeScript type definitions** - Single source of truth for all types across the platform.
+
+- Core types (ChatMessage, Conversation, ProviderConfig)
+- Completion types (CompletionRequest, CompletionResponse)
+- Streaming types (StreamEvent, StreamChunk)
+- Context types (ContextProvider, ContextResult)
+- Error types (AIError, AIErrorCode)
+- Future types (Tool, Agent, Memory, RAG)
+
+**Dependencies**: None
+
+### @ai-platform/shared-utils
+**Shared utility functions** - Reusable utilities for both frontend and backend.
+
+- Validation utilities
+- Token estimation
+- Retry logic with exponential backoff
+- Debounce/throttle
+- Object/array utilities
+- String/date utilities
+- ID generation
+- Error utilities
+- Async utilities
+- Environment utilities
+
+**Dependencies**: None
+
+### @ai-platform/ai-core
+**Core AI engine** - Provider-agnostic AI business logic.
+
+- Provider implementations (Anthropic, Ollama, OpenAI-compatible)
+- Model factory for provider creation
+- AI service for completion logic
+- Request/response normalization
+
+**Does NOT contain**: HTTP server, database, auth, framework code
+
+**Dependencies**: shared-types, shared-utils
+
+### @ai-platform/ai-sdk
+**Frontend SDK** - Type-safe API for frontend applications.
+
+- AIClient: HTTP client with streaming support
+- React hooks (useChat, useStreaming)
+- AbortController integration
+- Error normalization
+- Retry logic
+
+**Does NOT contain**: AI business logic, UI components
+
+**Dependencies**: shared-types, shared-utils
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-node src/index.js --file prompt.txt --out response.txt
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build:packages
 ```
 
-### API mode
+### Using ai-core (Backend)
 
-Start the backend server:
+```typescript
+import { createProvider, AIService } from '@ai-platform/ai-core';
 
-```bash
-npm run serve
+// Create a provider
+const provider = createProvider({
+    type: 'anthropic',
+    apiKey: 'your-api-key',
+    model: 'claude-sonnet-4-5',
+});
+
+// Create AI service
+const aiService = new AIService({
+    defaults: {
+        maxTokens: 500,
+        temperature: 0.7,
+    },
+});
+
+// Generate completion
+const response = await aiService.generateCompletion(provider, {
+    messages: [
+        { role: 'user', content: 'Hello, AI!' }
+    ],
+});
+
+console.log(response.output);
 ```
 
-Send a request:
+### Using ai-sdk (Frontend)
 
-```bash
-curl -X POST http://127.0.0.1:3000/generate \
-  -H "Content-Type: application/json" \
-  -d '{"prompt":"Summarize this text", "provider":"ollama", "model":"qwen2.5:3b"}'
+```typescript
+import { AIClient } from '@ai-platform/ai-sdk';
+
+// Create client
+const client = new AIClient({
+    baseUrl: 'http://localhost:8080',
+    defaultProvider: 'anthropic',
+    defaultModel: 'claude-sonnet-4-5',
+});
+
+// Send a chat message
+const response = await client.chatSend({
+    messages: [
+        { role: 'user', content: 'Hello, AI!' }
+    ],
+});
+
+console.log(response.output);
+
+// Stream a response
+for await (const event of client.chatStream({
+    messages: [
+        { role: 'user', content: 'Tell me a story' }
+    ],
+})) {
+    if (event.type === 'chunk' && event.content) {
+        console.log(event.content);
+    }
+}
 ```
 
-Supported JSON fields:
+### Using React Hook
 
-- `prompt` (required)
-- `provider` (optional; `ollama`, `anthropic`, `openai-compatible`)
-- `model` (optional)
-- `maxTokens` (optional)
-- `temperature` (optional)
+```typescript
+import { useChat } from '@ai-platform/ai-sdk';
+import { AIClient } from '@ai-platform/ai-sdk';
 
-## Frontend Setup (`ai-ui`)
+const client = new AIClient({
+    baseUrl: 'http://localhost:8080',
+});
 
-1. Open the UI folder:
-   ```bash
-   cd ai-ui
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the UI app:
-   ```bash
-   npm run dev
-   ```
+function ChatComponent() {
+    const { messages, isLoading, error, send, stop, clear } = useChat({
+        client,
+        provider: 'anthropic',
+        model: 'claude-sonnet-4-5',
+    });
 
-The UI uses a proxy to send requests to `http://127.0.0.1:3000/generate`, so make sure the backend is running.
+    const handleSend = async () => {
+        await send([{ role: 'user', content: 'Hello!' }]);
+    };
 
-## Running Tests
+    return (
+        <div>
+            {messages.map((msg, i) => (
+                <div key={i}>{msg.role}: {msg.content}</div>
+            ))}
+            <button onClick={handleSend} disabled={isLoading}>
+                Send
+            </button>
+            <button onClick={stop}>Stop</button>
+        </div>
+    );
+}
+```
 
-From `ai-backend`:
+## 🎨 Design Principles
+
+### 1. Separation of Concerns
+Each package has a single, well-defined responsibility.
+
+### 2. Dependency Direction
+Dependencies flow in one direction - applications depend on packages, not the other way around.
+
+### 3. Framework Agnostic
+- **ai-core**: Works with Express, NestJS, Fastify, or any backend framework
+- **ai-sdk**: Works with React, Vue, Svelte, or vanilla JavaScript
+
+### 4. Provider Agnostic
+Switch between AI providers without changing application code.
+
+### 5. Type Safety
+All packages are written in TypeScript with strict mode enabled.
+
+### 6. Extensibility
+New features can be added without breaking existing APIs.
+
+## 📁 Project Structure
+
+```
+PrasannAI/
+├── package.json                 # Monorepo root with workspaces
+├── ARCHITECTURE.md              # Detailed architecture documentation
+├── apps/                        # Future applications
+│   ├── chat-app/
+│   ├── learning-portal/
+│   └── pr-reviewer/
+├── packages/
+│   ├── shared-types/            # Type definitions
+│   │   ├── src/index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   ├── shared-utils/            # Utility functions
+│   │   ├── src/index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   ├── ai-core/                 # Core AI engine
+│   │   ├── src/
+│   │   │   ├── providers/       # Provider implementations
+│   │   │   ├── services/        # AI service logic
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   └── README.md
+│   └── ai-sdk/                  # Frontend SDK
+│       ├── src/
+│       │   ├── client/          # AIClient
+│       │   ├── hooks/           # React hooks
+│       │   └── index.ts
+│       ├── package.json
+│       └── README.md
+├── ai-backend/                  # Backend API (uses ai-core)
+│   └── src/
+└── ai-ui/                       # Frontend app (uses ai-sdk)
+    └── src/
+```
+
+## 🔧 Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm 8+
+- TypeScript 5+
+
+### Scripts
 
 ```bash
+# Install all dependencies
+npm install
+
+# Build all packages
+npm run build:packages
+
+# Run backend
+npm run dev:backend
+
+# Run frontend
+npm run dev:frontend
+
+# Run tests
 npm test
 ```
 
-## Extending the Backend
+### Adding a New Provider
 
-To add more providers:
+```typescript
+import { BaseProvider } from '@ai-platform/ai-core';
+import type { ChatMessage, CompletionOptions, ProviderConfig } from '@ai-platform/shared-types';
 
-1. Create a new class in `ai-backend/src/providers/` extending the base provider.
-2. Implement `generateText(prompt, options)`.
-3. Register the provider in `ai-backend/src/modelFactory.js`.
-4. Add config values to `ai-backend/src/config.js` and `.env.example`.
+class CustomProvider extends BaseProvider {
+    constructor(config: ProviderConfig) {
+        super(config);
+        // Initialize your provider
+    }
+
+    async generateText(prompt: string, options?: CompletionOptions): Promise<string> {
+        // Implement text generation
+    }
+
+    async *generateTextStream(prompt: string, options?: CompletionOptions): AsyncGenerator<string> {
+        // Implement streaming
+    }
+}
+
+// Register the provider
+import { registerProvider } from '@ai-platform/ai-core';
+registerProvider('custom', CustomProvider);
+```
+
+## 🎯 Benefits
+
+### Code Reuse
+- AI logic written once in ai-core
+- Frontend SDK written once in ai-sdk
+- All applications share the same code
+
+### Consistency
+- All apps use the same AI providers
+- Same error handling
+- Same streaming behavior
+- Same type definitions
+
+### Maintainability
+- Bug fixes in one place benefit all apps
+- New features added once, available everywhere
+- Clear separation of concerns
+
+### Flexibility
+- Swap providers without changing application code
+- Add new apps without duplicating AI logic
+- Customize per-app without affecting others
+
+## 📚 Documentation
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Detailed architecture documentation
+- [packages/shared-types/README.md](./packages/shared-types/README.md) - Shared types documentation
+- [packages/shared-utils/README.md](./packages/shared-utils/README.md) - Shared utilities documentation
+- [packages/ai-core/README.md](./packages/ai-core/README.md) - AI core documentation
+- [packages/ai-sdk/README.md](./packages/ai-sdk/README.md) - AI SDK documentation
+
+## 🔮 Future Enhancements
+
+- **Tool Calling**: Allow AI to use external tools
+- **MCP (Model Context Protocol)**: Standardize tool integration
+- **RAG (Retrieval-Augmented Generation)**: Add vector search
+- **Agents**: Multi-step reasoning with tool use
+- **Memory**: Long-term conversation memory
+- **Analytics**: Usage tracking and insights
+- **Multi-provider routing**: Intelligent provider selection
+- **Caching**: Response caching for common queries
+- **Rate limiting**: Built-in rate limiting in ai-core
+
+## 📄 License
+
+ISC
+
+## 👥 Contributing
+
+Contributions are welcome! Please read the architecture documentation before contributing.
+
+## 🔗 Related Projects
+
+- ai-backend: Backend API implementation
+- ai-ui: Frontend chat application

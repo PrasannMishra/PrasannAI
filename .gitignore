@@ -10,3 +10,15 @@ yarn-error.log*
 # dotenv local
 .env.local
 .env.*.local
+
+# Build outputs
+dist/
+build/
+out/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Package dist folders
+packages/*/dist/
+apps/*/dist/

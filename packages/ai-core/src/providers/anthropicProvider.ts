@@ -1,24 +1,40 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { BaseProvider } from './baseProvider.js';
+import type {
+    ChatMessage,
+    CompletionOptions,
+    CompletionResponse,
+    ProviderConfig,
+} from '@ai-platform/shared-types';
 
+/**
+ * Anthropic Claude Provider Implementation
+ */
 export class AnthropicProvider extends BaseProvider {
-    constructor(config = {}) {
+    private client: Anthropic;
+    private model: string;
+
+    constructor(config: ProviderConfig = {}) {
         super(config);
 
-        const apiKey = this.config.anthropic?.apiKey || process.env.ANTHROPIC_API_KEY;
+        const apiKey = this.config.apiKey || process.env.ANTHROPIC_API_KEY;
         if (!apiKey) {
-            throw new Error('Anthropic API key is missing. Set ANTHROPIC_API_KEY or pass anthropic.apiKey.');
+            throw new Error('Anthropic API key is missing. Set ANTHROPIC_API_KEY or pass apiKey in config.');
         }
 
         this.client = new Anthropic({ apiKey });
-        this.model = this.config.anthropic?.model || process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
+        this.model = this.config.model || process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
     }
 
-    async generateText(prompt, options = {}) {
+    getModel(options?: Partial<CompletionOptions>): string {
+        return options?.model || this.model;
+    }
+
+    async generateText(prompt: string, options: CompletionOptions = {}): Promise<string> {
         const response = await this.client.messages.create({
             model: this.getModel(options),
-            max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
-            temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
+            max_tokens: options.maxTokens || this.defaults.maxTokens || 500,
+            temperature: options.temperature ?? this.defaults.temperature ?? 0.7,
             messages: [
                 {
                     role: 'user',
@@ -34,11 +50,11 @@ export class AnthropicProvider extends BaseProvider {
             .join('');
     }
 
-    async *generateTextStream(prompt, options = {}) {
+    async *generateTextStream(prompt: string, options: CompletionOptions = {}): AsyncGenerator<string, void, unknown> {
         const stream = this.client.messages.stream({
             model: this.getModel(options),
-            max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
-            temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
+            max_tokens: options.maxTokens || this.defaults.maxTokens || 500,
+            temperature: options.temperature ?? this.defaults.temperature ?? 0.7,
             messages: [
                 {
                     role: 'user',
@@ -55,15 +71,15 @@ export class AnthropicProvider extends BaseProvider {
         }
     }
 
-    async generateChat(messages, options = {}) {
+    async generateChat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
         const response = await this.client.messages.create({
             model: this.getModel(options),
-            max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
-            temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
-            messages: Array.isArray(messages) ? messages.map((message) => ({
+            max_tokens: options.maxTokens || this.defaults.maxTokens || 500,
+            temperature: options.temperature ?? this.defaults.temperature ?? 0.7,
+            messages: messages.map((message) => ({
                 role: message.role === 'assistant' ? 'assistant' : 'user',
                 content: typeof message.content === 'string' ? message.content : JSON.stringify(message.content ?? ''),
-            })) : [{ role: 'user', content: String(messages ?? '') }],
+            })),
             ...options.requestOptions,
         });
 
@@ -73,15 +89,15 @@ export class AnthropicProvider extends BaseProvider {
             .join('');
     }
 
-    async *generateChatStream(messages, options = {}) {
+    async *generateChatStream(messages: ChatMessage[], options: CompletionOptions = {}): AsyncGenerator<string, void, unknown> {
         const stream = this.client.messages.stream({
             model: this.getModel(options),
-            max_tokens: options.maxTokens || this.config.defaults?.maxTokens || 500,
-            temperature: options.temperature ?? this.config.defaults?.temperature ?? 0.7,
-            messages: Array.isArray(messages) ? messages.map((message) => ({
+            max_tokens: options.maxTokens || this.defaults.maxTokens || 500,
+            temperature: options.temperature ?? this.defaults.temperature ?? 0.7,
+            messages: messages.map((message) => ({
                 role: message.role === 'assistant' ? 'assistant' : 'user',
                 content: typeof message.content === 'string' ? message.content : JSON.stringify(message.content ?? ''),
-            })) : [{ role: 'user', content: String(messages ?? '') }],
+            })),
             ...options.requestOptions,
         });
 

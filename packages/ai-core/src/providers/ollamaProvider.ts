@@ -1,14 +1,30 @@
 import { BaseProvider } from './baseProvider.js';
+import type {
+    ChatMessage,
+    CompletionOptions,
+    CompletionResponse,
+    ProviderConfig,
+} from '@ai-platform/shared-types';
 
+/**
+ * Ollama Provider Implementation
+ */
 export class OllamaProvider extends BaseProvider {
-    constructor(config = {}) {
+    private baseUrl: string;
+    private model: string;
+
+    constructor(config: ProviderConfig = {}) {
         super(config);
 
-        this.baseUrl = (this.config.ollama?.baseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434').replace(/\/$/, '');
-        this.model = this.config.ollama?.model || process.env.OLLAMA_MODEL || 'qwen2.5:3b';
+        this.baseUrl = (this.config.baseUrl || process.env.OLLAMA_BASE_URL || 'http://localhost:11434').replace(/\/$/, '');
+        this.model = this.config.model || process.env.OLLAMA_MODEL || 'qwen2.5:3b';
     }
 
-    async generateText(prompt, options = {}) {
+    getModel(options?: Partial<CompletionOptions>): string {
+        return options?.model || this.model;
+    }
+
+    async generateText(prompt: string, options: CompletionOptions = {}): Promise<string> {
         const response = await fetch(`${this.baseUrl}/api/generate`, {
             method: 'POST',
             headers: {
@@ -27,7 +43,7 @@ export class OllamaProvider extends BaseProvider {
             throw new Error(`Ollama request failed (${response.status}): ${errorBody}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as { response?: string };
 
         if (typeof data.response === 'string') {
             return data.response;
@@ -36,7 +52,7 @@ export class OllamaProvider extends BaseProvider {
         throw new Error('Ollama response did not contain text content');
     }
 
-    async *generateTextStream(prompt, options = {}) {
+    async *generateTextStream(prompt: string, options: CompletionOptions = {}): AsyncGenerator<string, void, unknown> {
         const response = await fetch(`${this.baseUrl}/api/generate`, {
             method: 'POST',
             headers: {
@@ -55,7 +71,11 @@ export class OllamaProvider extends BaseProvider {
             throw new Error(`Ollama stream request failed (${response.status}): ${errorBody}`);
         }
 
-        const reader = response.body.getReader();
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('Response body is not readable');
+        }
+
         const decoder = new TextDecoder();
         let buffer = '';
 
@@ -98,7 +118,7 @@ export class OllamaProvider extends BaseProvider {
         }
     }
 
-    async generateChat(messages, options = {}) {
+    async generateChat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
         const response = await fetch(`${this.baseUrl}/api/chat`, {
             method: 'POST',
             headers: {
@@ -106,7 +126,10 @@ export class OllamaProvider extends BaseProvider {
             },
             body: JSON.stringify({
                 model: this.getModel(options),
-                messages: Array.isArray(messages) ? messages : [{ role: 'user', content: String(messages ?? '') }],
+                messages: messages.map((message) => ({
+                    role: message.role === 'assistant' ? 'assistant' : 'user',
+                    content: message.content,
+                })),
                 stream: false,
                 ...options.requestBody,
             }),
@@ -117,16 +140,18 @@ export class OllamaProvider extends BaseProvider {
             throw new Error(`Ollama chat request failed (${response.status}): ${errorBody}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as { message?: { content?: string } };
 
         if (typeof data.message?.content === 'string') {
             return data.message.content;
         }
 
-        return this.generateText(messages.map((message) => `${message.role}: ${message.content}`).join('\n'), options);
+        // Fallback to text generation
+        const prompt = messages.map((message) => `${message.role}: ${message.content}`).join('\n');
+        return this.generateText(prompt, options);
     }
 
-    async *generateChatStream(messages, options = {}) {
+    async *generateChatStream(messages: ChatMessage[], options: CompletionOptions = {}): AsyncGenerator<string, void, unknown> {
         const response = await fetch(`${this.baseUrl}/api/chat`, {
             method: 'POST',
             headers: {
@@ -134,7 +159,10 @@ export class OllamaProvider extends BaseProvider {
             },
             body: JSON.stringify({
                 model: this.getModel(options),
-                messages: Array.isArray(messages) ? messages : [{ role: 'user', content: String(messages ?? '') }],
+                messages: messages.map((message) => ({
+                    role: message.role === 'assistant' ? 'assistant' : 'user',
+                    content: message.content,
+                })),
                 stream: true,
                 ...options.requestBody,
             }),
@@ -145,7 +173,11 @@ export class OllamaProvider extends BaseProvider {
             throw new Error(`Ollama chat stream request failed (${response.status}): ${errorBody}`);
         }
 
-        const reader = response.body.getReader();
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('Response body is not readable');
+        }
+
         const decoder = new TextDecoder();
         let buffer = '';
 

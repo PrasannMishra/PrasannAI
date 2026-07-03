@@ -1,26 +1,10 @@
+import { createProvider, registerProvider } from '@ai-platform/ai-core';
 import { loadConfig } from './config.js';
-import { AnthropicProvider } from './providers/anthropicProvider.js';
-import { OllamaProvider } from './providers/ollamaProvider.js';
-import { OpenAICompatibleProvider } from './providers/openaiCompatibleProvider.js';
 
-const providers = new Map();
+// Re-export for backward compatibility
+export { registerProvider, createProvider };
 
-export function registerProvider(name, ProviderClass) {
-    providers.set(name.toLowerCase(), ProviderClass);
-    return ProviderClass;
-}
-
-registerProvider('ollama', OllamaProvider);
-registerProvider('anthropic', AnthropicProvider);
-registerProvider('openai-compatible', OpenAICompatibleProvider);
-
+// Create a convenience function that matches the old API
 export function createModelProvider(config = loadConfig()) {
-    const providerName = (config?.provider || 'ollama').toLowerCase();
-    const ProviderClass = providers.get(providerName);
-
-    if (!ProviderClass) {
-        throw new Error(`Unknown provider '${providerName}'. Register it with registerProvider().`);
-    }
-
-    return new ProviderClass(config);
+    return createProvider(config);
 }

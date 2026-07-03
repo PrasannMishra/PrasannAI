@@ -1,9 +1,29 @@
 /**
  * AI Service
- * Handles all API communication with the backend
+ * Handles all API communication with the backend using @ai-platform/ai-sdk
  */
 
+import { AIClient } from '@ai-platform/ai-sdk';
 import { API_CONFIG } from '../config/constants.js';
+
+// Create a singleton client instance
+let clientInstance = null;
+
+/**
+ * Get or create the AI client instance
+ */
+export function getAIClient() {
+    if (!clientInstance) {
+        clientInstance = new AIClient({
+            baseUrl: API_CONFIG.baseUrl,
+            defaultProvider: API_CONFIG.defaultProvider || 'ollama',
+            defaultModel: API_CONFIG.defaultModel,
+            defaultMaxTokens: API_CONFIG.defaultMaxTokens,
+            defaultTemperature: API_CONFIG.defaultTemperature,
+        });
+    }
+    return clientInstance;
+}
 
 /**
  * Send a chat payload to the AI backend and get a response
@@ -13,6 +33,7 @@ import { API_CONFIG } from '../config/constants.js';
  * @param {string} params.model - The model to use
  * @param {number} params.maxTokens - Maximum tokens in response
  * @param {number} params.temperature - Temperature for response generation
+ * @param {AbortSignal} params.signal - Abort signal for stopping the request
  * @returns {Promise<Object>} Response from the API
  */
 export async function generateResponse({
@@ -23,64 +44,34 @@ export async function generateResponse({
     temperature,
     signal,
 }) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout);
-    console.log('API_CONFIG.baseUrl:', API_CONFIG.baseUrl);
-
-    // Combine external signal with internal controller
-    const combinedSignal = signal ? combineSignals(signal, controller.signal) : controller.signal;
+    const client = getAIClient();
 
     try {
-        const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.endpoint}`, {
-            method: API_CONFIG.method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messages,
-                provider,
-                model,
-                maxTokens: Number(maxTokens),
-                temperature: Number(temperature),
-            }),
-            signal: combinedSignal,
+        const response = await client.chatSend({
+            messages,
+            provider,
+            model,
+            maxTokens,
+            temperature,
+            signal,
         });
-
-        const payload = await response.json();
-
-        if (!response.ok) {
-            throw new Error(payload.error || 'Request failed');
-        }
 
         return {
             success: true,
-            output: payload.output || JSON.stringify(payload, null, 2),
+            output: response.output,
         };
     } catch (error) {
         if (error.name === 'AbortError') {
-            // Check if this was a user-initiated stop (external signal) or timeout (internal controller)
-            const wasUserInitiated = signal && signal.aborted;
-
-            if (wasUserInitiated) {
-                // User clicked stop - this is not an error
-                return {
-                    success: true,
-                    stopped: true,
-                };
-            } else {
-                // Timeout or other abort
-                return {
-                    success: false,
-                    error: 'Request timeout - taking too long to respond',
-                };
-            }
+            // User clicked stop - this is not an error
+            return {
+                success: true,
+                stopped: true,
+            };
         }
         return {
             success: false,
             error: error.message || 'Network error',
         };
-    } finally {
-        clearTimeout(timeoutId);
     }
 }
 
@@ -105,112 +96,42 @@ export async function generateResponseStream({
     onChunk,
     signal,
 }) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.timeout * 10); // Longer timeout for streaming
-
-    // Combine external signal with internal controller
-    const combinedSignal = signal ? combineSignals(signal, controller.signal) : controller.signal;
+    const client = getAIClient();
 
     try {
-        const response = await fetch(`http://127.0.0.1:8080/chat/stream`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                messages,
-                provider,
-                model,
-                maxTokens: Number(maxTokens),
-                temperature: Number(temperature),
-            }),
-            signal: combinedSignal,
+        const streamGenerator = client.chatStream({
+            messages,
+            provider,
+            model,
+            maxTokens,
+            temperature,
+            signal,
         });
 
-        if (!response.ok) {
-            const payload = await response.json();
-            throw new Error(payload.error || 'Request failed');
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-                if (line.startsWith('data: ')) {
-                    try {
-                        const data = JSON.parse(line.slice(6)); // Remove 'data: ' prefix
-
-                        if (data.type === 'error') {
-                            throw new Error(data.error);
-                        } else if (data.type === 'chunk') {
-                            onChunk(data.content);
-                        } else if (data.type === 'done') {
-                            return { success: true };
-                        } else if (data.type === 'stopped') {
-                            return { success: true, stopped: true };
-                        }
-                    } catch (e) {
-                        // Skip invalid JSON lines
-                    }
-                }
+        for await (const event of streamGenerator) {
+            if (event.type === 'chunk' && event.content) {
+                onChunk(event.content);
+            } else if (event.type === 'error' && event.error) {
+                throw new Error(event.error);
+            } else if (event.type === 'done') {
+                return { success: true };
+            } else if (event.type === 'stopped') {
+                return { success: true, stopped: true };
             }
         }
 
         return { success: true };
     } catch (error) {
         if (error.name === 'AbortError') {
-            // Check if this was a user-initiated stop (external signal) or timeout (internal controller)
-            const wasUserInitiated = signal && signal.aborted;
-
-            if (wasUserInitiated) {
-                // User clicked stop - this is not an error
-                return {
-                    success: true,
-                    stopped: true,
-                };
-            } else {
-                // Timeout or other abort
-                return {
-                    success: false,
-                    error: 'Request timeout - taking too long to respond',
-                };
-            }
+            // User clicked stop - this is not an error
+            return {
+                success: true,
+                stopped: true,
+            };
         }
         return {
             success: false,
             error: error.message || 'Network error',
         };
-    } finally {
-        clearTimeout(timeoutId);
     }
-}
-
-/**
- * Combine multiple abort signals into one
- * @param {AbortSignal[]} signals - Array of abort signals to combine
- * @returns {AbortSignal} Combined signal
- */
-function combineSignals(...signals) {
-    const controller = new AbortController();
-
-    const abort = () => controller.abort();
-
-    for (const signal of signals) {
-        if (signal.aborted) {
-            controller.abort();
-            break;
-        }
-        signal.addEventListener('abort', abort);
-    }
-
-    return controller.signal;
 }
