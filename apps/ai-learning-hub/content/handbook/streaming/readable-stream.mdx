@@ -1,0 +1,942 @@
+---
+id: handbook-streaming-readable-stream
+
+title: ReadableStream and Stream Parsing
+
+description: Understanding the browser's ReadableStream API, how to parse streaming data, handle buffers, and build robust frontend streaming implementations.
+
+category: Streaming
+
+topics:
+  - ReadableStream
+  - Stream Parsing
+  - Buffer Management
+  - TextDecoder
+  - Frontend Streaming
+
+related:
+  - roadmap/day-007-production-streaming-architecture
+  - handbook/streaming/streaming-basics
+  - handbook/streaming/sse
+  - handbook/architecture/ai-sdk
+---
+
+# ReadableStream and Stream Parsing
+
+## Purpose
+
+This handbook document covers the browser's ReadableStream API and stream parsing techniques essential for implementing robust frontend streaming in AI applications. Understanding how to properly read, decode, and parse streamed data is critical for production-quality streaming UX.
+
+---
+
+# What is ReadableStream?
+
+## Definition
+
+ReadableStream is a browser API that represents a readable stream of byte data. It's the interface through which browsers expose streamed HTTP response bodies.
+
+## Key Characteristics
+
+- **Streaming interface**: Read data as it arrives
+- **Chunk-based**: Data arrives in chunks (Uint8Array)
+- **Asynchronous**: Uses async iterators or readers
+- **Backpressure-aware**: Can pause/resume reading
+- **Cancellable**: Can be cancelled when no longer needed
+
+## Why ReadableStream for AI?
+
+When you make a streaming HTTP request:
+1. Server sends bytes incrementally
+2. Browser receives bytes in chunks
+3. ReadableStream provides access to these chunks
+4. You decode and parse the data
+5. Update UI with each token
+
+---
+
+# The Fetch API and Streams
+
+## Basic Streaming Request
+
+```typescript
+const response = await fetch('/api/chat/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ prompt: 'Hello' })
+});
+
+// Get the stream from response body
+const stream = response.body;
+
+if (!stream) {
+  throw new Error('No stream available');
+}
+```
+
+## Stream Structure
+
+```
+HTTP Response
+    ↓
+Response.body
+    ↓
+ReadableStream<Uint8Array>
+    ↓
+Chunks of bytes
+    ↓
+Decode to text
+    ↓
+Parse events
+    ↓
+Update UI
+```
+
+---
+
+# Reading Streams
+
+## Method 1: Async Iterator (Modern)
+
+```typescript
+const response = await fetch('/api/chat/stream');
+const stream = response.body;
+
+if (stream) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  
+  while (true) {
+    const { done, value } = await reader.read();
+    
+    if (done) {
+      console.log('Stream complete');
+      break;
+    }
+    
+    // value is Uint8Array
+    const text = decoder.decode(value);
+    console.log('Received:', text);
+  }
+}
+```
+
+## Method 2: Async Generator
+
+```typescript
+async function* readStream(stream: ReadableStream<Uint8Array>) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  
+  while (true) {
+    const { done, value } = await reader.read();
+    
+    if (done) break;
+    
+    yield decoder.decode(value);
+  }
+}
+
+// Usage
+const response = await fetch('/api/chat/stream');
+const stream = response.body;
+
+if (stream) {
+  for await (const chunk of readStream(stream)) {
+    console.log('Chunk:', chunk);
+    updateUI(chunk);
+  }
+}
+```
+
+## Method 3: Event-Based (Pipes)
+
+```typescript
+const response = await fetch('/api/chat/stream');
+const stream = response.body;
+
+if (stream) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  
+  reader.read().then(({ done, value }) => {
+    if (done) return;
+    
+    const text = decoder.decode(value);
+    handleChunk(text);
+    
+    // Continue reading
+    return reader.read().then(handleChunk);
+  });
+}
+```
+
+---
+
+# Understanding Uint8Array
+
+## What is Uint8Array?
+
+Uint8Array is a typed array representing 8-bit unsigned integers. It's how browsers represent binary data.
+
+## Example
+
+```typescript
+// Text: "Hello"
+// UTF-8 bytes: [72, 101, 108, 108, 111]
+
+const bytes = new Uint8Array([72, 101, 108, 108, 111]);
+const text = new TextDecoder().decode(bytes);
+console.log(text); // "Hello"
+```
+
+## Why Bytes, Not Strings?
+
+HTTP transports **bytes**, not strings:
+- Network protocols work with binary data
+- Encoding is handled at application layer
+- Browser receives raw bytes from server
+- You must decode to text
+
+## Byte Structure
+
+```
+Uint8Array: [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]
+
+Decodes to: "Hello World"
+
+Each number represents one byte (8 bits)
+Range: 0-255 per byte
+```
+
+---
+
+# TextDecoder
+
+## What is TextDecoder?
+
+TextDecoder is a browser API that decodes byte data into strings using a specific encoding (usually UTF-8).
+
+## Basic Usage
+
+```typescript
+const decoder = new TextDecoder();
+
+// Decode Uint8Array to string
+const bytes = new Uint8Array([72, 101, 108, 108, 111]);
+const text = decoder.decode(bytes);
+console.log(text); // "Hello"
+```
+
+## UTF-8 Encoding
+
+Most web data uses UTF-8:
+- ASCII characters: 1 byte
+- European characters: 2 bytes
+- Emoji: 4 bytes
+- Multi-byte sequences for non-ASCII
+
+## Example: Decoding Stream Chunks
+
+```typescript
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  
+  if (done) break;
+  
+  // value is Uint8Array
+  const text = decoder.decode(value);
+  
+  // text is now a string
+  console.log(text); // "Hello"
+}
+```
+
+## Handling Partial Characters
+
+```typescript
+// Problem: Character split across chunks
+// Chunk 1: [72, 101] → "He"
+// Chunk 2: [108, 108, 111] → "llo"
+
+// Solution: TextDecoder handles this automatically
+const decoder = new TextDecoder();
+
+// Chunk 1
+const text1 = decoder.decode(new Uint8Array([72, 101]));
+console.log(text1); // "He"
+
+// Chunk 2
+const text2 = decoder.decode(new Uint8Array([108, 108, 111]));
+console.log(text2); // "llo"
+
+// Combined: "Hello"
+```
+
+---
+
+# Buffer Management
+
+## The Buffer Problem
+
+Stream data arrives in arbitrary chunks:
+- Chunk 1: `{"text":"Hel`
+- Chunk 2: `lo"}`
+
+You can't parse Chunk 1 alone—it's incomplete!
+
+## Buffer Strategy
+
+```typescript
+let buffer = '';
+
+function processChunk(chunk: string) {
+  // Add chunk to buffer
+  buffer += chunk;
+  
+  // Split by event delimiter (double newline)
+  const events = buffer.split('\n\n');
+  
+  // Keep last element (might be incomplete)
+  buffer = events.pop() || '';
+  
+  // Process complete events
+  for (const event of events) {
+    if (event.startsWith('data: ')) {
+      const data = event.slice(6); // Remove 'data: ' prefix
+      handleEvent(JSON.parse(data));
+    }
+  }
+}
+```
+
+## Complete Buffer Management Example
+
+```typescript
+class StreamBuffer {
+  private buffer: string = '';
+  
+  add(chunk: string) {
+    this.buffer += chunk;
+    this.processEvents();
+  }
+  
+  private processEvents() {
+    const events = this.buffer.split('\n\n');
+    this.buffer = events.pop() || '';
+    
+    for (const event of events) {
+      if (event.trim()) {
+        this.handleEvent(event);
+      }
+    }
+  }
+  
+  private handleEvent(event: string) {
+    if (event.startsWith('data: ')) {
+      const data = JSON.parse(event.slice(6));
+      this.onEvent(data);
+    }
+  }
+  
+  onEvent(data: any) {
+    // Override or pass callback
+  }
+  
+  flush() {
+    // Process any remaining data
+    if (this.buffer.trim()) {
+      this.handleEvent(this.buffer);
+    }
+  }
+}
+```
+
+## Why Buffer Management is Critical
+
+Without proper buffering:
+```
+❌ Chunk 1: '{"text":"Hel'
+   Try to parse → JSON Error!
+
+✅ Buffer: '{"text":"Hel'
+   Wait for more data
+   
+✅ Chunk 2: 'lo"}'
+   Buffer: '{"text":"Hello"}'
+   Parse → Success!
+```
+
+---
+
+# Parsing SSE from Stream
+
+## Complete Parser
+
+```typescript
+class SSEParser {
+  private buffer: string = '';
+  private decoder: TextDecoder;
+  
+  constructor() {
+    this.decoder = new TextDecoder();
+  }
+  
+  parse(chunk: Uint8Array): SSEEvent[] {
+    // Decode bytes to text
+    const text = this.decoder.decode(chunk);
+    
+    // Add to buffer
+    this.buffer += text;
+    
+    // Split by double newline
+    const events = this.buffer.split('\n\n');
+    
+    // Keep incomplete event in buffer
+    this.buffer = events.pop() || '';
+    
+    // Parse complete events
+    return events
+      .filter(event => event.trim())
+      .map(event => this.parseEvent(event))
+      .filter(event => event !== null);
+  }
+  
+  private parseEvent(eventText: string): SSEEvent | null {
+    const lines = eventText.split('\n');
+    let data = '';
+    let id: string | undefined;
+    let eventType = 'message';
+    
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        data += line.slice(6);
+      } else if (line.startsWith('id: ')) {
+        id = line.slice(4);
+      } else if (line.startsWith('event: ')) {
+        eventType = line.slice(7);
+      }
+    }
+    
+    if (!data) return null;
+    
+    try {
+      return {
+        id,
+        type: eventType,
+        data: JSON.parse(data)
+      };
+    } catch (error) {
+      console.error('Failed to parse SSE event:', error);
+      return null;
+    }
+  }
+  
+  flush(): SSEEvent | null {
+    if (this.buffer.trim()) {
+      const event = this.parseEvent(this.buffer);
+      this.buffer = '';
+      return event;
+    }
+    return null;
+  }
+}
+
+interface SSEEvent {
+  id?: string;
+  type: string;
+  data: any;
+}
+```
+
+---
+
+# Complete Streaming Implementation
+
+## Production-Ready Stream Reader
+
+```typescript
+class StreamReader {
+  private reader: ReadableStreamDefaultReader<Uint8Array>;
+  private decoder: TextDecoder;
+  private buffer: string = '';
+  private onEvent: (event: any) => void;
+  private onError: (error: Error) => void;
+  private onComplete: () => void;
+  
+  constructor(
+    stream: ReadableStream<Uint8Array>,
+    callbacks: {
+      onEvent: (event: any) => void;
+      onError: (error: Error) => void;
+      onComplete: () => void;
+    }
+  ) {
+    this.reader = stream.getReader();
+    this.decoder = new TextDecoder();
+    this.onEvent = callbacks.onEvent;
+    this.onError = callbacks.onError;
+    this.onComplete = callbacks.onComplete;
+  }
+  
+  async read() {
+    try {
+      while (true) {
+        const { done, value } = await this.reader.read();
+        
+        if (done) {
+          // Process any remaining data in buffer
+          this.flushBuffer();
+          this.onComplete();
+          break;
+        }
+        
+        // Process chunk
+        this.processChunk(value);
+      }
+    } catch (error) {
+      this.onError(error as Error);
+    }
+  }
+  
+  private processChunk(chunk: Uint8Array) {
+    // Decode bytes to text
+    const text = this.decoder.decode(chunk);
+    
+    // Add to buffer
+    this.buffer += text;
+    
+    // Split by double newline (SSE delimiter)
+    const events = this.buffer.split('\n\n');
+    
+    // Keep incomplete event in buffer
+    this.buffer = events.pop() || '';
+    
+    // Process complete events
+    for (const event of events) {
+      if (event.trim()) {
+        this.parseEvent(event);
+      }
+    }
+  }
+  
+  private parseEvent(eventText: string) {
+    if (!eventText.startsWith('data: ')) {
+      return;
+    }
+    
+    try {
+      const data = JSON.parse(eventText.slice(6));
+      this.onEvent(data);
+    } catch (error) {
+      console.error('Failed to parse event:', eventText);
+    }
+  }
+  
+  private flushBuffer() {
+    if (this.buffer.trim() && this.buffer.startsWith('data: ')) {
+      this.parseEvent(this.buffer);
+    }
+  }
+  
+  cancel() {
+    this.reader.cancel();
+  }
+}
+```
+
+## Usage
+
+```typescript
+async function streamChat(prompt: string) {
+  const response = await fetch('/api/chat/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  
+  const stream = response.body;
+  
+  if (!stream) {
+    throw new Error('No stream');
+  }
+  
+  const reader = new StreamReader(stream, {
+    onEvent: (event) => {
+      switch (event.type) {
+        case 'token':
+          updateUI(event.text);
+          break;
+        case 'done':
+          markComplete();
+          break;
+        case 'error':
+          showError(event.message);
+          break;
+      }
+    },
+    onError: (error) => {
+      console.error('Stream error:', error);
+      showError('Stream failed');
+    },
+    onComplete: () => {
+      console.log('Stream complete');
+    }
+  });
+  
+  await reader.read();
+}
+```
+
+---
+
+# Common Stream Parsing Issues
+
+## Issue 1: Incomplete JSON
+
+**Problem**:
+```
+Chunk: '{"text":"Hel'
+```
+
+**Solution**: Buffer until complete
+```typescript
+let buffer = '';
+buffer += chunk;
+// Wait for more data
+```
+
+## Issue 2: Multiple Events in One Chunk
+
+**Problem**:
+```
+Chunk: 'data: {"text":"Hello"}\n\ndata: {"text":"World"}\n\n'
+```
+
+**Solution**: Split by delimiter
+```typescript
+const events = buffer.split('\n\n');
+```
+
+## Issue 3: Event Split Across Chunks
+
+**Problem**:
+```
+Chunk 1: 'data: {"text":"Hel'
+Chunk 2: 'lo"}\n\n'
+```
+
+**Solution**: Buffer management
+```typescript
+buffer += chunk;
+const events = buffer.split('\n\n');
+buffer = events.pop() || ''; // Keep incomplete
+```
+
+## Issue 4: Encoding Issues
+
+**Problem**: Special characters, emojis
+
+**Solution**: Use TextDecoder
+```typescript
+const decoder = new TextDecoder('utf-8');
+const text = decoder.decode(bytes);
+```
+
+---
+
+# Stream Performance Optimization
+
+## 1. Use requestAnimationFrame
+
+Don't update UI on every token—batch updates:
+
+```typescript
+let pendingText = '';
+let scheduled = false;
+
+function onToken(token: string) {
+  pendingText += token;
+  
+  if (!scheduled) {
+    scheduled = true;
+    requestAnimationFrame(() => {
+      updateUI(pendingText);
+      pendingText = '';
+      scheduled = false;
+    });
+  }
+}
+```
+
+## 2. Debounce UI Updates
+
+```typescript
+function debounce(func: Function, wait: number) {
+  let timeout: NodeJS.Timeout;
+  
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
+const debouncedUpdate = debounce(updateUI, 16); // ~60fps
+```
+
+## 3. Virtual Scrolling
+
+For long responses, use virtual scrolling:
+
+```typescript
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+const virtualizer = useVirtualizer({
+  count: tokens.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 20,
+  overscan: 10
+});
+```
+
+## 4. Web Workers (Advanced)
+
+For heavy parsing, use Web Workers:
+
+```typescript
+// main.ts
+const worker = new Worker('stream-parser.worker.ts');
+worker.postMessage({ chunk });
+worker.onmessage = (e) => {
+  updateUI(e.data);
+};
+
+// stream-parser.worker.ts
+self.onmessage = (e) => {
+  const parsed = parseChunk(e.data.chunk);
+  self.postMessage(parsed);
+};
+```
+
+---
+
+# Error Handling
+
+## Network Errors
+
+```typescript
+try {
+  await reader.read();
+} catch (error) {
+  if (error instanceof TypeError) {
+    // Network error
+    showError('Connection lost');
+  } else {
+    // Other error
+    showError('Stream failed');
+  }
+}
+```
+
+## Parse Errors
+
+```typescript
+try {
+  const data = JSON.parse(eventText);
+  this.onEvent(data);
+} catch (error) {
+  console.error('Failed to parse event:', eventText);
+  // Don't crash - skip malformed event
+}
+```
+
+## Timeout Handling
+
+```typescript
+const timeout = setTimeout(() => {
+  reader.cancel();
+  showError('Stream timeout');
+}, 30000); // 30 seconds
+
+// Clear on completion
+reader.read().then(() => {
+  clearTimeout(timeout);
+});
+```
+
+---
+
+# Testing Stream Parsing
+
+## Unit Tests
+
+```typescript
+test('parses complete SSE events', () => {
+  const parser = new SSEParser();
+  
+  const events = parser.parse(new Uint8Array([
+    ...TextEncoder.encode('data: {"type":"token","text":"Hello"}\n\n'),
+    ...TextEncoder.encode('data: {"type":"done"}\n\n')
+  ]));
+  
+  expect(events).toHaveLength(2);
+  expect(events[0].data.text).toBe('Hello');
+  expect(events[1].data.type).toBe('done');
+});
+
+test('handles split events', () => {
+  const parser = new SSEParser();
+  
+  // First chunk (incomplete)
+  parser.parse(new Uint8Array([...TextEncoder.encode('data: {"text":"Hel')]));
+  
+  // Second chunk (completes event)
+  const events = parser.parse(new Uint8Array([...TextEncoder.encode('lo"}\n\n')]));
+  
+  expect(events).toHaveLength(1);
+  expect(events[0].data.text).toBe('Hello');
+});
+
+test('handles multiple events in one chunk', () => {
+  const parser = new SSEParser();
+  
+  const events = parser.parse(new Uint8Array([
+    ...TextEncoder.encode('data: {"type":"token"}\n\n'),
+    ...TextEncoder.encode('data: {"type":"done"}\n\n')
+  ]));
+  
+  expect(events).toHaveLength(2);
+});
+```
+
+---
+
+# Interview Questions
+
+## Q: What is ReadableStream?
+
+**A**: ReadableStream is a browser API that represents a readable stream of byte data. It's the interface through which browsers expose streamed HTTP response bodies, allowing you to read data incrementally as it arrives from the server.
+
+## Q: Why does the browser return Uint8Array instead of strings?
+
+**A**: HTTP transports bytes, not strings. Network protocols work with binary data at the transport layer. The browser receives raw bytes from the server and provides them as Uint8Array. You must use TextDecoder to convert these bytes to strings.
+
+## Q: What is buffer management and why is it important?
+
+**A**: Buffer management is the practice of accumulating streamed data until you have complete units (like SSE events) before parsing. It's important because stream data arrives in arbitrary chunks—an event might be split across multiple chunks, or multiple events might arrive in one chunk. Without buffering, you'll try to parse incomplete data and fail.
+
+## Q: How do you handle incomplete JSON in streams?
+
+**A**: Use a buffer to accumulate data. Add each chunk to the buffer, then attempt to parse complete events. Keep any incomplete data in the buffer for the next chunk. Only parse when you have complete JSON (e.g., when you see the closing brace and event delimiter).
+
+## Q: What is TextDecoder and when do you use it?
+
+**A**: TextDecoder is a browser API that decodes byte data (Uint8Array) into strings using a specific character encoding (usually UTF-8). You use it to convert the raw bytes from a ReadableStream into readable text that you can parse and display.
+
+---
+
+# Assignment
+
+## Objective
+
+Build a robust stream parser for AI responses.
+
+## Tasks
+
+1. Implement StreamBuffer class:
+   - Accumulate chunks
+   - Split by SSE delimiter
+   - Handle incomplete events
+   - Parse complete events
+
+2. Add error handling:
+   - Malformed JSON
+   - Incomplete events
+   - Network errors
+   - Timeout handling
+
+3. Create test suite:
+   - Complete events
+   - Split events
+   - Multiple events per chunk
+   - Error cases
+
+4. Build demo:
+   - Connect to Ollama streaming API
+   - Parse responses
+   - Display in UI
+   - Handle errors gracefully
+
+## Deliverables
+
+- StreamBuffer implementation
+- Error handling
+- Test suite
+- Working demo
+- Documentation
+
+---
+
+# Mini Project
+
+## Objective
+
+Build a production-ready stream reader for your AI SDK.
+
+## Requirements
+
+1. Create StreamReader class:
+   - Read from ReadableStream
+   - Decode with TextDecoder
+   - Buffer management
+   - Event parsing
+
+2. Add features:
+   - Multiple event types
+   - Event IDs
+   - Error recovery
+   - Cancellation support
+
+3. Optimize performance:
+   - requestAnimationFrame batching
+   - Minimal re-renders
+   - Efficient buffer management
+
+4. Testing:
+   - Unit tests for parsing
+   - Integration tests
+   - Error scenarios
+   - Performance tests
+
+## Focus
+
+- Understanding stream parsing fundamentals
+- Building robust buffer management
+- Handling real-world streaming edge cases
+- Production-ready error handling
+
+---
+
+# Key Takeaways
+
+- ReadableStream provides access to streamed bytes
+- HTTP transports bytes, not strings
+- TextDecoder converts bytes to text
+- Buffer management is critical for parsing
+- Events may split across chunks
+- Always handle incomplete data
+- Use requestAnimationFrame for smooth UI
+- Test with various chunk sizes
+- Handle errors gracefully
+- Stream parsing is foundational for AI streaming
+
+---
+
+# Related Documents
+
+- [Streaming Basics](./streaming-basics.mdx)
+- [SSE](./sse.mdx)
+- [Provider Abstraction](./provider-abstraction.mdx)
+- [AI SDK Architecture](../architecture/ai-sdk.mdx)
+- [Roadmap Day 7](../roadmap/day-007-production-streaming-architecture/lesson.mdx)

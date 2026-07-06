@@ -1,0 +1,526 @@
+---
+id: handbook-llms-llm-basics
+
+title: Large Language Model Fundamentals
+
+description: Understanding what Large Language Models are, how they work at a high level, and their role in modern AI applications.
+
+category: LLM Fundamentals
+
+topics:
+  - LLM
+  - Neural Networks
+  - Token Prediction
+  - AI Models
+  - Foundation Models
+
+related:
+  - roadmap/day-002-llms-and-provider-landscape
+  - handbook/llms/tokens
+  - handbook/llms/context-window
+  - handbook/llms/provider-comparison
+---
+
+# Large Language Model Fundamentals
+
+## Purpose
+
+This handbook document provides a comprehensive understanding of Large Language Models (LLMs), their underlying mechanics, and their role in AI Engineering. It serves as a reusable reference for all AI applications built in this roadmap.
+
+---
+
+# What is a Large Language Model?
+
+## Definition
+
+A Large Language Model (LLM) is a neural network trained on vast amounts of text data to predict the next token in a sequence.
+
+## Key Characteristics
+
+- **Large**: Trained on massive datasets (hundreds of billions of tokens)
+- **Language**: Specialized in understanding and generating text
+- **Model**: A mathematical representation learned from data
+- **Pre-trained**: Base model trained once, then fine-tuned or prompted
+
+## How LLMs Work (High Level)
+
+### Training Process
+
+1. **Data Collection**: Gather massive text corpus (books, websites, code, etc.)
+2. **Tokenization**: Convert text into tokens
+3. **Training**: Learn patterns by predicting next tokens
+4. **Fine-tuning**: Optimize for specific tasks (optional)
+5. **Alignment**: Make outputs helpful and safe (RLHF, etc.)
+
+### Inference
+
+During inference (when you use the model):
+1. Receive a prompt
+2. Tokenize the input
+3. Predict the next token
+4. Repeat until completion
+5. Convert tokens back to text
+
+## What LLMs Actually Do
+
+LLMs are **next-token predictors**. Given a sequence of tokens, they calculate the probability distribution for the next token.
+
+```
+Input: "The capital of France is"
+↓
+Model predicts: " Paris" (highest probability)
+↓
+Input: "The capital of France is Paris"
+↓
+Model predicts: "." or " and" or ","
+```
+
+This simple mechanism, applied at scale, produces remarkably intelligent-seeming behavior.
+
+---
+
+# LLM Architecture Overview
+
+## Transformer Architecture
+
+Modern LLMs are based on the Transformer architecture introduced in "Attention Is All You Need" (2017).
+
+### Key Components
+
+#### 1. Token Embeddings
+
+Convert tokens to numerical vectors representing meaning.
+
+#### 2. Positional Encoding
+
+Add information about token position in the sequence.
+
+#### 3. Attention Mechanism
+
+Allow the model to focus on relevant parts of the input when generating each token.
+
+#### 4. Feed-Forward Networks
+
+Process the attended information through neural network layers.
+
+#### 5. Layer Normalization
+
+Stabilize training and improve convergence.
+
+## Scale
+
+Modern LLMs contain:
+- **Parameters**: 7B to 1T+ (weights in the neural network)
+- **Layers**: 32 to 100+
+- **Attention Heads**: 32 to 128+
+- **Vocabulary**: 32K to 128K tokens
+
+Example:
+- **Llama 3.2 7B**: 7 billion parameters
+- **Claude 3.5 Sonnet**: ~175B parameters (estimated)
+- **GPT-4**: ~1.7T parameters (estimated, mixture of experts)
+
+---
+
+# Types of LLMs
+
+## By Size
+
+### Small Models (7B-13B parameters)
+- Fast inference
+- Lower resource requirements
+- Good for simple tasks
+- Examples: Llama 3.2 7B, Phi-3
+
+### Medium Models (13B-70B parameters)
+- Balanced performance
+- Moderate resource needs
+- Strong reasoning
+- Examples: Llama 3.2 70B, Qwen 2.5 34B
+
+### Large Models (70B+ parameters)
+- Best quality
+- High resource requirements
+- Complex reasoning
+- Examples: Claude 3.5 Sonnet, GPT-4, Llama 3.2 405B
+
+## By Access
+
+### Open Models
+- Weights publicly available
+- Can be run locally
+- Customizable
+- Examples: Llama, Qwen, Mistral, Gemma
+
+### Closed Models
+- Accessible only via API
+- No local deployment
+- Often larger/more capable
+- Examples: GPT-4, Claude 3.5 Sonnet, Gemini
+
+## By Training
+
+### Base Models
+- Trained on raw text
+- Complete text continuation
+- Not optimized for conversation
+- Examples: Llama 3.2 Base
+
+### Instruction-Tuned Models
+- Fine-tuned on instruction-following data
+- Better at following prompts
+- More conversational
+- Examples: Llama 3.2 Instruct, Qwen 2.5 Chat
+
+### Chat Models
+- Optimized for dialogue
+- Include system prompts
+- Better at multi-turn conversation
+- Examples: Claude 3.5 Sonnet, GPT-4 Turbo
+
+---
+
+# What LLMs Can Do
+
+## Text Generation
+
+- Write essays, articles, documentation
+- Generate creative content
+- Draft emails and messages
+- Create marketing copy
+
+## Code Generation
+
+- Write functions and classes
+- Debug code
+- Explain code
+- Convert between languages
+- Generate tests
+
+## Analysis
+
+- Summarize documents
+- Extract key information
+- Classify text
+- Sentiment analysis
+- Entity recognition
+
+## Reasoning
+
+- Answer questions
+- Solve problems
+- Make inferences
+- Logical reasoning
+- Mathematical calculations
+
+## Translation
+
+- Language translation
+- Code translation
+- Style transfer
+- Tone adjustment
+
+## Conversation
+
+- Chatbots
+- Customer support
+- Tutoring
+- Interview preparation
+
+---
+
+# What LLMs Cannot Do
+
+## Limitations
+
+### No Real-Time Information
+- Training data has a cutoff date
+- Cannot access current events without RAG
+- No live data feeds
+
+### No Persistent Memory
+- Each request is stateless
+- No long-term memory between conversations
+- Must be implemented externally
+
+### No Factual Guarantees
+- Can generate plausible-sounding but incorrect information (hallucinations)
+- Should always verify important facts
+- Not suitable for critical decisions without validation
+
+### No True Understanding
+- Pattern matching, not comprehension
+- No consciousness or awareness
+- Statistical correlation, not causal reasoning
+
+### Limited Reasoning
+- Struggles with complex multi-step logic
+- Can make arithmetic errors
+- May contradict itself in long responses
+
+### No Agency
+- Cannot take actions independently
+- Cannot access external systems without tools
+- Cannot learn from interactions in real-time
+
+---
+
+# LLM Capabilities Spectrum
+
+## Current State (2024-2025)
+
+```
+Capability              Status
+─────────────────────────────────────
+Text generation         ✅ Excellent
+Code generation         ✅ Very Good
+Summarization           ✅ Good
+Translation             ✅ Good
+Q&A                     ✅ Good
+Reasoning               ⚠️ Improving
+Math                    ⚠️ Moderate
+Factual accuracy        ⚠️ Variable
+Long-term memory        ❌ Not inherent
+Real-time info          ❌ Not inherent
+Agency                  ❌ Requires tools
+```
+
+---
+
+# How AI Engineers Use LLMs
+
+## Integration, Not Training
+
+As an AI Engineer, you will:
+- **Integrate** LLMs into applications via APIs
+- **Design** prompts and context
+- **Build** architecture around LLM capabilities
+- **Orchestrate** multi-step AI workflows
+- **Implement** RAG, agents, and tools
+
+You will NOT typically:
+- Train models from scratch
+- Optimize model weights
+- Work with training datasets
+- Design model architectures
+
+## Provider APIs
+
+LLMs are accessed through provider APIs:
+
+```typescript
+// Anthropic
+const message = await anthropic.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+
+// OpenAI
+const completion = await openai.chat.completions.create({
+  model: 'gpt-4',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+
+// Ollama (local)
+const response = await fetch('http://localhost:11434/api/generate', {
+  method: 'POST',
+  body: JSON.stringify({
+    model: 'llama3.2',
+    prompt: 'Hello!'
+  })
+});
+```
+
+## Abstraction is Key
+
+Production applications abstract provider differences:
+
+```typescript
+// Application code never calls provider SDKs directly
+const response = await aiCore.generate({
+  prompt: 'Hello!',
+  provider: 'anthropic' // or 'openai', 'ollama'
+});
+```
+
+---
+
+# The Role of LLMs in AI Applications
+
+## LLMs as Components
+
+LLMs are one component of larger AI systems:
+
+```
+User Request
+    ↓
+Context Assembly (RAG, history, etc.)
+    ↓
+Prompt Construction
+    ↓
+LLM Inference
+    ↓
+Response Processing
+    ↓
+User Interface
+```
+
+## LLMs + Traditional Code
+
+Modern AI applications combine:
+- **LLMs**: Reasoning, generation, understanding
+- **Traditional code**: Data processing, API calls, business logic
+- **Databases**: Persistence, retrieval
+- **External tools**: Actions, calculations, lookups
+
+Example:
+```typescript
+// AI-powered PR reviewer
+async function reviewPR(prId: string) {
+  // Traditional code
+  const pr = await github.getPR(prId);
+  const diff = await github.getDiff(prId);
+  const standards = await db.getCodingStandards();
+  
+  // LLM for analysis
+  const review = await aiCore.generate({
+    prompt: buildReviewPrompt(pr, diff, standards)
+  });
+  
+  // Traditional code
+  await github.postComment(prId, review);
+  await db.saveReview(prId, review);
+  
+  return review;
+}
+```
+
+---
+
+# Key Concepts
+
+## Tokens
+
+The basic unit of text processing. See [handbook/llms/tokens.mdx](./tokens.mdx).
+
+## Context Window
+
+The maximum amount of text a model can process in one request. See [handbook/llms/context-window.mdx](./context-window.mdx).
+
+## Temperature
+
+Controls randomness in generation:
+- **Low (0.0-0.3)**: Deterministic, focused, repetitive
+- **Medium (0.4-0.7)**: Balanced creativity and coherence
+- **High (0.8-1.0)**: Creative, diverse, unpredictable
+
+## Top-P (Nucleus Sampling)
+
+Controls diversity by selecting from the smallest set of top probable tokens.
+
+## Max Tokens
+
+Limits the length of generated responses.
+
+## Stop Sequences
+
+Specific tokens that halt generation when encountered.
+
+---
+
+# Interview Questions
+
+## Q: What is a Large Language Model?
+
+**A**: A Large Language Model is a neural network trained on massive text data to predict the next token in a sequence. It learns patterns, grammar, facts, and reasoning abilities from the training data.
+
+## Q: How do LLMs generate text?
+
+**A**: LLMs generate text one token at a time. Given an input sequence, they predict the most likely next token, append it to the input, and repeat the process until a stopping condition is met.
+
+## Q: What's the difference between a base model and an instruction-tuned model?
+
+**A**: A base model completes text patterns. An instruction-tuned model has been further trained on instruction-following data, making it better at understanding and executing user commands.
+
+## Q: Can LLMs reason?
+
+**A**: LLMs demonstrate emergent reasoning capabilities, especially in larger models. However, this reasoning is based on pattern matching from training data, not true logical deduction. They excel at certain reasoning tasks but can fail at complex multi-step logic.
+
+## Q: What are the main limitations of LLMs?
+
+**A**: Key limitations include: no real-time information (without RAG), no persistent memory, potential for hallucinations (generating false information), limited mathematical reasoning, no true understanding, and no agency without external tools.
+
+---
+
+# Assignment
+
+## Objective
+
+Understand LLM fundamentals and their practical implications.
+
+## Tasks
+
+1. Research three different LLMs (e.g., Llama 3.2, Qwen 2.5, Mistral)
+2. Document their:
+   - Parameter count
+   - Context window size
+   - Training data cutoff
+   - Strengths and weaknesses
+   - Best use cases
+3. Compare open vs closed models
+4. Identify which model you would use for:
+   - A coding assistant
+   - A customer support chatbot
+   - A document analysis tool
+   - A creative writing assistant
+
+## Deliverables
+
+- Comparison table of 3 LLMs
+- Analysis of open vs closed models
+- Recommendations with justification
+
+---
+
+# Mini Project
+
+## Objective
+
+Build a simple LLM comparison tool.
+
+## Requirements
+
+1. Set up Ollama with 2-3 different models
+2. Create a simple interface to send the same prompt to each model
+3. Compare:
+   - Response quality
+   - Response speed
+   - Token usage
+   - Consistency
+4. Document which model performs best for different task types
+
+## Focus
+
+- Understanding model differences
+- Practical evaluation skills
+- Documentation
+
+---
+
+# Key Takeaways
+
+- LLMs are next-token predictors trained on massive text data
+- They excel at text generation, code, analysis, and conversation
+- They have limitations: no real-time info, no persistent memory, potential hallucinations
+- AI Engineers integrate LLMs via APIs, not train them
+- Provider abstraction allows switching models without changing application code
+- Understanding LLM capabilities helps design better AI applications
+
+---
+
+# Related Documents
+
+- [Tokens](./tokens.mdx)
+- [Context Window](./context-window.mdx)
+- [Provider Comparison](./provider-comparison.mdx)
+- [Roadmap Day 2](../roadmap/day-002-llms-and-provider-landscape/lesson.mdx)

@@ -1,0 +1,470 @@
+---
+id: day-005-context-engineering
+
+type: roadmap
+
+day: 5
+
+slug: context-engineering
+
+title: Context Engineering
+
+subtitle: The Foundation of Production AI Systems
+
+description: >
+  Learn why prompts alone are not enough for production AI applications.
+  Understand Context Engineering, ContextBuilder, context assembly,
+  conversation history, retrieved knowledge, and scalable AI architecture.
+
+version: 1.0.0
+
+status: completed
+
+difficulty: Intermediate
+
+estimatedTime: 2.5 Hours
+
+readingTime: 60 min
+
+category:
+  - Context Engineering
+
+topics:
+  - Context Engineering
+  - ContextBuilder
+  - Conversation History
+  - Memory
+  - Retrieved Knowledge
+  - AI Architecture
+
+tags:
+  - context
+  - llm
+  - architecture
+  - ai-core
+  - prompt
+
+prerequisites:
+  - day-004-prompt-templates
+
+learningObjectives:
+  - Understand Context Engineering
+  - Learn why prompts are only one part of AI systems
+  - Design ContextBuilder architecture
+  - Assemble context from multiple sources
+  - Prepare for RAG and AI Agents
+
+projects:
+  - ai-chat
+  - ai-learning-portal
+  - pr-reviewer
+
+assignment: true
+
+quiz: true
+
+pdf: true
+
+searchable: true
+
+related:
+  - handbook/context/context-engineering
+  - handbook/context/context-builder
+  - handbook/rag/retrieval
+
+lastUpdated: 2026-07-05
+---
+
+# Day 5 — Context Engineering
+
+---
+
+# Overview
+
+One of the biggest misconceptions in AI development is that better prompts automatically produce better results.
+
+In reality, modern AI systems succeed because they provide the model with the **right context**, not merely a well-written prompt.
+
+Context Engineering is the discipline of selecting, organizing, and delivering the information that an LLM needs to perform a task effectively.
+
+While Prompt Engineering focuses on *how we ask*, Context Engineering focuses on *what the model knows at inference time*.
+
+---
+
+# Learning Objectives
+
+By the end of today's lesson, you should be able to:
+
+- Explain what Context Engineering is.
+- Differentiate prompts from context.
+- Identify common context sources.
+- Understand the role of ContextBuilder.
+- Recognize why context quality is often more important than prompt quality.
+
+---
+
+# Prompt vs Context
+
+Many beginners treat these terms as interchangeable, but they serve different purposes.
+
+| Prompt | Context |
+|---------|----------|
+| Instructions | Information |
+| Defines the task | Supplies knowledge |
+| Usually short | Can be very large |
+| Mostly static | Highly dynamic |
+| Created by developers | Built at runtime |
+
+A prompt tells the model **what to do**.
+
+Context tells the model **what it needs to know**.
+
+---
+
+# A Production AI Request
+
+A production request rarely contains only a prompt.
+
+Instead, it is composed from several sources:
+
+```mermaid
+flowchart TD
+
+User
+
+↓
+
+PromptBuilder
+
+↓
+
+ContextBuilder
+
+↓
+
+Conversation History
+
+Retrieved Documents
+
+User Profile
+
+Application State
+
+System Instructions
+
+↓
+
+Final Context
+
+↓
+
+LLM
+```
+
+The model receives the assembled result as one request, but internally that request has been built from many components.
+
+---
+
+# What is Context?
+
+Context includes any information that helps the model generate a better response.
+
+Examples:
+
+- Previous conversation
+- User preferences
+- Uploaded files
+- Retrieved documentation
+- Current project
+- Application settings
+- Code snippets
+- Database results
+- Tool outputs
+
+The quality of the context often has a greater impact on the response than the wording of the prompt itself.
+
+---
+
+# Why Context Matters
+
+Imagine asking:
+
+```text
+Review this Pull Request.
+```
+
+Without context, the model knows almost nothing.
+
+Now imagine providing:
+
+- PR title
+- Changed files
+- Team coding standards
+- Architecture guidelines
+- Linked Jira ticket
+- Existing comments
+- Repository structure
+
+The response becomes dramatically more useful.
+
+---
+
+# ContextBuilder
+
+Just as PromptBuilder constructs prompts, ContextBuilder assembles the complete context required by the model.
+
+Responsibilities include:
+
+- Loading conversation history.
+- Retrieving relevant documents.
+- Including user preferences.
+- Adding project metadata.
+- Enforcing context limits.
+- Prioritizing important information.
+
+Applications should request a completed context rather than assembling it manually.
+
+---
+
+# ContextBuilder Architecture
+
+```mermaid
+flowchart TD
+
+Conversation
+
+Repository
+
+Knowledge Base
+
+User Preferences
+
+Application State
+
+↓
+
+ContextBuilder
+
+↓
+
+Token Optimization
+
+↓
+
+Final Context
+
+↓
+
+LLM
+```
+
+ContextBuilder becomes one of the core services inside AI Core.
+
+---
+
+# Context Sources
+
+A mature AI application may gather information from many places.
+
+Examples include:
+
+- Conversation history
+- Retrieval-Augmented Generation (RAG)
+- Database records
+- User profile
+- Tool results
+- Application configuration
+- Uploaded documents
+- External APIs
+
+Not every request requires every source. ContextBuilder selects only what is relevant.
+
+---
+
+# The Cost of Context
+
+Context is not free.
+
+Every additional token increases:
+
+- Cost
+- Latency
+- Memory usage
+
+More context does not automatically improve quality.
+
+The goal is to provide the **most relevant** context, not the largest amount of context.
+
+---
+
+# Context Window Constraints
+
+Every LLM has a maximum context window.
+
+When assembling context, ContextBuilder must ensure that:
+
+- Important information is preserved.
+- Irrelevant details are removed.
+- Token limits are respected.
+
+This balancing act becomes increasingly important as applications scale.
+
+---
+
+# Context Engineering Principles
+
+1. Relevance over quantity.
+2. Dynamic context beats static context.
+3. Assemble context at runtime.
+4. Separate context generation from business logic.
+5. Measure token usage.
+6. Prefer modular context providers.
+
+These principles form the basis of production AI architectures.
+
+---
+
+# Common Anti-Patterns
+
+❌ Sending the entire database.
+
+❌ Including every previous conversation message.
+
+❌ Ignoring token limits.
+
+❌ Embedding context logic inside UI components.
+
+❌ Hardcoding context assembly.
+
+Instead, centralize context creation through ContextBuilder.
+
+---
+
+# Real-World Example
+
+Consider an AI PR Reviewer.
+
+Instead of sending only the changed code, ContextBuilder may assemble:
+
+- Pull request description
+- Git diff
+- Coding standards
+- Repository architecture
+- Previous review comments
+- Security checklist
+- Performance guidelines
+
+The prompt remains almost unchanged, but the model now has significantly richer information to work with.
+
+---
+
+# Relationship to Future Topics
+
+Today's lesson lays the foundation for several advanced concepts:
+
+- Retrieval-Augmented Generation (RAG)
+- AI Agents
+- Tool Calling
+- Long-term Memory
+- Semantic Search
+- AI Learning Portal
+- Multi-step Workflows
+
+As the roadmap progresses, ContextBuilder will become one of the central services within AI Core.
+
+---
+
+# Best Practices
+
+- Keep PromptBuilder and ContextBuilder separate.
+- Assemble context dynamically.
+- Rank information by relevance.
+- Monitor token consumption.
+- Make context providers modular and testable.
+
+---
+
+# Assignment
+
+Design a ContextBuilder for an AI Documentation Assistant.
+
+List at least five context sources it should combine before sending a request to the model.
+
+Explain why each source is valuable.
+
+---
+
+# Mini Project
+
+Expand the architecture for your AI Chat application.
+
+Add a ContextBuilder component that:
+
+- Receives the user's message.
+- Retrieves conversation history.
+- Loads user preferences.
+- Produces the final context sent to the LLM.
+
+Do not implement it yet; focus on the architecture.
+
+---
+
+# Key Takeaways
+
+- Prompt Engineering and Context Engineering solve different problems.
+- Context quality often matters more than prompt wording.
+- ContextBuilder assembles information from multiple sources.
+- Effective context must balance relevance with token limits.
+- Context Engineering is the foundation of scalable AI applications.
+
+---
+
+# Revision Notes
+
+- Prompt = instructions.
+- Context = knowledge.
+- ContextBuilder assembles runtime information.
+- More context is not always better.
+- Relevance is the primary optimization goal.
+
+---
+
+# Knowledge Graph
+
+## Concepts Introduced
+
+- Context Engineering
+- ContextBuilder
+- Context Sources
+- Token Budget
+- Runtime Context
+
+## Builds Upon
+
+- Day 4 — Prompt Templates & PromptBuilder
+
+## Enables Future Topics
+
+- RAG
+- AI Agents
+- Semantic Search
+- Memory Systems
+- Tool Calling
+- AI Core
+- Multi-provider Architecture
+
+---
+
+# Discussion Notes
+
+During our roadmap discussions, we recognized that every AI application we plan to build—including the AI Chat Platform, PR Reviewer, and AI Learning Portal—will require a reusable ContextBuilder.
+
+Rather than allowing each application to gather context independently, AI Core will expose a shared ContextBuilder responsible for assembling all relevant information. This decision keeps business logic clean, encourages reuse, and enables future features such as semantic retrieval, memory management, and intelligent context optimization without changing application code.
+
+---
+
+# Next Lesson
+
+**Day 6 — Streaming Fundamentals**
+
+We'll explore why modern AI applications stream responses instead of waiting for a complete answer, how token streaming works, and how streaming improves both performance and user experience. We'll also introduce the foundations that later evolve into our production-grade streaming architecture.

@@ -1,0 +1,628 @@
+---
+id: handbook-llms-tokens
+
+title: Understanding Tokens
+
+description: Comprehensive guide to tokens, tokenization, token counting, and how tokens affect LLM interactions, costs, and context limits.
+
+category: LLM Fundamentals
+
+topics:
+  - Tokens
+  - Tokenization
+  - Token Counting
+  - Cost Calculation
+  - Context Management
+
+related:
+  - roadmap/day-002-llms-and-provider-landscape
+  - handbook/llms/llm-basics
+  - handbook/llms/context-window
+  - handbook/llms/provider-comparison
+---
+
+# Understanding Tokens
+
+## Purpose
+
+This handbook document provides a comprehensive understanding of tokens—the fundamental unit of text processing in Large Language Models. Understanding tokens is essential for cost management, context engineering, and building production AI applications.
+
+---
+
+# What is a Token?
+
+## Definition
+
+A token is the basic unit of text that LLMs process. Tokens are pieces of text that the model has been trained on and can understand.
+
+## Size
+
+Tokens can be:
+- **Whole words**: Common words like "the", "cat", "computer"
+- **Parts of words**: Prefixes, suffixes, or stems like "ing", "tion", "pre"
+- **Punctuation**: ".", ",", "!", "?"
+- **Spaces**: Leading spaces in subwords
+- **Special characters**: Numbers, symbols, emojis
+
+## Average Length
+
+On average:
+- 1 token ≈ 4 characters in English
+- 1 token ≈ ¾ of a word
+- 100 tokens ≈ 75 words
+- 1000 tokens ≈ 750 words
+
+These are rough estimates—actual token counts vary by language and content.
+
+---
+
+# Tokenization
+
+## What is Tokenization?
+
+Tokenization is the process of converting text into tokens that the LLM can process.
+
+## Example
+
+```
+Text: "Hello, world! How are you?"
+
+Tokens:
+["Hello", ",", " world", "!", " How", " are", " you", "?"]
+
+Count: 8 tokens
+```
+
+Notice:
+- "Hello" is one token
+- ", world" is one token (comma + space + word)
+- " How" is one token (space + word)
+
+## Tokenizers
+
+Different models use different tokenizers:
+- **Claude**: Uses a custom tokenizer
+- **GPT-4**: Uses tiktoken (BPE - Byte Pair Encoding)
+- **Llama**: Uses SentencePiece (BPE)
+- **Open-source models**: Various tokenizers
+
+## Why Tokenization Matters
+
+1. **Cost**: You pay per token
+2. **Context limits**: Models have token limits
+3. **Processing**: More tokens = more computation
+4. **Accuracy**: Token boundaries affect model understanding
+
+---
+
+# Tokenization Examples
+
+## English Text
+
+```
+Text: "The quick brown fox jumps over the lazy dog"
+
+Tokens (approximate):
+["The", " quick", " brown", " fox", " jumps", " over", " the", " lazy", " dog"]
+
+Count: 9 tokens
+```
+
+## Code
+
+```python
+Text: "def hello_world():\n    print('Hello, World!')"
+
+Tokens (approximate):
+["def", " hello", "_", "world", "():", "\n", "    ", "print", "('", "Hello", ",", " World", "!')"]
+
+Count: 13 tokens
+```
+
+Code often has more tokens than expected due to:
+- Indentation (spaces)
+- Special characters
+- Variable names
+
+## Non-English Text
+
+```
+Spanish: "Hola, ¿cómo estás?"
+
+Tokens: ["Hola", ",", " ¿", "cómo", " est", "ás", "?"]
+
+Count: 7 tokens
+```
+
+Non-English text often tokenizes differently:
+- Accented characters may split
+- Different languages have different token densities
+
+---
+
+# Why Tokens Matter
+
+## 1. Cost
+
+LLM providers charge per token:
+
+```
+Example pricing (approximate):
+- Input: $3 per million tokens
+- Output: $15 per million tokens
+
+A 1000-word document (~1300 tokens):
+- Input cost: $0.0039
+- A conversation with 10 exchanges (~5000 tokens each):
+  - Total: 50,000 tokens
+  - Cost: $0.75
+```
+
+## 2. Context Window
+
+Every model has a maximum context window:
+
+```
+Model Context Windows:
+- Claude 3.5 Sonnet: 200K tokens
+- GPT-4: 128K tokens
+- Llama 3.2: 128K tokens
+- GPT-3.5: 16K tokens
+- Ollama models: Varies (typically 4K-32K)
+```
+
+If your request exceeds the context window, it will fail.
+
+## 3. Performance
+
+More tokens mean:
+- Slower inference
+- Higher memory usage
+- Increased latency
+- Higher costs
+
+## 4. Quality
+
+Very long contexts can degrade model performance:
+- Models may "forget" earlier information
+- Attention becomes less focused
+- Response quality may decrease
+
+---
+
+# Counting Tokens
+
+## Why Count Tokens?
+
+1. **Estimate costs** before making API calls
+2. **Stay within limits** of the model
+3. **Optimize context** for best performance
+4. **Track usage** for billing and monitoring
+
+## Counting Methods
+
+### Provider SDKs
+
+```typescript
+// Anthropic
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic();
+const count = await anthropic.messages.countTokens({
+  model: 'claude-3-5-sonnet-20241022',
+  messages: [{ role: 'user', content: 'Hello!' }]
+});
+
+// OpenAI
+import { Tiktoken } from 'js-tiktoken';
+
+const encoder = new Tiktoken('cl100k_base');
+const tokens = encoder.encode('Hello, world!');
+console.log(tokens.length); // 4 tokens
+```
+
+### Estimation
+
+Quick estimation:
+```typescript
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+```
+
+This is rough but useful for quick checks.
+
+### Online Tools
+
+- [OpenAI Tokenizer](https://platform.openai.com/tokenizer)
+- [Claude Token Counter](https://claude.ai)
+- [Hugging Face Tokenizers](https://huggingface.co/docs/tokenizers)
+
+---
+
+# Token Budget Management
+
+## What is a Token Budget?
+
+The maximum number of tokens available for a request, calculated as:
+
+```
+Token Budget = Context Window - Reserved Tokens
+
+Example:
+- Context Window: 100K tokens
+- Reserved for response: 4K tokens
+- Available for input: 96K tokens
+```
+
+## Budget Allocation
+
+A production request might allocate tokens like this:
+
+```
+Total Budget: 100K tokens
+
+System Prompt: 500 tokens (0.5%)
+Conversation History: 20K tokens (20%)
+Retrieved Documents: 50K tokens (50%)
+Current User Message: 1K tokens (1%)
+Reserved for Response: 28.5K tokens (28.5%)
+```
+
+## Optimization Strategies
+
+### 1. Prioritize Important Information
+
+```
+✅ Include:
+- Recent conversation
+- Relevant retrieved documents
+- Critical system instructions
+
+❌ Exclude:
+- Old, irrelevant messages
+- Duplicate information
+- Unnecessary context
+```
+
+### 2. Summarize History
+
+Instead of sending full conversation history:
+```
+Option A: Full history (50K tokens)
+Option B: Summary of key points (2K tokens)
+```
+
+### 3. Truncate Strategically
+
+```
+Keep:
+- Most recent messages
+- First message (often contains context)
+- Important system instructions
+
+Remove:
+- Very old messages
+- Failed attempts
+- Redundant information
+```
+
+### 4. Use Retrieval
+
+Instead of sending everything:
+```
+RAG approach:
+- Index all documents
+- Retrieve only relevant chunks
+- Send top 5-10 most relevant
+```
+
+---
+
+# Token Pricing
+
+## How Pricing Works
+
+Providers charge separately for:
+- **Input tokens**: Your prompt + context
+- **Output tokens**: Model's response
+
+## Example Pricing (2024)
+
+### Anthropic Claude
+
+```
+Claude 3.5 Sonnet:
+- Input: $3 per 1M tokens
+- Output: $15 per 1M tokens
+
+Example request:
+- Input: 10K tokens
+- Output: 2K tokens
+- Cost: (10K × $3/1M) + (2K × $15/1M) = $0.03 + $0.03 = $0.06
+```
+
+### OpenAI
+
+```
+GPT-4:
+- Input: $30 per 1M tokens
+- Output: $60 per 1M tokens
+
+GPT-3.5 Turbo:
+- Input: $0.50 per 1M tokens
+- Output: $1.50 per 1M tokens
+```
+
+### Ollama (Local)
+
+```
+Cost: $0 (after hardware)
+
+But consider:
+- Electricity costs
+- Hardware depreciation
+- Time cost
+```
+
+## Cost Optimization
+
+### Strategies
+
+1. **Use smaller models** for simple tasks
+2. **Cache responses** for common queries
+3. **Optimize prompts** to reduce token count
+4. **Use local models** for development
+5. **Implement streaming** to show partial results
+6. **Set max_tokens** to limit response length
+7. **Use RAG** instead of sending full documents
+
+### Example Savings
+
+```
+Scenario: Customer support chatbot
+
+Without optimization:
+- Average input: 5K tokens
+- Average output: 1K tokens
+- Cost per query: $0.0225 (GPT-4)
+- 10,000 queries/month: $225
+
+With optimization:
+- Average input: 2K tokens (RAG + shorter prompts)
+- Average output: 500 tokens (max_tokens limit)
+- Cost per query: $0.0075 (GPT-4)
+- 10,000 queries/month: $75
+
+Savings: $150/month (67% reduction)
+```
+
+---
+
+# Token Limits by Model
+
+## Context Window Sizes
+
+### Anthropic Claude
+
+```
+Claude 3.5 Sonnet: 200K tokens
+Claude 3 Opus: 200K tokens
+Claude 3 Sonnet: 200K tokens
+Claude 3 Haiku: 200K tokens
+```
+
+### OpenAI
+
+```
+GPT-4 Turbo: 128K tokens
+GPT-4: 8K tokens
+GPT-3.5 Turbo: 16K tokens
+```
+
+### Google
+
+```
+Gemini 1.5 Pro: 1M tokens
+Gemini 1.5 Flash: 1M tokens
+Gemini 1.0 Pro: 32K tokens
+```
+
+### Open Source (via Ollama)
+
+```
+Llama 3.2: 128K tokens
+Qwen 2.5: 32K tokens
+Mistral: 32K tokens
+```
+
+## Output Limits
+
+Models also limit output tokens:
+
+```
+Claude 3.5 Sonnet: 8K output tokens (max_tokens)
+GPT-4: 4K-16K output tokens (varies by model)
+Llama 3.2: 8K output tokens
+```
+
+Always set `max_tokens` to control response length and cost.
+
+---
+
+# Tokenization Best Practices
+
+## 1. Count Tokens Early
+
+```typescript
+// Before making API call
+const inputTokens = countTokens(prompt + context);
+if (inputTokens > budget) {
+  // Reduce context or split request
+}
+```
+
+## 2. Monitor Usage
+
+```typescript
+// Track tokens per conversation
+interface ConversationMetrics {
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCost: number;
+}
+```
+
+## 3. Set Limits
+
+```typescript
+const response = await aiCore.generate({
+  prompt: userMessage,
+  maxTokens: 1000, // Limit response length
+});
+```
+
+## 4. Optimize Context
+
+```typescript
+// Instead of sending everything
+const context = await contextBuilder.build({
+  maxTokens: 50000, // Stay within budget
+  prioritize: ['recent', 'relevant']
+});
+```
+
+## 5. Cache Common Requests
+
+```typescript
+// Cache responses for identical prompts
+const cached = await cache.get(promptHash);
+if (cached) return cached;
+
+const response = await aiCore.generate({ prompt });
+await cache.set(promptHash, response);
+```
+
+---
+
+# Common Tokenization Issues
+
+## Issue 1: Unexpected Token Counts
+
+**Problem**: Text is longer/shorter than expected in tokens
+
+**Solution**: Use the actual tokenizer, not estimation
+
+## Issue 2: Context Window Exceeded
+
+**Problem**: Request fails due to too many tokens
+
+**Solution**: Implement token counting and context optimization
+
+## Issue 3: High Costs
+
+**Problem**: API bills higher than expected
+
+**Solution**: Monitor usage, optimize prompts, use caching
+
+## Issue 4: Truncated Responses
+
+**Problem**: Model stops mid-response
+
+**Solution**: Increase `max_tokens` or implement streaming with continuation
+
+---
+
+# Interview Questions
+
+## Q: What is a token?
+
+**A**: A token is the basic unit of text processing in LLMs. It can be a whole word, part of a word, punctuation, or special character. Models process text as sequences of tokens.
+
+## Q: How do tokens affect cost?
+
+**A**: LLM providers charge per token for both input and output. More tokens in your prompt and response mean higher costs. Optimizing token usage is critical for production applications.
+
+## Q: What's the difference between input and output tokens?
+
+**A**: Input tokens are the tokens in your request (prompt + context). Output tokens are the tokens in the model's response. Providers typically charge different rates for each.
+
+## Q: How can you optimize token usage?
+
+**A**: Strategies include: using RAG instead of sending full documents, caching common responses, optimizing prompts for brevity, summarizing conversation history, setting max_tokens limits, and using smaller models for simple tasks.
+
+## Q: Why does tokenization vary between models?
+
+**A**: Different models use different tokenizers trained on different datasets. This affects how text is split into tokens, which impacts token count, cost, and sometimes even model performance.
+
+---
+
+# Assignment
+
+## Objective
+
+Understand tokenization and its impact on AI applications.
+
+## Tasks
+
+1. Use an online tokenizer to count tokens in:
+   - A 500-word essay
+   - A code snippet (100 lines)
+   - A conversation with 10 messages
+2. Calculate the cost of processing each with Claude 3.5 Sonnet
+3. Identify strategies to reduce token count for each
+4. Implement a token counting function in your project
+
+## Deliverables
+
+- Token counts for each example
+- Cost calculations
+- Optimization recommendations
+- Working token counter code
+
+---
+
+# Mini Project
+
+## Objective
+
+Build a token budget manager for your AI Chat application.
+
+## Requirements
+
+1. Create a TokenBudget class that:
+   - Tracks input and output tokens
+   - Calculates cost in real-time
+   - Warns when approaching limits
+   - Suggests optimizations
+2. Integrate with your AI Core
+3. Display token usage in the UI
+4. Implement cost tracking per conversation
+
+## Focus
+
+- Understanding token economics
+- Building monitoring into applications
+- Cost-aware development
+
+---
+
+# Key Takeaways
+
+- Tokens are the fundamental unit of LLM processing
+- 1 token ≈ 4 characters or ¾ of a word (roughly)
+- Token count affects cost, context limits, and performance
+- Different models use different tokenizers
+- Always count tokens before making API calls
+- Optimize context to stay within budget
+- Monitor token usage in production
+- Token optimization can significantly reduce costs
+
+---
+
+# Related Documents
+
+- [LLM Basics](./llm-basics.mdx)
+- [Context Window](./context-window.mdx)
+- [Provider Comparison](./provider-comparison.mdx)
+- [Roadmap Day 2](../roadmap/day-002-llms-and-provider-landscape/lesson.mdx)

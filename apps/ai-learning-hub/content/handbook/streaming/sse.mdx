@@ -1,0 +1,914 @@
+---
+id: handbook-streaming-sse
+
+title: Server-Sent Events (SSE)
+
+description: Understanding Server-Sent Events, how they enable streaming in AI applications, implementation patterns, and best practices for production streaming.
+
+category: Streaming
+
+topics:
+  - SSE
+  - Server-Sent Events
+  - Streaming Protocol
+  - Backend Streaming
+  - Real-time Data
+
+related:
+  - roadmap/day-007-production-streaming-architecture
+  - handbook/streaming/streaming-basics
+  - handbook/streaming/readable-stream
+  - handbook/architecture/ai-backend
+---
+
+# Server-Sent Events (SSE)
+
+## Purpose
+
+This handbook document covers Server-Sent Events (SSE)—the primary protocol used for streaming AI responses from backend to frontend. SSE enables servers to push real-time updates to clients over a single HTTP connection.
+
+---
+
+# What is Server-Sent Events?
+
+## Definition
+
+Server-Sent Events (SSE) is a web technology that allows servers to push real-time updates to clients over a single, long-lived HTTP connection.
+
+## Key Characteristics
+
+- **One-way communication**: Server → Client only
+- **HTTP-based**: Uses standard HTTP/HTTPS
+- **Text-based**: Events are text (usually JSON)
+- **Auto-reconnect**: Clients automatically reconnect if connection drops
+- **Event IDs**: Server can assign IDs to events for tracking
+- **Simple protocol**: Easier than WebSockets for one-way streaming
+
+## SSE vs WebSockets
+
+| Aspect | SSE | WebSockets |
+|--------|-----|------------|
+| Direction | Server → Client | Bidirectional |
+| Protocol | HTTP | Custom protocol |
+| Complexity | Simple | More complex |
+| Use case | Streaming data | Real-time chat, games |
+| Reconnection | Built-in | Manual |
+| Firewall friendly | Yes (HTTP) | Sometimes blocked |
+
+**For AI streaming**: SSE is preferred because we only need server → client communication.
+
+---
+
+# How SSE Works
+
+## Basic Flow
+
+```
+1. Client sends HTTP request
+   POST /api/chat/stream
+
+2. Server responds with special headers
+   Content-Type: text/event-stream
+   Cache-Control: no-cache
+   Connection: keep-alive
+
+3. Server sends events
+   data: {"text": "Hello"}
+   
+   data: {"text": " world"}
+   
+   data: {"text": "!"}
+
+4. Each event ends with double newline
+   
+5. Client receives and parses events
+```
+
+## SSE Format
+
+### Basic Event
+
+```
+data: This is a simple message
+
+```
+
+**Note**: Two newlines at the end mark event completion
+
+### Event with ID
+
+```
+id: 123
+data: {"text": "Hello"}
+
+```
+
+### Event with Type
+
+```
+event: message
+data: {"text": "Hello"}
+
+```
+
+### Multiple Data Lines
+
+```
+data: First line
+data: Second line
+
+```
+
+Combined into: `"First line\nSecond line"`
+
+### JSON Data (Most Common for AI)
+
+```
+data: {"type": "token", "text": "Hello", "tokens": 1}
+
+```
+
+---
+
+# SSE Implementation
+
+## Backend Implementation (Node.js/Express)
+
+### Basic SSE Endpoint
+
+```typescript
+app.post('/api/chat/stream', async (req, res) => {
+  // Set SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  
+  // Handle CORS if needed
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  
+  try {
+    // Stream from AI provider
+    const stream = await aiCore.stream({
+      prompt: req.body.prompt,
+      model: req.body.model
+    });
+    
+    // Send each token as SSE event
+    for await (const chunk of stream) {
+      const event = {
+        id: generateId(),
+        type: 'token',
+        text: chunk.text,
+        tokens: chunk.tokens
+      };
+      
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+    }
+    
+    // Send completion event
+    res.write(`data: ${JSON.stringify({
+      id: generateId(),
+      type: 'done',
+      totalTokens: totalTokenCount
+    })}\n\n`);
+    
+    res.end();
+    
+  } catch (error) {
+    // Send error event
+    res.write(`data: ${JSON.stringify({
+      id: generateId(),
+      type: 'error',
+      message: error.message
+    })}\n\n`);
+    
+    res.end();
+  }
+});
+```
+
+## Backend Implementation (Python/FastAPI)
+
+```python
+from fastapi import Request
+from fastapi.responses import StreamingResponse
+
+@app.post("/api/chat/stream")
+async def stream_chat(request: Request):
+    async def event_generator():
+        try:
+            # Stream from AI provider
+            async for chunk in ai_core.stream(
+                prompt=request.body.prompt,
+                model=request.body.model
+            ):
+                event = {
+                    "id": generate_id(),
+                    "type": "token",
+                    "text": chunk.text,
+                    "tokens": chunk.tokens
+                }
+                
+                # SSE format
+                yield f"data: {json.dumps(event)}\n\n"
+            
+            # Completion event
+            yield f"data: {json.dumps({{
+                'id': generate_id(),
+                'type': 'done',
+                'totalTokens': total_tokens
+            })}\n\n"
+            
+        except Exception as e:
+            # Error event
+            yield f"data: {json.dumps({{
+                'id': generate_id(),
+                'type': 'error',
+                'message': str(e)
+            })}\n\n"
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        }
+    )
+```
+
+## Frontend Implementation (TypeScript)
+
+### Using EventSource
+
+```typescript
+// EventSource only supports GET, so we need a workaround for POST
+async function streamWithFetch(prompt: string) {
+  const response = await fetch('/api/chat/stream', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ prompt })
+  });
+  
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  
+  while (true) {
+    const { done, value } = await reader!.read();
+    
+    if (done) break;
+    
+    // Decode bytes to text
+    const text = decoder.decode(value);
+    buffer += text;
+    
+    // Split by double newline (SSE event delimiter)
+    const events = buffer.split('\n\n');
+    buffer = events.pop() || ''; // Keep incomplete event in buffer
+    
+    // Process complete events
+    for (const event of events) {
+      if (event.startsWith('data: ')) {
+        const data = event.slice(6); // Remove 'data: ' prefix
+        const parsed = JSON.parse(data);
+        
+        handleEvent(parsed);
+      }
+    }
+  }
+}
+
+function handleEvent(event: any) {
+  switch (event.type) {
+    case 'token':
+      updateUI(event.text);
+      break;
+    case 'done':
+      markComplete();
+      break;
+    case 'error':
+      showError(event.message);
+      break;
+  }
+}
+```
+
+### Using EventSource (GET only)
+
+```typescript
+// For GET requests (query parameters)
+const eventSource = new EventSource(`/api/chat/stream?prompt=${encodeURIComponent(prompt)}`);
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  handleEvent(data);
+};
+
+eventSource.addEventListener('token', (event) => {
+  const data = JSON.parse(event.data);
+  updateUI(data.text);
+});
+
+eventSource.addEventListener('done', () => {
+  eventSource.close();
+  markComplete();
+});
+
+eventSource.addEventListener('error', (event) => {
+  eventSource.close();
+  showError(event.message);
+});
+
+// Cleanup
+eventSource.close();
+```
+
+---
+
+# SSE Event Design for AI Applications
+
+## Event Types
+
+### 1. Token Event
+
+```
+data: {
+  "id": "evt_123",
+  "type": "token",
+  "text": "Hello",
+  "tokens": 1,
+  "timestamp": "2026-01-15T10:30:00Z"
+}
+```
+
+**Purpose**: Stream individual tokens
+
+### 2. Done Event
+
+```
+data: {
+  "id": "evt_124",
+  "type": "done",
+  "totalTokens": 150,
+  "totalCost": 0.0045,
+  "duration": 5000,
+  "timestamp": "2026-01-15T10:30:05Z"
+}
+```
+
+**Purpose**: Signal completion with metadata
+
+### 3. Error Event
+
+```
+data: {
+  "id": "evt_125",
+  "type": "error",
+  "message": "Rate limit exceeded",
+  "code": "RATE_LIMIT",
+  "retryable": true,
+  "timestamp": "2026-01-15T10:30:02Z"
+}
+```
+
+**Purpose**: Communicate errors
+
+### 4. Metadata Event (Optional)
+
+```
+data: {
+  "id": "evt_126",
+  "type": "metadata",
+  "model": "claude-3-5-sonnet",
+  "provider": "anthropic",
+  "timestamp": "2026-01-15T10:30:00Z"
+}
+```
+
+**Purpose**: Provide request metadata
+
+---
+
+# SSE Best Practices
+
+## 1. Set Correct Headers
+
+```typescript
+res.setHeader('Content-Type', 'text/event-stream');
+res.setHeader('Cache-Control', 'no-cache, no-transform');
+res.setHeader('Connection', 'keep-alive');
+res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+```
+
+## 2. Flush After Each Event
+
+```typescript
+res.write(`data: ${JSON.stringify(event)}\n\n`);
+res.flush(); // Ensure event is sent immediately
+```
+
+## 3. Handle Client Disconnection
+
+```typescript
+req.on('close', () => {
+  console.log('Client disconnected');
+  cleanup();
+});
+```
+
+## 4. Send Heartbeats (Optional)
+
+Keep connection alive:
+
+```typescript
+const heartbeatInterval = setInterval(() => {
+  res.write(':heartbeat\n\n');
+}, 30000); // Every 30 seconds
+
+req.on('close', () => {
+  clearInterval(heartbeatInterval);
+});
+```
+
+## 5. Use Event IDs
+
+```typescript
+let eventId = 0;
+
+function sendEvent(data: any) {
+  eventId++;
+  res.write(`id: ${eventId}\n`);
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
+```
+
+## 6. Handle Errors Gracefully
+
+```typescript
+try {
+  // Stream logic
+} catch (error) {
+  res.write(`data: ${JSON.stringify({
+    type: 'error',
+    message: error.message
+  })}\n\n`);
+} finally {
+  res.end();
+}
+```
+
+---
+
+# SSE Challenges and Solutions
+
+## Challenge 1: Buffer Management
+
+**Problem**: Data arrives in incomplete chunks
+
+**Solution**: Buffer incomplete events:
+
+```typescript
+let buffer = '';
+
+function processChunk(chunk: string) {
+  buffer += chunk;
+  const events = buffer.split('\n\n');
+  buffer = events.pop() || ''; // Keep incomplete event
+  
+  for (const event of events) {
+    if (event.startsWith('data: ')) {
+      const data = event.slice(6);
+      handleEvent(JSON.parse(data));
+    }
+  }
+}
+```
+
+## Challenge 2: Nginx Buffering
+
+**Problem**: Nginx buffers responses, breaking streaming
+
+**Solution**: Disable buffering:
+
+```nginx
+location /api/stream {
+  proxy_pass http://backend;
+  proxy_buffering off;
+  proxy_cache off;
+  proxy_set_header X-Accel-Buffering no;
+}
+```
+
+## Challenge 3: Connection Drops
+
+**Problem**: Connection interrupted mid-stream
+
+**Solution**: Client auto-reconnects with EventSource:
+
+```typescript
+const eventSource = new EventSource(url);
+
+eventSource.onerror = () => {
+  // EventSource automatically reconnects
+  console.log('Connection lost, reconnecting...');
+};
+```
+
+## Challenge 4: CORS
+
+**Problem**: Cross-origin requests blocked
+
+**Solution**: Set CORS headers:
+
+```typescript
+res.setHeader('Access-Control-Allow-Origin', '*');
+res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+```
+
+---
+
+# SSE in AI Applications
+
+## Complete Example
+
+### Backend (Express)
+
+```typescript
+app.post('/api/chat/stream', async (req, res) => {
+  // SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  
+  const { prompt, model, conversationId } = req.body;
+  
+  try {
+    // Stream from AI Core
+    const stream = await aiCore.stream({
+      prompt,
+      model,
+      conversationId
+    });
+    
+    let totalTokens = 0;
+    let eventId = 0;
+    
+    for await (const chunk of stream) {
+      eventId++;
+      totalTokens += chunk.tokens;
+      
+      // Send token event
+      res.write(`id: ${eventId}\n`);
+      res.write(`data: ${JSON.stringify({
+        type: 'token',
+        text: chunk.text,
+        tokens: chunk.tokens
+      })}\n\n`);
+      
+      res.flush();
+    }
+    
+    // Send completion event
+    eventId++;
+    res.write(`id: ${eventId}\n`);
+    res.write(`data: ${JSON.stringify({
+      type: 'done',
+      totalTokens,
+      duration: Date.now() - startTime
+    })}\n\n`);
+    
+    res.end();
+    
+  } catch (error) {
+    // Send error event
+    res.write(`data: ${JSON.stringify({
+      type: 'error',
+      message: error.message,
+      code: error.code
+    })}\n\n`);
+    
+    res.end();
+  }
+});
+```
+
+### Frontend (React)
+
+```typescript
+function useStreamingChat() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [currentMessage, setCurrentMessage] = useState<string>('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  
+  const sendMessage = async (content: string) => {
+    setIsStreaming(true);
+    setCurrentMessage('');
+    
+    try {
+      const response = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: content })
+      });
+      
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      
+      while (true) {
+        const { done, value } = await reader!.read();
+        
+        if (done) break;
+        
+        const text = decoder.decode(value);
+        buffer += text;
+        
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        
+        for (const event of events) {
+          if (event.startsWith('data: ')) {
+            const data = JSON.parse(event.slice(6));
+            
+            switch (data.type) {
+              case 'token':
+                setCurrentMessage(prev => prev + data.text);
+                break;
+              case 'done':
+                setIsStreaming(false);
+                break;
+              case 'error':
+                showError(data.message);
+                setIsStreaming(false);
+                break;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      showError(error.message);
+      setIsStreaming(false);
+    }
+  };
+  
+  return { messages, currentMessage, isStreaming, sendMessage };
+}
+```
+
+---
+
+# SSE Testing
+
+## Manual Testing with curl
+
+```bash
+curl -N -X POST http://localhost:3000/api/chat/stream \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello"}'
+```
+
+## Testing with Postman
+
+1. Create POST request
+2. Set URL: `http://localhost:3000/api/chat/stream`
+3. Set body: `{"prompt": "Hello"}`
+4. Send request
+5. View streaming response in console
+
+## Automated Testing
+
+```typescript
+test('streams tokens', async () => {
+  const response = await fetch('/api/chat/stream', {
+    method: 'POST',
+    body: JSON.stringify({ prompt: 'Hi' })
+  });
+  
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  const tokens: string[] = [];
+  
+  while (true) {
+    const { done, value } = await reader!.read();
+    if (done) break;
+    
+    const text = decoder.decode(value);
+    const events = text.split('\n\n');
+    
+    for (const event of events) {
+      if (event.startsWith('data: ')) {
+        const data = JSON.parse(event.slice(6));
+        if (data.type === 'token') {
+          tokens.push(data.text);
+        }
+      }
+    }
+  }
+  
+  expect(tokens.length).toBeGreaterThan(0);
+  expect(tokens.join('')).toBe('Hello!');
+});
+```
+
+---
+
+# SSE Production Considerations
+
+## 1. Timeout Management
+
+```typescript
+// Set maximum stream duration
+const timeout = setTimeout(() => {
+  res.write(`data: ${JSON.stringify({
+    type: 'error',
+    message: 'Stream timeout'
+  })}\n\n`);
+  res.end();
+}, 60000); // 60 seconds
+
+req.on('close', () => clearTimeout(timeout));
+```
+
+## 2. Rate Limiting
+
+```typescript
+const rateLimiter = rateLimit({
+  windowMs: 60000,
+  max: 10 // 10 requests per minute
+});
+
+app.post('/api/chat/stream', rateLimiter, async (req, res) => {
+  // Stream logic
+});
+```
+
+## 3. Monitoring
+
+```typescript
+console.log('SSE stream:', {
+  conversationId,
+  startTime: Date.now(),
+  userAgent: req.headers['user-agent']
+});
+
+req.on('close', () => {
+  console.log('SSE stream closed:', {
+    conversationId,
+    duration: Date.now() - startTime,
+    tokensSent: totalTokens
+  });
+});
+```
+
+## 4. Load Balancing
+
+Ensure load balancer supports streaming:
+
+```nginx
+# nginx.conf
+proxy_buffering off;
+proxy_request_buffering off;
+proxy_http_version 1.1;
+proxy_set_header Connection '';
+```
+
+---
+
+# Interview Questions
+
+## Q: What is Server-Sent Events?
+
+**A**: Server-Sent Events (SSE) is a web technology that allows servers to push real-time updates to clients over a single, long-lived HTTP connection. It's used for one-way server-to-client communication, making it ideal for streaming AI responses.
+
+## Q: When would you use SSE vs WebSockets?
+
+**A**: Use SSE for one-way server-to-client streaming (like AI responses). Use WebSockets for bidirectional communication (like chat apps where both client and server send messages). SSE is simpler, HTTP-based, and has built-in reconnection.
+
+## Q: How does SSE work?
+
+**A**: Client makes HTTP request, server responds with special headers (Content-Type: text/event-stream), then server sends events in the format `data: {json}\n\n`. Each event ends with double newline. Client parses events as they arrive.
+
+## Q: What are common SSE challenges?
+
+**A**: Challenges include: buffer management (incomplete chunks), nginx buffering (needs to be disabled), connection drops (auto-reconnection helps), CORS (need proper headers), and timeout management (long-running streams need careful handling).
+
+## Q: Why is SSE good for AI streaming?
+
+**A**: SSE is perfect for AI streaming because: it's one-way (server → client), HTTP-based (no special protocols), has auto-reconnection, simple to implement, firewall-friendly, and designed for real-time updates. AI responses only need server-to-client communication.
+
+---
+
+# Assignment
+
+## Objective
+
+Implement SSE streaming for an AI chat application.
+
+## Tasks
+
+1. Create SSE endpoint:
+   - Set correct headers
+   - Stream AI responses
+   - Send token events
+   - Send completion event
+   - Handle errors
+
+2. Implement frontend:
+   - Connect to SSE endpoint
+   - Parse events
+   - Display tokens
+   - Handle completion
+   - Handle errors
+
+3. Add features:
+   - Event IDs
+   - Metadata events
+   - Heartbeat (optional)
+   - Auto-reconnection
+
+4. Test thoroughly:
+   - Normal streaming
+   - Connection drops
+   - Errors
+   - Timeouts
+   - Multiple concurrent streams
+
+## Deliverables
+
+- Working SSE endpoint
+- Frontend stream reader
+- Event handling logic
+- Test suite
+- Documentation
+
+---
+
+# Mini Project
+
+## Objective
+
+Build production-ready SSE streaming for your AI Chat application.
+
+## Requirements
+
+1. Backend SSE implementation:
+   - Express/FastAPI endpoint
+   - Correct headers
+   - Event formatting
+   - Error handling
+   - Timeout management
+
+2. Frontend implementation:
+   - Stream reader
+   - Buffer management
+   - Event parsing
+   - UI updates
+   - Error handling
+
+3. Production features:
+   - Rate limiting
+   - Monitoring/logging
+   - Load balancer config
+   - Health checks
+
+4. Testing:
+   - Unit tests
+   - Integration tests
+   - Load tests
+   - Failure scenarios
+
+## Focus
+
+- Understanding SSE protocol
+- Building robust streaming backend
+- Handling real-world streaming challenges
+- Production-ready implementation
+
+---
+
+# Key Takeaways
+
+- SSE enables server-to-client streaming over HTTP
+- Perfect for AI response streaming (one-way communication)
+- Simple protocol: `data: {json}\n\n`
+- Requires specific headers (Content-Type, Cache-Control)
+- Frontend parses events from stream
+- Handle buffer management for incomplete chunks
+- Disable nginx buffering for streaming
+- Auto-reconnection built into EventSource
+- Monitor and log streams in production
+- SSE is preferred over WebSockets for AI streaming
+
+---
+
+# Related Documents
+
+- [Streaming Basics](./streaming-basics.mdx)
+- [ReadableStream](./readable-stream.mdx)
+- [Provider Abstraction](./provider-abstraction.mdx)
+- [AI Backend Architecture](../architecture/ai-backend.mdx)
+- [Roadmap Day 7](../roadmap/day-007-production-streaming-architecture/lesson.mdx)

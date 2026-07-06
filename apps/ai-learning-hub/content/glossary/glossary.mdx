@@ -1,0 +1,731 @@
+---
+id: glossary
+
+title: AI Engineering Glossary
+
+description: Comprehensive glossary of AI Engineering terms, concepts, and definitions used throughout the 100-day learning roadmap.
+
+category: Reference
+
+topics:
+  - Glossary
+  - Definitions
+  - AI Terms
+  - Reference
+
+related:
+  - handbook/fundamentals/ai-engineering-philosophy
+  - handbook/llms/llm-basics
+  - handbook/prompting/prompt-engineering
+  - handbook/context/context-engineering
+  - handbook/streaming/streaming-basics
+---
+
+# AI Engineering Glossary
+
+## Purpose
+
+This glossary provides definitions for key terms and concepts used throughout the AI Engineering learning roadmap. It serves as a quick reference for students and helps ensure consistent terminology across all learning materials.
+
+---
+
+# A
+
+## AI (Artificial Intelligence)
+
+The simulation of human intelligence processes by computer systems, including learning, reasoning, and self-correction. In this roadmap, we focus on AI powered by Large Language Models.
+
+## AI Backend
+
+The server-side component of an AI application that handles API requests, authentication, provider communication, and business logic. See [AI Backend Architecture](../architecture/ai-backend.mdx).
+
+## AI Chat
+
+A conversational AI application that allows users to interact with AI models through a chat interface. One of the three main projects in this roadmap.
+
+## AI Core
+
+The reusable, framework-agnostic heart of the AI platform that orchestrates all AI-related workflows including PromptBuilder, ContextBuilder, provider abstraction, and streaming. See [AI Core Architecture](../architecture/ai-core.mdx).
+
+## AI Engineer
+
+A software engineer who integrates AI capabilities (particularly LLMs) into applications and products. Focuses on architecture, APIs, prompts, context, and production systems rather than training models. See [AI Engineering Philosophy](../fundamentals/ai-engineering-philosophy.mdx).
+
+## AI SDK (Software Development Kit)
+
+A client-side package that provides a clean, type-safe interface for React applications to interact with the AI backend. Handles streaming, conversations, and state management. See [AI SDK Architecture](../architecture/ai-sdk.mdx).
+
+## AI Tutor
+
+An AI-powered learning assistant that helps students understand course material, answer questions, and provide personalized guidance. Part of the AI Learning Portal.
+
+## API (Application Programming Interface)
+
+A set of protocols and tools for building software applications. In AI engineering, APIs allow applications to interact with LLM providers (Anthropic, OpenAI, etc.).
+
+## Async Generator
+
+A JavaScript function that generates values asynchronously over time. Used extensively in streaming to yield tokens as they arrive from the LLM provider.
+
+## AbortController
+
+A browser API that allows you to cancel asynchronous operations like fetch requests. Used to implement "Stop Generation" in AI chat applications.
+
+## Agent
+
+An AI system that can autonomously perform tasks by reasoning, planning, and using tools. Agents go beyond simple Q&A by taking actions and making decisions.
+
+## Architecture
+
+The high-level design and structure of a software system. In AI engineering, architecture defines how components like AI Core, AI SDK, AI Backend, and providers interact.
+
+## Attention Mechanism
+
+A neural network component that allows models to focus on relevant parts of the input when generating each token. The foundation of Transformer architecture used in modern LLMs.
+
+## Authentication
+
+The process of verifying user identity. In AI applications, typically handled by the backend before allowing access to AI features.
+
+## Auto-Discovery
+
+A system that automatically finds and registers content (like MDX files) without manual configuration. Used in the Learning Portal to dynamically load lessons.
+
+---
+
+# B
+
+## Backend
+
+The server-side of an application that handles business logic, data processing, and API endpoints. In our architecture, the AI Backend orchestrates AI workflows.
+
+## Buffer Management
+
+The practice of accumulating streamed data until complete units (like SSE events) are available for parsing. Critical for handling data that arrives in arbitrary chunks.
+
+## Business Logic
+
+The part of an application that implements business rules and workflows. In AI applications, business logic should be separate from AI orchestration (which lives in AI Core).
+
+---
+
+# C
+
+## Chat Application
+
+A user interface that allows conversational interaction with AI models. The primary interface for most AI applications.
+
+## Claude
+
+Anthropic's family of AI models (Claude 3.5 Sonnet, Claude 3 Opus, etc.) known for strong reasoning and long context windows (200K tokens).
+
+## Cloud Model
+
+An LLM hosted on remote servers and accessed via API. Examples: Claude, GPT-4, Gemini. Contrast with local models.
+
+## Completion
+
+The act of generating text from a prompt. Also refers to the generated text itself.
+
+## Context
+
+Information provided to the LLM to help it generate better responses. Includes conversation history, retrieved documents, user preferences, etc. See [Context Engineering](../context/context-engineering.mdx).
+
+## Context Builder (ContextBuilder)
+
+A component responsible for assembling context from multiple sources. Part of AI Core. See [ContextBuilder Architecture](../context/context-builder.mdx).
+
+## Context Engineering
+
+The discipline of selecting, organizing, and delivering information that an LLM needs to perform a task effectively. Focuses on what the model knows at inference time. See [Context Engineering](../context/context-engineering.mdx).
+
+## Context Provider
+
+A modular component that supplies a specific type of context (conversation history, user profile, documents, etc.) to the ContextBuilder.
+
+## Context Window
+
+The maximum number of tokens an LLM can process in a single request (input + output). Examples: Claude 200K, GPT-4 128K, Gemini 1M. See [Context Window](../llms/context-window.mdx).
+
+## Conversation
+
+A series of related messages between a user and an AI model, including both user inputs and AI responses.
+
+## Conversation Manager
+
+An AI Core module responsible for managing conversation state, history, configuration, and metadata.
+
+## Cost Optimization
+
+Strategies to reduce API costs in AI applications, including token optimization, caching, using smaller models, and local development.
+
+## Currying
+
+A functional programming technique where a function with multiple arguments is transformed into a sequence of functions. Sometimes used in prompt composition.
+
+---
+
+# D
+
+## DALL-E
+
+OpenAI's image generation model that creates images from text descriptions.
+
+## Data Flow
+
+The path data takes through a system. In AI applications: User → Frontend → AI SDK → Backend → AI Core → Provider → LLM → (reverse path).
+
+## Dependencies
+
+External packages or modules that a project relies on. In AI architecture, dependencies flow inward: Applications → AI SDK → AI Core → Providers.
+
+## Document Chat
+
+An AI application that allows users to have conversations with their documents using RAG.
+
+## Dynamic Context
+
+Context that is assembled at runtime based on the current request, user, and situation. Contrast with static context.
+
+---
+
+# E
+
+## Embedding
+
+A numerical representation of text that captures semantic meaning. Used in RAG to find similar documents. Typically a vector of floating-point numbers.
+
+## Error Handling
+
+The process of managing and responding to errors in AI applications, including provider errors, network failures, and invalid responses.
+
+## Event Source (EventSource)
+
+A browser API for receiving server-sent events over HTTP. Used for streaming in some implementations.
+
+## Evaluation
+
+The process of assessing AI model outputs for quality, accuracy, and relevance. Critical for prompt testing and production monitoring.
+
+## Extensibility
+
+The ability to add new features or providers without modifying existing code. A core principle of AI Core design.
+
+---
+
+# F
+
+## FastAPI
+
+A modern, fast Python web framework for building APIs. Used for the AI Backend in this roadmap.
+
+## Few-Shot Learning
+
+A prompting technique where you provide a few examples of the desired input-output pattern in the prompt to guide the model.
+
+## Fine-Tuning
+
+The process of further training a pre-trained model on specific data to improve performance on a particular task. Not the focus of this roadmap (we use pre-trained models via APIs).
+
+## Frontend
+
+The client-side of an application that users interact with. In our architecture, React applications that consume the AI SDK.
+
+## Function Calling
+
+A feature that allows LLMs to request execution of external functions or tools. Enables agents and tool use.
+
+## Future Vision
+
+The long-term goals for the AI platform, including AI Tutor, personal knowledge base, semantic search, PDF generation, mobile apps, VS Code extension, and team learning.
+
+---
+
+# G
+
+## Generate
+
+To produce text using an LLM. The core operation in AI applications.
+
+## Generation
+
+The process of an LLM producing text token by token until completion.
+
+## GPT (Generative Pre-trained Transformer)
+
+OpenAI's family of language models. GPT-4 is one of the most capable models available.
+
+## Git-Friendly
+
+Content and code that works well with version control systems like Git. MDX files are Git-friendly because they're text-based.
+
+## Ground Truth
+
+Verified, correct information used to evaluate AI outputs. Important for testing and evaluation.
+
+---
+
+# H
+
+## Hallucination
+
+When an LLM generates plausible-sounding but incorrect or fabricated information. A major challenge in AI applications.
+
+## Handbook
+
+A collection of reusable reference documents that capture concepts, patterns, and best practices. Extracted from roadmap lessons to avoid duplication.
+
+## HTML
+
+HyperText Markup Language. The standard markup language for web pages. MDX allows mixing Markdown with HTML/JSX.
+
+## HTTP (Hypertext Transfer Protocol)
+
+The foundation of data communication on the web. Used for all API calls in AI applications.
+
+## Hybrid Approach
+
+Using local AI for development and cloud AI for production. Combines benefits of both: cost savings during development, quality in production.
+
+---
+
+# I
+
+## Inference
+
+The process of running a trained model to generate predictions or outputs. In LLMs, inference is generating text from a prompt.
+
+## Interface
+
+A contract that defines what methods a class must implement. Used extensively in AI Core for providers, context providers, etc.
+
+## Interview Questions
+
+Questions designed to test understanding of AI Engineering concepts, often used in job interviews.
+
+## Iteration
+
+Repeating a process to improve results. In AI, iterating on prompts, context, and architecture based on feedback and metrics.
+
+---
+
+# J
+
+## JavaScript
+
+The programming language used for frontend development and increasingly for backend (Node.js). The primary language for the AI SDK.
+
+## JSON (JavaScript Object Notation)
+
+A lightweight data interchange format. Used for API requests/responses and SSE events in AI applications.
+
+## JSX
+
+A syntax extension for JavaScript that allows writing HTML-like code in JavaScript files. Used in React and MDX.
+
+---
+
+# K
+
+## Knowledge Base
+
+A collection of documents, articles, and information that an AI application can retrieve and use as context. Central to RAG and the Learning Portal.
+
+## Knowledge Graph
+
+A visual representation of concepts and their relationships. Used in roadmap lessons to show how topics connect.
+
+---
+
+# L
+
+## LangChain
+
+A popular framework for building LLM-powered applications. Provides abstractions for chains, agents, and memory.
+
+## Layered Architecture
+
+An architectural pattern that organizes code into layers with specific responsibilities. Our AI platform uses: React → AI SDK → AI Backend → AI Core → Providers.
+
+## Learning Portal
+
+An AI-powered educational platform that delivers course content, quizzes, assignments, and an AI Tutor. One of the three main projects.
+
+## Learning Strategy
+
+The approach to learning AI Engineering in this roadmap: Learn theory → Examine examples → Apply through assignments → Integrate into projects → Summarize takeaways.
+
+## Llama
+
+Meta's family of open-source LLMs. Available in various sizes (7B, 13B, 70B, etc.) and can be run locally via Ollama.
+
+## LLM (Large Language Model)
+
+A neural network trained on massive text data to predict the next token. The foundation of modern AI applications. See [LLM Basics](../llms/llm-basics.mdx).
+
+## Local AI
+
+Running LLMs on your own hardware instead of using cloud APIs. Enabled by tools like Ollama. See [Local AI](../fundamentals/local-ai.mdx).
+
+## Local-First
+
+A development approach that prioritizes local tools and resources before using cloud services. Reduces costs and enables offline work.
+
+---
+
+# M
+
+## MCP (Model Context Protocol)
+
+A protocol for standardizing tool integration with LLMs. Allows models to use external tools in a consistent way.
+
+## MDX
+
+Markdown + JSX. A file format that allows writing Markdown with embedded React components. Used for all lesson content in the Learning Portal.
+
+## Memory
+
+In AI systems, the ability to store and retrieve information from past interactions. Can be short-term (conversation history) or long-term (persistent storage).
+
+## Message
+
+A single unit of communication in a conversation. Can be from the user or the AI assistant.
+
+## Metadata
+
+Data about data. In AI, includes model name, provider, token count, timestamp, finish reason, etc.
+
+## Mistral
+
+A French AI company that develops open-source LLMs. Mistral 7B is a popular, capable small model.
+
+## Model
+
+Short for language model. The AI system that generates text. Examples: Claude, GPT-4, Llama.
+
+## Modularity
+
+Designing systems with separate, interchangeable components. AI Core is modular with separate PromptBuilder, ContextBuilder, etc.
+
+## Monorepo
+
+A single repository containing multiple packages or projects. Our AI platform uses a monorepo structure with packages for ai-core, ai-sdk, shared-types, etc.
+
+## Multi-Provider
+
+Supporting multiple LLM providers (Anthropic, OpenAI, Ollama) in the same application. Enabled by provider abstraction.
+
+---
+
+# N
+
+## NestJS
+
+A Node.js framework for building server-side applications. Could be used for the AI Backend (we use Express/FastAPI).
+
+## Next.js
+
+A React framework for building web applications. Used for the Learning Portal.
+
+## Normalization
+
+Converting different formats into a standard format. In streaming, normalizing provider-specific events into a common StreamEvent format.
+
+## NPM (Node Package Manager)
+
+The package manager for Node.js. Used to install and manage dependencies.
+
+---
+
+# O
+
+## Ollama
+
+A tool for running LLMs locally. Simplifies model downloading, management, and provides an OpenAI-compatible API. See [Local AI](../fundamentals/local-ai.mdx).
+
+## OpenAI
+
+An AI research company that created ChatGPT and the GPT model series. One of the major LLM providers.
+
+## Open Source
+
+Software with publicly available source code that can be used, modified, and distributed. Many LLMs are open-source (Llama, Mistral, etc.).
+
+## Optimization
+
+The process of improving performance, cost, or quality. In AI, includes token optimization, context optimization, and prompt optimization.
+
+## Provider
+
+A service that offers LLM access via API. Examples: Anthropic, OpenAI, Google, Ollama (local).
+
+## Provider Abstraction
+
+The practice of wrapping different provider APIs behind a common interface. Enables switching providers without changing application code. See [Provider Abstraction](../streaming/provider-abstraction.mdx).
+
+## Provider Adapter
+
+A component that wraps a specific provider's API and normalizes it to the standard interface. Part of AI Core.
+
+## Provider Registry
+
+A central registry of all available providers. Applications request providers from the registry rather than instantiating them directly.
+
+## Prompt
+
+The input provided to an LLM that guides its response. Includes instructions, context, and constraints. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+
+## Prompt Engineering
+
+The discipline of designing effective prompts for LLMs. In production, prompts are treated as software artifacts. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+
+## Prompt Template
+
+A reusable prompt structure with placeholders for dynamic values. Enables prompt reusability and maintainability. See [Prompt Templates](../prompting/prompt-templates.mdx).
+
+## PromptBuilder
+
+An AI Core module responsible for assembling prompts from templates and variables. See [PromptBuilder Architecture](../architecture/prompt-builder.mdx).
+
+## Production-First
+
+A mindset that prioritizes production requirements (scalability, maintainability, observability) from the beginning, not as an afterthought.
+
+## Production-Ready
+
+Software that is ready for use in production environments, with proper error handling, monitoring, security, and scalability.
+
+## PR Reviewer
+
+An AI-powered tool that reviews pull requests for bugs, security issues, performance problems, and code quality. One of the three main projects.
+
+## Python
+
+A programming language widely used in AI and data science. Used for the AI Backend in this roadmap.
+
+---
+
+# Q
+
+## Q&A (Question and Answer)
+
+A common AI application pattern where users ask questions and receive answers. The foundation of AI chat and tutoring systems.
+
+## Quality
+
+In AI, refers to the accuracy, relevance, and usefulness of model outputs. Improved through better prompts, context, and architecture.
+
+## Query
+
+A user's question or request to an AI system.
+
+## Quiz
+
+An assessment tool that tests understanding of course material. Can be generated by AI in the Learning Portal.
+
+---
+
+# R
+
+## RAG (Retrieval-Augmented Generation)
+
+A technique that enhances LLM responses by retrieving relevant information from a knowledge base and adding it to the context. Powers document chat and AI tutors.
+
+## React
+
+A JavaScript library for building user interfaces. Used for the frontend in this roadmap.
+
+## ReadableStream
+
+A browser API that provides a readable stream of byte data. Used to consume streamed HTTP responses. See [ReadableStream](../streaming/readable-stream.mdx).
+
+## Reasoning
+
+The ability of LLMs to think through problems, make inferences, and draw conclusions. A key capability that varies by model.
+
+## Reusability
+
+The principle of building components once and using them in multiple places. AI Core, AI SDK, and Provider Adapters are designed for reusability.
+
+## Role Prompting
+
+A technique that assigns specific expertise or persona to the model to improve response quality. See [Role Prompting](../prompting/role-prompting.mdx).
+
+## Routing
+
+Directing requests to different providers or models based on criteria like cost, speed, or quality requirements.
+
+---
+
+# S
+
+## SSE (Server-Sent Events)
+
+A web technology that allows servers to push real-time updates to clients over HTTP. The primary protocol for streaming AI responses. See [SSE](../streaming/sse.mdx).
+
+## Streaming
+
+Sending data incrementally as it becomes available, rather than waiting for the complete response. Critical for AI UX. See [Streaming Basics](../streaming/streaming-basics.mdx).
+
+## StreamEvent
+
+A normalized event in a streaming AI response. Contains type (token, done, error), text, tokens, timestamp, and metadata.
+
+## Streaming State
+
+The current state of a streaming message: IDLE, STREAMING, COMPLETED, STOPPED, or ERROR.
+
+## System Prompt
+
+Instructions that define the AI's long-term behavior and identity. Usually static across a conversation. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+
+---
+
+# T
+
+## Template
+
+A reusable structure with placeholders for dynamic values. Used for prompts, documents, and code generation.
+
+## Temperature
+
+A parameter that controls randomness in LLM generation:
+- Low (0.0-0.3): Deterministic, focused
+- Medium (0.4-0.7): Balanced
+- High (0.8-1.0): Creative, diverse
+
+## TextDecoder
+
+A browser API that decodes byte data (Uint8Array) into strings using UTF-8 encoding. Essential for parsing streamed data.
+
+## Token
+
+The basic unit of text processing in LLMs. Can be a word, part of a word, or character. LLMs process text as sequences of tokens. See [Tokens](../llms/tokens.mdx).
+
+## Token Budget
+
+The maximum number of tokens available for a request, calculated as: Context Window - Reserved Tokens.
+
+## Token Counting
+
+The process of counting tokens in prompts and responses. Critical for cost management and context window limits.
+
+## Token Streaming
+
+The practice of sending tokens (pieces of text) to the frontend as they are generated by the LLM, rather than waiting for the complete response.
+
+## Tool Calling
+
+A feature that allows LLMs to request execution of external tools or functions. Enables agents to take actions.
+
+## TypeScript
+
+A typed superset of JavaScript that compiles to plain JavaScript. Used throughout the AI platform for type safety.
+
+---
+
+# U
+
+## UI (User Interface)
+
+The visual part of an application that users interact with. In our architecture, React components that consume the AI SDK.
+
+## Uint8Array
+
+A typed array representing 8-bit unsigned integers. The format in which browsers receive streamed data from HTTP responses.
+
+## User Message
+
+A message from the user in a conversation. Contrast with assistant message (from the AI).
+
+## User Profile
+
+Information about the user including preferences, skill level, goals, and past interactions. Used as context in AI applications.
+
+---
+
+# V
+
+## Validation
+
+The process of checking that data meets certain criteria. In AI, includes validating prompts, inputs, and provider responses.
+
+## Variable
+
+A placeholder in a template that gets replaced with a value at runtime. Used in prompt templates.
+
+## Vector Database
+
+A database optimized for storing and searching vector embeddings. Used in RAG systems for semantic search.
+
+## Version Control
+
+Tracking changes to code and content over time. Git is the most common version control system. Prompts and templates should be version controlled.
+
+## Vision
+
+The ability of LLMs to understand and analyze images. Claude 3+ and GPT-4V have vision capabilities.
+
+---
+
+# W
+
+## WebSocket
+
+A communication protocol that provides full-duplex communication channels over a single TCP connection. Alternative to SSE for streaming, but more complex.
+
+## Workflow
+
+A sequence of steps or tasks. In AI, multi-step workflows orchestrate multiple AI operations to accomplish complex tasks.
+
+---
+
+# X
+
+No entries
+
+---
+
+# Y
+
+No entries
+
+---
+
+# Z
+
+No entries
+
+---
+
+# Acronyms
+
+| Acronym | Full Form |
+|---------|-----------|
+| AI | Artificial Intelligence |
+| API | Application Programming Interface |
+| CRUD | Create, Read, Update, Delete |
+| GPT | Generative Pre-trained Transformer |
+| JSX | JavaScript XML |
+| LLM | Large Language Model |
+| MCP | Model Context Protocol |
+| MDX | Markdown + JSX |
+| MVC | Model-View-Controller |
+| NLP | Natural Language Processing |
+| RAG | Retrieval-Augmented Generation |
+| SDK | Software Development Kit |
+| SSE | Server-Sent Events |
+| UI | User Interface |
+| UX | User Experience |
+| YAML | YAML Ain't Markup Language |
+
+---
+
+# Related Documents
+
+- [AI Engineering Philosophy](../fundamentals/ai-engineering-philosophy.mdx)
+- [LLM Basics](../llms/llm-basics.mdx)
+- [Prompt Engineering](../prompting/prompt-engineering.mdx)
+- [Context Engineering](../context/context-engineering.mdx)
+- [Streaming Basics](../streaming/streaming-basics.mdx)
+- [Architecture Overview](../../ARCHITECTURE.md)

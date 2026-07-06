@@ -1,0 +1,385 @@
+---
+id: day-003-prompt-engineering
+
+type: roadmap
+
+day: 3
+
+slug: prompt-engineering
+
+title: Prompt Engineering
+
+subtitle: Treating Prompts as Production Software
+
+description: >
+  Learn what prompt engineering is, why prompts are one of the most
+  important components of AI applications, and how to write prompts
+  that are reusable, maintainable and production-ready.
+
+version: 1.0.0
+
+status: completed
+
+difficulty: Beginner
+
+estimatedTime: 2 Hours
+
+readingTime: 45 min
+
+category:
+  - Prompt Engineering
+
+topics:
+  - Prompt Engineering
+  - Prompt Structure
+  - System Prompt
+  - User Prompt
+  - Role Prompting
+  - Prompt Design
+
+tags:
+  - prompt
+  - ai
+  - llm
+  - claude
+  - prompting
+
+prerequisites:
+  - day-001-ai-engineering-overview
+  - day-002-llms-and-provider-landscape
+
+learningObjectives:
+  - Understand prompt engineering
+  - Learn prompt anatomy
+  - Understand role prompting
+  - Write maintainable prompts
+  - Recognize prompt anti-patterns
+
+projects:
+  - ai-chat
+  - ai-learning-portal
+
+assignment: true
+
+quiz: true
+
+pdf: true
+
+searchable: true
+
+related:
+  - handbook/prompting/prompt-engineering
+  - handbook/prompting/role-prompting
+  - handbook/prompting/prompt-templates
+
+lastUpdated: 2026-07-05
+---
+
+# Day 3 — Prompt Engineering
+
+---
+
+# Overview
+
+Prompt Engineering is the process of designing instructions that guide a Large Language Model toward producing accurate, useful, and consistent responses.
+
+Many beginners think prompting is simply "asking better questions." In production systems, prompts are carefully designed software artifacts. They evolve over time, are versioned, reviewed, tested, and reused across applications.
+
+This lesson introduces the mindset required to treat prompts as first-class components in an AI system.
+
+---
+
+# Learning Objectives
+
+By the end of today's lesson, you should be able to:
+
+- Explain what Prompt Engineering is.
+- Identify the different parts of a prompt.
+- Understand the purpose of system prompts.
+- Write structured prompts instead of ad hoc instructions.
+- Recognize common prompt design mistakes.
+
+---
+
+# Why Prompt Engineering Matters
+
+Traditional software relies on deterministic logic.
+
+AI applications rely on:
+
+- Prompts
+- Context
+- Model capabilities
+- User intent
+
+A well-designed prompt often has more impact than changing the underlying model.
+
+Prompt quality directly affects:
+
+- Accuracy
+- Consistency
+- Reliability
+- Cost
+- User experience
+
+---
+
+# Prompt Anatomy
+
+Most production prompts contain several logical sections:
+
+```text
+System Instructions
+
+↓
+
+Role
+
+↓
+
+Context
+
+↓
+
+Task
+
+↓
+
+Constraints
+
+↓
+
+Output Format
+```
+
+Separating these concerns makes prompts easier to understand and maintain.
+
+📖 Handbook Reference:
+
+- `handbook/prompting/prompt-engineering.mdx`
+
+---
+
+# System Prompt
+
+The system prompt defines the assistant's long-term behavior.
+
+Examples:
+
+- You are a senior software engineer.
+- You are an AI code reviewer.
+- You are a technical documentation expert.
+
+The system prompt should describe **who the model is**, not the specific task to perform.
+
+---
+
+# User Prompt
+
+The user prompt represents the current request.
+
+Example:
+
+```
+Review this pull request.
+```
+
+Unlike the system prompt, user prompts change for every interaction.
+
+---
+
+# Role Prompting
+
+Role prompting assigns expertise to the model.
+
+Example:
+
+```
+You are a Staff Frontend Engineer with
+10 years of experience reviewing React applications.
+```
+
+Providing an appropriate role often leads to more focused and contextually relevant responses.
+
+📖 Handbook Reference:
+
+- `handbook/prompting/role-prompting.mdx`
+
+---
+
+# Characteristics of Good Prompts
+
+Good prompts are:
+
+- Clear
+- Specific
+- Structured
+- Reusable
+- Testable
+- Version controlled
+
+Avoid vague or ambiguous instructions whenever possible.
+
+---
+
+# Prompt Design Principles
+
+1. Be explicit.
+2. Define the desired outcome.
+3. Provide relevant context.
+4. Specify the expected output format.
+5. Avoid unnecessary information.
+6. Keep prompts maintainable.
+
+These principles become increasingly important as AI applications grow in complexity.
+
+---
+
+# Common Prompt Anti-Patterns
+
+❌ Mixing unrelated instructions in a single prompt.
+
+❌ Hardcoding user-specific values.
+
+❌ Embedding application logic directly inside prompts.
+
+❌ Creating large, monolithic prompts that are difficult to maintain.
+
+These issues often lead to inconsistent model behavior and make prompts harder to evolve.
+
+---
+
+# Real-World Example
+
+Instead of writing:
+
+```text
+Review this PR and tell me everything.
+```
+
+A structured prompt is more effective:
+
+```text
+Role:
+Senior Frontend Engineer
+
+Task:
+Review the pull request.
+
+Focus:
+
+- Bugs
+- Performance
+- Accessibility
+- Security
+
+Output:
+
+Markdown report with actionable suggestions.
+```
+
+Notice how each concern is separated into its own section.
+
+---
+
+# Best Practices
+
+- Keep prompts modular.
+- Reuse prompt sections where possible.
+- Store prompts in version control.
+- Review prompt changes like source code.
+- Test prompts using multiple scenarios.
+
+---
+
+# Assignment
+
+Create three prompts for the same task:
+
+1. Unstructured prompt.
+2. Structured prompt.
+3. Role-based structured prompt.
+
+Compare the responses from each and document the differences.
+
+---
+
+# Mini Project
+
+Design a prompt for an AI PR Reviewer.
+
+Include:
+
+- Role
+- Context
+- Task
+- Constraints
+- Output format
+
+Do not implement it yet; focus only on prompt design.
+
+---
+
+# Key Takeaways
+
+- Prompt Engineering is a software engineering discipline.
+- Prompts should be structured and maintainable.
+- System prompts define long-term behavior.
+- User prompts define the current task.
+- Role prompting improves response quality.
+- Prompt quality directly impacts AI application quality.
+
+---
+
+# Revision Notes
+
+- Prompts are production assets.
+- Separate role, context, task, and output.
+- Avoid monolithic prompts.
+- Structure improves consistency.
+- Treat prompts like code.
+
+---
+
+# Knowledge Graph
+
+## Concepts Introduced
+
+- Prompt Engineering
+- System Prompt
+- User Prompt
+- Role Prompting
+- Prompt Structure
+
+## Builds Upon
+
+- Day 2 — Large Language Models
+
+## Enables Future Topics
+
+- Prompt Templates
+- PromptBuilder
+- ContextBuilder
+- AI SDK
+- AI Core
+
+---
+
+# Discussion Notes
+
+During our discussions we identified several key architectural principles:
+
+- Prompt engineering is more than writing clever instructions—it is designing reusable interfaces between your application and the model.
+- Prompt definitions should live outside business logic.
+- Prompt evolution should be managed through version control.
+- Future applications such as the AI Chat Platform and Learning Portal will rely on reusable prompt templates rather than hardcoded strings.
+
+These ideas will evolve into the PromptBuilder architecture introduced in the next lesson.
+
+---
+
+# Next Lesson
+
+**Day 4 — Prompt Templates & PromptBuilder**
+
+You'll learn how production AI applications eliminate hardcoded prompts by using reusable templates, parameter substitution, and PromptBuilder components to improve maintainability and scalability.

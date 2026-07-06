@@ -1,0 +1,449 @@
+---
+id: handbook-fundamentals-local-ai
+
+title: Local AI Development
+
+description: Setting up and using local AI tools like Ollama for cost-effective experimentation, offline development, and learning AI concepts without API costs.
+
+category: Fundamentals
+
+topics:
+  - Local AI
+  - Ollama
+  - Offline Development
+  - Privacy
+  - Cost Optimization
+
+related:
+  - roadmap/day-001-ai-engineering-overview
+  - roadmap/day-002-llms-and-provider-landscape
+  - handbook/llms/provider-comparison
+---
+
+# Local AI Development
+
+## Purpose
+
+This handbook document covers local AI development using Ollama and other local tools. It explains when to use local models, how to set them up, and why they are essential for learning and experimentation.
+
+---
+
+# What is Local AI?
+
+Local AI refers to running Large Language Models directly on your own hardware instead of using cloud-based APIs.
+
+## Key Characteristics
+
+- **No API costs**: Models run on your machine
+- **Offline capability**: No internet required
+- **Full privacy**: Data never leaves your device
+- **Fast iteration**: No network latency
+- **Complete control**: Configure models as needed
+
+---
+
+# Why Use Local AI?
+
+## Cost Savings
+
+Cloud APIs charge per token:
+- Development and testing can consume significant tokens
+- Experimentation becomes expensive
+- Local models eliminate these costs during learning
+
+## Privacy
+
+Local models ensure:
+- Sensitive data stays on your machine
+- No data sent to third-party servers
+- Complete control over information
+
+## Offline Development
+
+Benefits include:
+- Work without internet connectivity
+- No dependency on external services
+- Reliable development environment
+- Test anywhere, anytime
+
+## Learning
+
+Local models enable:
+- Understand LLM behavior without costs
+- Experiment freely with prompts
+- Test different models
+- Learn at your own pace
+
+---
+
+# Ollama
+
+## What is Ollama?
+
+Ollama is the leading tool for running local LLMs. It simplifies:
+- Model downloading
+- Model management
+- Inference serving
+- API compatibility
+
+## Installation
+
+### macOS
+
+```bash
+brew install ollama
+```
+
+### Linux
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+### Windows
+
+Download from [ollama.com](https://ollama.com)
+
+## Basic Usage
+
+### Pull a Model
+
+```bash
+ollama pull llama3.2
+ollama pull qwen2.5
+ollama pull mistral
+ollama pull codellama
+```
+
+### Run a Model
+
+```bash
+ollama run llama3.2
+```
+
+### API Usage
+
+Ollama provides a local API compatible with OpenAI's format:
+
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "Why is the sky blue?"
+}'
+```
+
+## Popular Models
+
+### General Purpose
+
+- **Llama 3.2**: Meta's latest open model
+- **Qwen 2.5**: Alibaba's versatile model
+- **Mistral**: High-quality general model
+- **Gemma**: Google's open model
+
+### Code-Specific
+
+- **Code Llama**: Optimized for code generation
+- **DeepSeek Coder**: Strong coding capabilities
+- **Qwen Coder**: Code-focused variant
+
+### Small/Fast
+
+- **Phi-3**: Microsoft's compact model
+- **Gemma 2B**: Lightweight Google model
+- **TinyLlama**: Very small but capable
+
+## Model Selection
+
+### For Learning
+
+Start with:
+- **Llama 3.2 7B**: Good balance of quality and speed
+- **Qwen 2.5 7B**: Strong reasoning capabilities
+
+### For Code
+
+Use:
+- **Code Llama**: Specialized for programming
+- **DeepSeek Coder**: Excellent code understanding
+
+### For Speed
+
+Choose:
+- **Phi-3**: Fast and capable
+- **Gemma 2B**: Lightweight option
+
+---
+
+# Hardware Requirements
+
+## Minimum Requirements
+
+- **RAM**: 8GB (for 7B models)
+- **Storage**: 10GB for model storage
+- **CPU**: Modern multi-core processor
+
+## Recommended Requirements
+
+- **RAM**: 16GB+ (for 13B+ models)
+- **GPU**: NVIDIA GPU with 8GB+ VRAM (optional but faster)
+- **Storage**: 50GB+ SSD for multiple models
+
+## Performance Tips
+
+### CPU-Only Systems
+
+- Use smaller models (7B parameters)
+- Adjust thread count in Ollama settings
+- Expect slower generation speeds
+
+### GPU-Accelerated Systems
+
+- Use larger models (13B+ parameters)
+- Enable GPU acceleration
+- Significantly faster inference
+
+---
+
+# Local vs Cloud Models
+
+## Comparison
+
+| Aspect | Local Models | Cloud Models |
+|--------|--------------|--------------|
+| Cost | Free after hardware | Pay per token |
+| Quality | Good (7B-13B) | Excellent (70B+) |
+| Speed | Depends on hardware | Fast (network dependent) |
+| Privacy | Complete | Provider-dependent |
+| Offline | Yes | No |
+| Setup | One-time | None |
+| Maintenance | Update models | None |
+
+## When to Use Local
+
+✅ Learning and experimentation
+✅ Development and testing
+✅ Privacy-sensitive tasks
+✅ Offline work
+✅ Cost optimization
+✅ Rapid prototyping
+
+## When to Use Cloud
+
+✅ Production applications
+✅ Best quality required
+✅ Large context windows needed
+✅ Advanced features (vision, function calling)
+✅ High availability required
+✅ Scalability needed
+
+---
+
+# Setting Up Ollama
+
+## Step 1: Install Ollama
+
+Follow the installation instructions for your operating system.
+
+## Step 2: Verify Installation
+
+```bash
+ollama --version
+```
+
+## Step 3: Pull Your First Model
+
+```bash
+ollama pull llama3.2
+```
+
+## Step 4: Test the Model
+
+```bash
+ollama run llama3.2 "Explain what AI is in one sentence."
+```
+
+## Step 5: Configure API Access
+
+Ollama runs on `http://localhost:11434` by default.
+
+Test the API:
+
+```bash
+curl http://localhost:11434/api/tags
+```
+
+---
+
+# Integration with AI Applications
+
+## API Compatibility
+
+Ollama provides OpenAI-compatible endpoints:
+
+```typescript
+// Same code works with Ollama or OpenAI
+const response = await fetch('http://localhost:11434/v1/chat/completions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'llama3.2',
+    messages: [{ role: 'user', content: 'Hello!' }]
+  })
+});
+```
+
+## Provider Abstraction
+
+Our AI Core architecture supports Ollama as a first-class provider:
+
+```typescript
+// In AI Core
+const provider = ProviderRegistry.get('ollama');
+const response = await provider.generate(prompt);
+```
+
+## Development Workflow
+
+1. **Develop locally** with Ollama
+2. **Test prompts** without API costs
+3. **Iterate quickly** without network latency
+4. **Deploy to cloud** when ready for production
+
+---
+
+# Best Practices
+
+## Model Management
+
+- Pull only models you need
+- Regularly update models for improvements
+- Remove unused models to save space
+- Use model tags for version control
+
+## Performance Optimization
+
+- Match model size to your hardware
+- Use GPU acceleration when available
+- Adjust context window for speed
+- Batch requests when possible
+
+## Development Workflow
+
+- Start with local models
+- Test thoroughly before cloud deployment
+- Use the same prompts locally and in production
+- Compare outputs between local and cloud models
+
+---
+
+# Common Issues
+
+## Out of Memory
+
+**Problem**: Model too large for available RAM
+
+**Solution**: Use a smaller model or increase swap space
+
+## Slow Generation
+
+**Problem**: Inference takes too long
+
+**Solution**: 
+- Use a smaller model
+- Enable GPU acceleration
+- Reduce context window
+- Close other applications
+
+## Model Not Found
+
+**Problem**: Ollama can't find the model
+
+**Solution**: Pull the model first with `ollama pull <model-name>`
+
+---
+
+# Interview Questions
+
+## Q: What is local AI?
+
+**A**: Local AI refers to running AI models directly on your own hardware instead of using cloud-based APIs. It provides privacy, cost savings, and offline capability.
+
+## Q: When should you use local models vs cloud models?
+
+**A**: Use local models for learning, development, testing, and privacy-sensitive tasks. Use cloud models for production, best quality, large context windows, and advanced features.
+
+## Q: What is Ollama?
+
+**A**: Ollama is a tool that simplifies running local LLMs. It handles model downloading, management, and provides an OpenAI-compatible API.
+
+## Q: What are the trade-offs of local AI?
+
+**A**: Local AI offers cost savings and privacy but requires hardware investment and may have lower quality compared to large cloud models. It's ideal for development but may not suit all production use cases.
+
+---
+
+# Assignment
+
+## Objective
+
+Set up a local AI development environment.
+
+## Tasks
+
+1. Install Ollama on your machine
+2. Pull at least two different models
+3. Test each model with the same prompt
+4. Compare response quality and speed
+5. Document your findings
+
+## Deliverables
+
+- Screenshot of Ollama installation
+- List of models tested
+- Comparison table (quality, speed, use cases)
+- Recommendation for which model to use for different tasks
+
+---
+
+# Mini Project
+
+## Objective
+
+Build a simple local AI chat interface.
+
+## Requirements
+
+1. Create a basic web interface
+2. Connect to Ollama API
+3. Send messages and receive responses
+4. Display streaming output
+5. Handle errors gracefully
+
+## Focus
+
+- API integration
+- Streaming implementation
+- Error handling
+- User experience
+
+Do not worry about production features yet. Focus on understanding how local AI works.
+
+---
+
+# Key Takeaways
+
+- Local AI enables cost-free experimentation
+- Ollama simplifies running local LLMs
+- Local models are ideal for learning and development
+- Privacy and offline capability are major benefits
+- Cloud models still excel in quality and features
+- A hybrid approach (local dev, cloud production) works well
+
+---
+
+# Related Documents
+
+- [Provider Comparison](../llms/provider-comparison.mdx)
+- [Roadmap Day 1](../roadmap/day-001-ai-engineering-overview/lesson.mdx)
+- [Roadmap Day 2](../roadmap/day-002-llms-and-provider-landscape/lesson.mdx)

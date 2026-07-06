@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-primary-50: #f0f9ff;
+        --color-primary-100: #e0f2fe;
+        --color-primary-200: #bae6fd;
+        --color-primary-300: #7dd3fc;
+        --color-primary-400: #38bdf8;
+        --color-primary-500: #0ea5e9;
+        --color-primary-600: #0284c7;
+        --color-primary-700: #0369a1;
+        --color-primary-800: #075985;
+        --color-primary-900: #0c4a6e;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors;
+    }
+
+    .btn-secondary {
+        @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors;
+    }
+
+    .card {
+        @apply bg-white dark:bg-gray-800 rounded-lg shadow-md p-6;
+    }
+
+    .sidebar-link {
+        @apply flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors;
+    }
+
+    .sidebar-link.active {
+        @apply bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400;
+    }
+}
+
+@layer utilities {
+    .prose-content {
+        @apply max-w-none prose dark:prose-invert prose-headings:font-bold prose-a:text-primary-600;
+    }
+}

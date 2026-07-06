@@ -10,6 +10,7 @@
     "scripts": {
         "dev:backend": "npm run dev --workspace=claude-day1",
         "dev:frontend": "npm run dev --workspace=prasannai-ai-ui",
+        "dev:learning-hub": "npm run dev --workspace=ai-learning-hub",
         "build:packages": "npm run build --workspace=@ai-platform/shared-types && npm run build --workspace=@ai-platform/shared-utils && npm run build --workspace=@ai-platform/ai-core && npm run build --workspace=@ai-platform/ai-sdk",
         "test": "npm run test --workspace=claude-day1 && npm run test --workspace=@ai-platform/ai-core"
     },
