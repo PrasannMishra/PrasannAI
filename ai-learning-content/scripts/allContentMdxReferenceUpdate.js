@@ -2,959 +2,238 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const CONFIG = {
+    contentDir: path.resolve(__dirname, "../"),
+    indexFile: path.resolve(__dirname, "../generated/content-index.json"),
+    logFile: path.resolve(__dirname, "./mdx-reference-migration.log"),
+    ignoreDirs: new Set(["node_modules", ".git", "dist", "generated"])
+};
 
-// ======================================================
-// CONFIG
-// ======================================================
+if (!fs.existsSync(CONFIG.indexFile))
+    throw new Error(`Index not found: ${CONFIG.indexFile}`);
 
-const CONTENT_DIR =
-    path.resolve(
-        __dirname,
-        "../"
-    );
+const entries = Object.values(JSON.parse(fs.readFileSync(CONFIG.indexFile, "utf8")));
 
+const pathLookup = new Map();
+const fileLookup = new Map();
 
-const INDEX_FILE =
-    path.resolve(
-        __dirname,
-        "../generated/content-index.json"
-    );
+entries.forEach(item => {
+    const file = normalizePath(item.filePath);
+    const name = path.basename(file);
 
+    pathLookup.set(file, item);
+    fileLookup.set(name, [...(fileLookup.get(name) || []), item]);
+});
 
-const LOG_FILE =
-    path.resolve(
-        __dirname,
-        "./mdx-reference-migration.log"
-    );
-
-
-const IGNORE_DIRS = new Set([
-    "node_modules",
-    ".git",
-    "dist",
-    "generated"
-]);
-
-
-// ======================================================
-// VALIDATE INDEX
-// ======================================================
-
-if (!fs.existsSync(INDEX_FILE)) {
-
-    throw new Error(
-        `Content index not found: ${INDEX_FILE}`
-    );
-
-}
-
-
-// ======================================================
-// LOAD CONTENT INDEX
-// ======================================================
-
-const index =
-    JSON.parse(
-        fs.readFileSync(
-            INDEX_FILE,
-            "utf8"
-        )
-    );
-
-
-
-const entries =
-    Object.values(index);
-
-
-
-// ======================================================
-// BUILD LOOKUPS
-// ======================================================
-
-
-// Full normalized path lookup
-
-const pathLookup =
-    new Map();
-
-
-// Filename lookup
-// Multiple files can have same name
-
-const fileLookup =
-    new Map();
-
-
-
-for (const item of entries) {
-
-
-    const normalizedPath =
-        normalizePath(
-            item.filePath
-        );
-
-
-    pathLookup.set(
-        normalizedPath,
-        item
-    );
-
-
-    const fileName =
-        path.basename(
-            normalizedPath
-        );
-
-
-    const existing =
-        fileLookup.get(
-            fileName
-        ) ?? [];
-
-
-    existing.push(item);
-
-
-    fileLookup.set(
-        fileName,
-        existing
-    );
-
-}
-
-
-
-// ======================================================
-// STATS
-// ======================================================
+const stats = {
+    totalFiles: 0,
+    updatedFiles: 0,
+    updatedReferences: 0,
+    missingReferences: 0,
+    duplicateReferences: 0
+};
 
 const logs = [];
 
-
-let totalFiles = 0;
-
-let updatedFiles = 0;
-
-let updatedReferences = 0;
-
-let missingReferences = 0;
-
-let duplicateReferences = 0;
-
-
-
-// ======================================================
-// HELPERS
-// ======================================================
-
-
-function normalizePath(
-    value = ""
-) {
-
-
+function normalizePath(value = "") {
     return value
-        .replace(
-            /\\/g,
-            "/"
-        )
-        .replace(
-            /^\/content\//,
-            ""
-        )
-        .replace(
-            /^\.\//,
-            ""
-        )
-        .replace(
-            /^\/+/,
-            ""
-        )
-        .replace(
-            /^(\.\.\/)+/,
-            ""
-        )
+        .replaceAll("\\", "/")
+        .replace(/^\/content\//, "")
+        .replace(/^\.?\//, "")
+        .replace(/^(\.\.\/)+/, "")
         .trim();
-
 }
 
-
-
-function addLog(
-    type,
-    file,
-    oldValue,
-    newValue = ""
-) {
-
-
+function addLog(type, file, oldValue, newValue) {
     logs.push(
-        `
-============================================================
-
-${type}
-
-File:
-${file}
-
-Old:
-${oldValue}
-
-${newValue ?
-            `New:
-${newValue}`
-            :
-            ""}
-
-============================================================
-`
+        [
+            `[${type}] ${file}`,
+            `OLD: ${oldValue}`,
+            newValue && `NEW: ${newValue}`
+        ].filter(Boolean).join("\n")
     );
-
 }
 
+function findEntry(ref) {
+    const normalized = normalizePath(ref);
 
+    if (pathLookup.has(normalized))
+        return pathLookup.get(normalized);
 
-// ======================================================
-// FIND CONTENT ENTRY
-// ======================================================
-//
-// Priority:
-//
-// 1. Exact path match
-// 2. Filename match
-// 3. Reject duplicate filename
-//
-// ======================================================
+    const matches = fileLookup.get(path.basename(normalized));
 
-
-function findEntry(
-    referencePath
-) {
-
-
-    const normalized =
-        normalizePath(
-            referencePath
-        );
-
-
-
-    // ------------------------------------------
-    // Exact path match
-    // ------------------------------------------
-
-    const exact =
-        pathLookup.get(
-            normalized
-        );
-
-
-    if (exact) {
-
-        return exact;
-
-    }
-
-
-
-    // ------------------------------------------
-    // Filename fallback
-    // ------------------------------------------
-
-    const fileName =
-        path.basename(
-            normalized
-        );
-
-
-    const matches =
-        fileLookup.get(
-            fileName
-        );
-
-
-
-    if (!matches) {
-
+    if (!matches)
         return null;
-
-    }
-
-
 
     if (matches.length > 1) {
-
-        duplicateReferences++;
-
+        stats.duplicateReferences++;
         return null;
-
     }
 
-
-
     return matches[0];
-
 }
 
-function migrateContent(
-    content,
-    relativeFile
-) {
+function missing(file, value) {
+    stats.missingReferences++;
+    addLog("NOT FOUND", file, value);
+    return value;
+}
+
+function replaceReference(content, regex, handler, file) {
+    return content.replace(regex, (...args) => {
+        const result = handler(...args);
+
+        if (result === args[0])
+            return result;
+
+        stats.updatedReferences++;
+        addLog("UPDATED", file, args[0], result);
+
+        return result;
+    });
+}
 
 
-    // ==================================================
-    // PASS 1
-    //
-    // Markdown links
-    //
-    // [Title](file.mdx)
-    //
-    // ==================================================
-
-    content =
-        content.replace(
-            /\[([^\]]*)\]\(([^)\s]+\.mdx)\)/g,
-            (
-                fullMatch,
-                oldTitle,
-                mdxPath
-            ) => {
-
-
-                const entry =
-                    findEntry(
-                        mdxPath
-                    );
-
-
-                if (!entry) {
-
-                    missingReferences++;
-
-
-                    addLog(
-                        "NOT FOUND",
-                        relativeFile,
-                        fullMatch
-                    );
-
-
-                    return fullMatch;
-
-                }
+const rules = [
+    [
+        /\[([^\]]*)\]\(([^)\s]+\.mdx)\)/g,
+        (full, title, file, relative) => {
+            const entry = findEntry(file);
+            return entry
+                ? `[${title || entry.title}](${entry.id})`
+                : missing(relative, full);
+        }
+    ],
+    [
+        /^\s*-\s*`?([^`\n]+\.mdx)`?\s*$/gm,
+        (full, file, relative) => {
+            const entry = findEntry(file);
+            return entry
+                ? `- [${entry.title}](${entry.id})`
+                : missing(relative, full);
+        }
+    ],
+    [
+        /`([^`\n]+\.mdx)`/g,
+        (full, file, relative) => {
+            const entry = findEntry(file);
+            return entry
+                ? `[${entry.title}](${entry.id})`
+                : missing(relative, full);
+        }
+    ],
+    [
+        /(^|[\s:>])([A-Za-z0-9_./-]+\.mdx)(?=$|[\s<])/gm,
+        (full, prefix, file, relative) => {
+            const entry = findEntry(file);
+            return entry
+                ? `${prefix}[${entry.title}](${entry.id})`
+                : missing(relative, file);
+        }
+    ]
+];
 
 
-
-                const replacement =
-                    `[${oldTitle || entry.title}](${entry.id})`;
-
-
-
-                updatedReferences++;
-
-
-                addLog(
-                    "UPDATED",
-                    relativeFile,
-                    fullMatch,
-                    replacement
-                );
-
-
-                return replacement;
-
-            }
+function migrateContent(content, file) {
+    for (const [regex, handler] of rules)
+        content = replaceReference(
+            content,
+            regex,
+            (...args) => handler(...args, file),
+            file
         );
-
-
-
-
-    // ==================================================
-    // PASS 2
-    //
-    // Bullet references
-    //
-    // - handbook/file.mdx
-    //
-    // ==================================================
-
-    content =
-        content.replace(
-            /^\s*-\s*`?([^`\n]+\.mdx)`?\s*$/gm,
-            (
-                fullMatch,
-                mdxPath
-            ) => {
-
-
-                const entry =
-                    findEntry(
-                        mdxPath
-                    );
-
-
-
-                if (!entry) {
-
-                    missingReferences++;
-
-
-                    addLog(
-                        "NOT FOUND",
-                        relativeFile,
-                        fullMatch
-                    );
-
-
-                    return fullMatch;
-
-                }
-
-
-
-                const replacement =
-                    `- [${entry.title}](${entry.id})`;
-
-
-
-                updatedReferences++;
-
-
-                addLog(
-                    "UPDATED",
-                    relativeFile,
-                    fullMatch,
-                    replacement
-                );
-
-
-                return replacement;
-
-            }
-        );
-
-
-
-
-
-    // ==================================================
-    // PASS 3
-    //
-    // Inline MDX path
-    //
-    // `handbook/file.mdx`
-    //
-    // ==================================================
-
-    content =
-        content.replace(
-            /`([^`\n]+\.mdx)`/g,
-            (
-                fullMatch,
-                mdxPath
-            ) => {
-
-
-                const entry =
-                    findEntry(
-                        mdxPath
-                    );
-
-
-
-                if (!entry) {
-
-
-                    missingReferences++;
-
-
-                    addLog(
-                        "NOT FOUND",
-                        relativeFile,
-                        fullMatch
-                    );
-
-
-                    return fullMatch;
-
-                }
-
-
-
-                const replacement =
-                    `[${entry.title}](${entry.id})`;
-
-
-
-                updatedReferences++;
-
-
-                addLog(
-                    "UPDATED",
-                    relativeFile,
-                    fullMatch,
-                    replacement
-                );
-
-
-                return replacement;
-
-            }
-        );
-
-
-
-
-
-    // ==================================================
-    // PASS 4
-    //
-    // Plain MDX paths
-    //
-    // handbook/a/b/file.mdx
-    //
-    // ==================================================
-
-    content =
-        content.replace(
-            /(^|[\s:>])([A-Za-z0-9_./-]+\.mdx)(?=$|[\s<])/gm,
-            (
-                fullMatch,
-                prefix,
-                mdxPath
-            ) => {
-
-
-                const entry =
-                    findEntry(
-                        mdxPath
-                    );
-
-
-
-                if (!entry) {
-
-
-                    missingReferences++;
-
-
-                    addLog(
-                        "NOT FOUND",
-                        relativeFile,
-                        mdxPath
-                    );
-
-
-                    return fullMatch;
-
-                }
-
-
-
-                const replacement =
-                    `${prefix}[${entry.title}](${entry.id})`;
-
-
-
-                updatedReferences++;
-
-
-                addLog(
-                    "UPDATED",
-                    relativeFile,
-                    mdxPath,
-                    replacement.trim()
-                );
-
-
-                return replacement;
-
-            }
-        );
-
-
 
     return content;
-
 }
 
 
-
-
-
-// ======================================================
-// PROTECT CODE BLOCKS
-// ======================================================
-
-
-function extractCodeBlocks(
-    content
-) {
-
-
+function extractCodeBlocks(content) {
     const blocks = [];
 
-
-
-    const replaced =
-        content.replace(
-            /```[\s\S]*?```/g,
-            (
-                block
-            ) => {
-
-
-                const token =
-                    `___MDX_CODE_BLOCK_${Date.now()}_${blocks.length}___`;
-
-
-
-                blocks.push(
-                    block
-                );
-
-
-                return token;
-
-            }
-        );
-
-
-
-    return {
-        content: replaced,
-        blocks
-    };
-
-}
-
-
-
-
-
-function restoreCodeBlocks(
-    content,
-    blocks
-) {
-
-
-    blocks.forEach(
-        (
-            block,
-            index
-        ) => {
-
-
-            const token =
-                new RegExp(
-                    `___MDX_CODE_BLOCK_\\d+_${index}___`
-                );
-
-
-
-            content =
-                content.replace(
-                    token,
-                    block
-                );
-
+    content = content.replace(
+        /```[\s\S]*?```/g,
+        block => {
+            const token = `___CODE_${blocks.length}_${Date.now()}___`;
+            blocks.push(block);
+            return token;
         }
     );
 
+    return { content, blocks };
+}
 
+
+function restoreCodeBlocks(content, blocks) {
+    blocks.forEach((block, i) =>
+        content = content.replace(
+            new RegExp(`___CODE_${i}_\\d+___`),
+            block
+        )
+    );
 
     return content;
-
 }
 
 
+function processFile(file) {
+    stats.totalFiles++;
 
-// ======================================================
-// PROCESS SINGLE MDX FILE
-// ======================================================
+    const original = fs.readFileSync(file, "utf8");
+    const relative = path.relative(CONFIG.contentDir, file);
 
+    const { content, blocks } = extractCodeBlocks(original);
 
-function processFile(
-    fullPath
-) {
-
-
-    totalFiles++;
-
-
-    const relativeFile =
-        path.relative(
-            CONTENT_DIR,
-            fullPath
-        );
-
-
-
-    const originalContent =
-        fs.readFileSync(
-            fullPath,
-            "utf8"
-        );
-
-
-
-    const {
-        content: withoutCodeBlocks,
+    const updated = restoreCodeBlocks(
+        migrateContent(content, relative),
         blocks
-    } =
-        extractCodeBlocks(
-            originalContent
-        );
+    );
 
-
-
-    let migratedContent =
-        migrateContent(
-            withoutCodeBlocks,
-            relativeFile
-        );
-
-
-
-    migratedContent =
-        restoreCodeBlocks(
-            migratedContent,
-            blocks
-        );
-
-
-
-    if (
-        migratedContent !== originalContent
-    ) {
-
-
-        updatedFiles++;
-
-
-
-        fs.writeFileSync(
-            fullPath,
-            migratedContent,
-            "utf8"
-        );
-
-
-
-        console.log(
-            `✔ Updated : ${relativeFile}`
-        );
-
+    if (updated !== original) {
+        stats.updatedFiles++;
+        fs.writeFileSync(file, updated);
+        console.log(`✔ Updated: ${relative}`);
     }
-
 }
 
 
+function scan(dir) {
+    for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
 
-
-
-// ======================================================
-// DIRECTORY SCANNER
-// ======================================================
-
-
-function scan(
-    directory
-) {
-
-
-    const items =
-        fs.readdirSync(
-            directory,
-            {
-                withFileTypes: true
-            }
-        );
-
-
-
-    for (
-        const item of items
-    ) {
-
-
-        // --------------------------------------
-        // Ignore folders
-        // --------------------------------------
-
-        if (
-            item.isDirectory()
-            &&
-            IGNORE_DIRS.has(
-                item.name
-            )
-        ) {
-
+        if (item.isDirectory() && CONFIG.ignoreDirs.has(item.name))
             continue;
 
-        }
+        const file = path.join(dir, item.name);
 
-
-
-        const fullPath =
-            path.join(
-                directory,
-                item.name
-            );
-
-
-
-        if (
-            item.isDirectory()
-        ) {
-
-
-            scan(
-                fullPath
-            );
-
-
-            continue;
-
-        }
-
-
-
-        if (
-            !item.name.endsWith(
-                ".mdx"
-            )
-        ) {
-
-            continue;
-
-        }
-
-
-
-        processFile(
-            fullPath
-        );
-
+        if (item.isDirectory())
+            scan(file);
+        else if (item.name.endsWith(".mdx"))
+            processFile(file);
     }
-
 }
-
-
-
-
-
-// ======================================================
-// WRITE LOG
-// ======================================================
 
 
 function writeLog() {
-
-
-    const summary =
-        `
-MDX Reference Migration Report
-================================
-
-Total Files Scanned :
-${totalFiles}
-
-Files Updated :
-${updatedFiles}
-
-References Updated :
-${updatedReferences}
-
-Missing References :
-${missingReferences}
-
-Duplicate References :
-${duplicateReferences}
-
-
-`;
-
-
     fs.writeFileSync(
-        LOG_FILE,
-        summary + logs.join("\n"),
-        "utf8"
+        CONFIG.logFile,
+        `MDX Migration Report\n\n${JSON.stringify(stats, null, 2)}\n\n${logs.join("\n\n")}`
     );
-
 }
-
-
-
-
-
-// ======================================================
-// EXECUTION
-// ======================================================
 
 
 function main() {
+    console.log("Starting MDX migration...\n");
 
-
-    console.log(
-        "\nStarting MDX reference migration...\n"
-    );
-
-
-
-    console.log(
-        `Content Directory:
-${CONTENT_DIR}\n`
-    );
-
-
-
-    scan(
-        CONTENT_DIR
-    );
-
-
-
+    scan(CONFIG.contentDir);
     writeLog();
 
-
-
     console.log(
-        `
-================================
-
-Migration Completed
-
-Files Scanned :
-${totalFiles}
-
-Files Updated :
-${updatedFiles}
-
-References Updated :
-${updatedReferences}
-
-Missing :
-${missingReferences}
-
-Duplicates :
-${duplicateReferences}
-
-
-Log File :
-${LOG_FILE}
-
-================================
-`
+        "Completed:",
+        stats,
+        "\nLog:",
+        CONFIG.logFile
     );
-
 }
-
-
 
 main();
