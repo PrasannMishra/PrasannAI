@@ -49,7 +49,7 @@ The reusable, framework-agnostic heart of the AI platform that orchestrates all 
 
 ## AI Engineer
 
-A software engineer who integrates AI capabilities (particularly LLMs) into applications and products. Focuses on architecture, APIs, prompts, context, and production systems rather than training models. See [AI Engineering Philosophy](../fundamentals/ai-engineering-philosophy.mdx).
+A software engineer who integrates AI capabilities (particularly LLMs) into applications and products. Focuses on architecture, APIs, prompts, context, and production systems rather than training models. See [AI Engineering Philosophy](handbook.fundamentals.ai-engineering-philosophy).
 
 ## AI SDK (Software Development Kit)
 
@@ -129,15 +129,15 @@ The act of generating text from a prompt. Also refers to the generated text itse
 
 ## Context
 
-Information provided to the LLM to help it generate better responses. Includes conversation history, retrieved documents, user preferences, etc. See [Context Engineering](../context/context-engineering.mdx).
+Information provided to the LLM to help it generate better responses. Includes conversation history, retrieved documents, user preferences, etc. See [Context Engineering](handbook.context.context-engineering).
 
 ## Context Builder (ContextBuilder)
 
-A component responsible for assembling context from multiple sources. Part of AI Core. See [ContextBuilder Architecture](../context/context-builder.mdx).
+A component responsible for assembling context from multiple sources. Part of AI Core. See [ContextBuilder Architecture](handbook.context.context-builder).
 
 ## Context Engineering
 
-The discipline of selecting, organizing, and delivering information that an LLM needs to perform a task effectively. Focuses on what the model knows at inference time. See [Context Engineering](../context/context-engineering.mdx).
+The discipline of selecting, organizing, and delivering information that an LLM needs to perform a task effectively. Focuses on what the model knows at inference time. See [Context Engineering](handbook.context.context-engineering).
 
 ## Context Provider
 
@@ -145,7 +145,7 @@ A modular component that supplies a specific type of context (conversation histo
 
 ## Context Window
 
-The maximum number of tokens an LLM can process in a single request (input + output). Examples: Claude 200K, GPT-4 128K, Gemini 1M. See [Context Window](../llms/context-window.mdx).
+The maximum number of tokens an LLM can process in a single request (input + output). Examples: Claude 200K, GPT-4 128K, Gemini 1M. See [Context Window](handbook.llms.context-window).
 
 ## Conversation
 
@@ -361,11 +361,11 @@ Meta's family of open-source LLMs. Available in various sizes (7B, 13B, 70B, etc
 
 ## LLM (Large Language Model)
 
-A neural network trained on massive text data to predict the next token. The foundation of modern AI applications. See [LLM Basics](../llms/llm-basics.mdx).
+A neural network trained on massive text data to predict the next token. The foundation of modern AI applications. See [LLM Basics](handbook.llms.llm-basics).
 
 ## Local AI
 
-Running LLMs on your own hardware instead of using cloud APIs. Enabled by tools like Ollama. See [Local AI](../fundamentals/local-ai.mdx).
+Running LLMs on your own hardware instead of using cloud APIs. Enabled by tools like Ollama. See [Local AI](handbook.fundamentals.local-ai).
 
 ## Local-First
 
@@ -441,7 +441,7 @@ The package manager for Node.js. Used to install and manage dependencies.
 
 ## Ollama
 
-A tool for running LLMs locally. Simplifies model downloading, management, and provides an OpenAI-compatible API. See [Local AI](../fundamentals/local-ai.mdx).
+A tool for running LLMs locally. Simplifies model downloading, management, and provides an OpenAI-compatible API. See [Local AI](handbook.fundamentals.local-ai).
 
 ## OpenAI
 
@@ -461,7 +461,7 @@ A service that offers LLM access via API. Examples: Anthropic, OpenAI, Google, O
 
 ## Provider Abstraction
 
-The practice of wrapping different provider APIs behind a common interface. Enables switching providers without changing application code. See [Provider Abstraction](../streaming/provider-abstraction.mdx).
+The practice of wrapping different provider APIs behind a common interface. Enables switching providers without changing application code. See [Provider Abstraction](handbook.streaming.provider-abstraction).
 
 ## Provider Adapter
 
@@ -473,15 +473,15 @@ A central registry of all available providers. Applications request providers fr
 
 ## Prompt
 
-The input provided to an LLM that guides its response. Includes instructions, context, and constraints. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+The input provided to an LLM that guides its response. Includes instructions, context, and constraints. See [Prompt Engineering](handbook.prompting.prompt-engineering).
 
 ## Prompt Engineering
 
-The discipline of designing effective prompts for LLMs. In production, prompts are treated as software artifacts. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+The discipline of designing effective prompts for LLMs. In production, prompts are treated as software artifacts. See [Prompt Engineering](handbook.prompting.prompt-engineering).
 
 ## Prompt Template
 
-A reusable prompt structure with placeholders for dynamic values. Enables prompt reusability and maintainability. See [Prompt Templates](../prompting/prompt-templates.mdx).
+A reusable prompt structure with placeholders for dynamic values. Enables prompt reusability and maintainability. See [Prompt Templates](handbook.prompting.prompt-templates).
 
 ## PromptBuilder
 
@@ -537,7 +537,7 @@ A JavaScript library for building user interfaces. Used for the frontend in this
 
 ## ReadableStream
 
-A browser API that provides a readable stream of byte data. Used to consume streamed HTTP responses. See [ReadableStream](../streaming/readable-stream.mdx).
+A browser API that provides a readable stream of byte data. Used to consume streamed HTTP responses. See [ReadableStream](handbook.streaming.readable-stream).
 
 ## Reasoning
 
@@ -549,7 +549,7 @@ The principle of building components once and using them in multiple places. AI 
 
 ## Role Prompting
 
-A technique that assigns specific expertise or persona to the model to improve response quality. See [Role Prompting](../prompting/role-prompting.mdx).
+A technique that assigns specific expertise or persona to the model to improve response quality. See [Role Prompting](handbook.prompting.role-prompting).
 
 ## Routing
 
@@ -561,11 +561,11 @@ Directing requests to different providers or models based on criteria like cost,
 
 ## SSE (Server-Sent Events)
 
-A web technology that allows servers to push real-time updates to clients over HTTP. The primary protocol for streaming AI responses. See [SSE](../streaming/sse.mdx).
+A web technology that allows servers to push real-time updates to clients over HTTP. The primary protocol for streaming AI responses. See [SSE](handbook.streaming.sse).
 
 ## Streaming
 
-Sending data incrementally as it becomes available, rather than waiting for the complete response. Critical for AI UX. See [Streaming Basics](../streaming/streaming-basics.mdx).
+Sending data incrementally as it becomes available, rather than waiting for the complete response. Critical for AI UX. See [Streaming Basics](handbook.streaming.streaming-basics).
 
 ## StreamEvent
 
@@ -577,7 +577,7 @@ The current state of a streaming message: IDLE, STREAMING, COMPLETED, STOPPED, o
 
 ## System Prompt
 
-Instructions that define the AI's long-term behavior and identity. Usually static across a conversation. See [Prompt Engineering](../prompting/prompt-engineering.mdx).
+Instructions that define the AI's long-term behavior and identity. Usually static across a conversation. See [Prompt Engineering](handbook.prompting.prompt-engineering).
 
 ---
 
@@ -600,7 +600,7 @@ A browser API that decodes byte data (Uint8Array) into strings using UTF-8 encod
 
 ## Token
 
-The basic unit of text processing in LLMs. Can be a word, part of a word, or character. LLMs process text as sequences of tokens. See [Tokens](../llms/tokens.mdx).
+The basic unit of text processing in LLMs. Can be a word, part of a word, or character. LLMs process text as sequences of tokens. See [Tokens](handbook.llms.tokens).
 
 ## Token Budget
 
@@ -723,9 +723,9 @@ No entries
 
 # Related Documents
 
-- [AI Engineering Philosophy](../fundamentals/ai-engineering-philosophy.mdx)
-- [LLM Basics](../llms/llm-basics.mdx)
-- [Prompt Engineering](../prompting/prompt-engineering.mdx)
-- [Context Engineering](../context/context-engineering.mdx)
-- [Streaming Basics](../streaming/streaming-basics.mdx)
+- [AI Engineering Philosophy](handbook.fundamentals.ai-engineering-philosophy)
+- [LLM Basics](handbook.llms.llm-basics)
+- [Prompt Engineering](handbook.prompting.prompt-engineering)
+- [Context Engineering](handbook.context.context-engineering)
+- [Streaming Basics](handbook.streaming.streaming-basics)
 - [Architecture Overview](../../ARCHITECTURE.md)
