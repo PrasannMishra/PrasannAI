@@ -35,7 +35,7 @@ export default function SearchPage() {
                 });
             }
 
-            const contentMatch = lesson.content.toLowerCase().includes(lowerQuery);
+            const contentMatch = lesson?.content?.toLowerCase().includes(lowerQuery) ?? "";
             if (contentMatch) {
                 const index = lesson.content.toLowerCase().indexOf(lowerQuery);
                 const start = Math.max(0, index - 50);
@@ -120,8 +120,8 @@ export default function SearchPage() {
                                         Day {result.lesson.day}
                                     </span>
                                     <span className={`px-2 py-1 text-xs rounded-full ${result.lesson.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
-                                            result.lesson.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-red-100 text-red-700'
+                                        result.lesson.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-red-100 text-red-700'
                                         }`}>
                                         {result.lesson.difficulty}
                                     </span>
