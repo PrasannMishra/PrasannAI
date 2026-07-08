@@ -1,0 +1,68 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #374151;
+}
+
+.submitBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.submitBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--primary-dark), #1d4ed8);
+}
+
+.submitBtn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,49 +1,89 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, BookOpen, Clock, CheckCircle2, Circle, Share2, Bookmark } from 'lucide-react';
-import { useLessonStore } from '@/stores/useLessonStore';
-import { useProgressStore } from '@/stores/useLessonStore';
+import { useLessonStore, useProgressStore } from '@/stores/useLessonStore';
 import MDXContent from '@/components/MDXContent';
 import { extractHeadings } from '@/utils/tableOfContents';
+import { lessonFiles, parseLessonFromMDX } from '@/utils/contentLoader';
 
 export default function LessonPage() {
     const { id } = useParams<{ id: string }>();
+
+    // 1. Store Selectors
     const lessons = useLessonStore(state => state.lessons);
     const getAdjacentLessons = useLessonStore(state => state.getAdjacentLessons);
+    const loadContentById = useLessonStore(state => state.loadContentById);
+
     const progress = useProgressStore(state => state.progress);
     const markLessonComplete = useProgressStore(state => state.markLessonComplete);
     const updateReadingProgress = useProgressStore(state => state.updateReadingProgress);
 
-    console.log("LessonPage - Current lesson ID:", lessons, id);
+    // 2. Derive Current Lesson cleanly from Store instead of duplicating in useState
+    const lesson = useMemo(() => {
+        if (!id || !lessons.length) return null;
+        return lessons.find(l => l.id === id) || null;
+    }, [lessons, id]);
 
-    const lesson = lessons.find(l => l.id === id);
+    const day = lesson ? String(lesson.day) : '';
 
+    // 3. Isolated Fetch: Trigger asynchronous loading ONLY when ID actually shifts
+    const prevIdRef = useRef<string | undefined>(id);
+    useEffect(() => {
+        const currentLesson = lessons.find(l => l.id === id);
+        if (currentLesson && !currentLesson.content) {
+            loadContentById(id);
+        }
+        prevIdRef.current = id;
+    }, [id, lessons, loadContentById]);
+
+    // 4. Adjacent Navigation Optimization
     const { previous, next } = useMemo(() => {
         if (!id) return { previous: undefined, next: undefined };
         return getAdjacentLessons(id);
     }, [id, getAdjacentLessons]);
 
+    // 5. Track Last Opened Lesson History quietly
     useEffect(() => {
-        if (lesson) {
+        if (lesson?.id) {
             useProgressStore.getState().updateProgress({
                 lastOpenedLesson: lesson.id,
             });
         }
-    }, [lesson]);
+    }, [lesson?.id]);
 
-    const handleScroll = () => {
+    // 6. Simplified Scroll Event Listener
+    useEffect(() => {
         if (!id) return;
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const scrollPercentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
-        updateReadingProgress(id, scrollPercentage);
+
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+            updateReadingProgress(id, scrollPercentage);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [id, updateReadingProgress]);
+
+    // 7. Handlers & Derived Values
+    const openLinkedLesson = async (path: string) => {
+        if (typeof lessonFiles[path] !== 'function') return;
+        const content = await lessonFiles[path]() as string;
+        const linkedLesson = parseLessonFromMDX(path, content, day);
+
+        // Update store dynamic layout/state logic here if linkedLesson replaces current layout
+        if (linkedLesson?.id) {
+            // Recommendation: Navigate to the new lesson link instead of hard-setting state
+            // e.g., navigate(`/lesson/${linkedLesson.id}`);
+        }
     };
 
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [id]);
+    const isCompleted = lesson ? progress.completedLessons.includes(lesson.id) : false;
+    const readingProgress = lesson ? (progress.readingProgress[lesson.id] || 0) : 0;
+    const headings = useMemo(() => extractHeadings(lesson?.content || ''), [lesson?.content]);
 
+    // 8. Guard Clause (Early Return)
     if (!lesson) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -57,12 +97,9 @@ export default function LessonPage() {
         );
     }
 
-    const isCompleted = progress.completedLessons.includes(lesson.id);
-    const readingProgress = progress.readingProgress[lesson.id] || 0;
-    const headings = extractHeadings(lesson.content);
-
     return (
         <div className="max-w-4xl mx-auto">
+            {/* Header / Breadcrumbs */}
             <div className="mb-6">
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                     <Link to="/" className="hover:text-primary-600">Dashboard</Link>
@@ -94,6 +131,7 @@ export default function LessonPage() {
                     </div>
                 </div>
 
+                {/* Toolbar */}
                 <div className="flex items-center gap-4 mb-6">
                     <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <Clock className="w-4 h-4" />
@@ -121,6 +159,7 @@ export default function LessonPage() {
                     </div>
                 </div>
 
+                {/* Progress Bar */}
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-8">
                     <div
                         className="bg-primary-600 h-2 rounded-full transition-all"
@@ -129,44 +168,37 @@ export default function LessonPage() {
                 </div>
             </div>
 
+            {/* Layout Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
                     <div className="card prose-content">
-                        <MDXContent content={lesson.content} />
+                        <MDXContent content={lesson.content || ''} openMdx={openLinkedLesson} />
                     </div>
 
+                    {/* Prev / Next Pagination */}
                     <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                         {previous ? (
-                            <Link
-                                to={`/lesson/${previous.id}`}
-                                className="flex items-center gap-2 text-primary-600 hover:text-primary-700"
-                            >
+                            <Link to={`/lesson/${previous.id}`} className="flex items-center gap-2 text-primary-600 hover:text-primary-700">
                                 <ChevronLeft className="w-5 h-5" />
                                 <div>
                                     <p className="text-sm text-gray-500">Previous</p>
                                     <p className="font-medium">Day {previous.day}: {previous.title}</p>
                                 </div>
                             </Link>
-                        ) : (
-                            <div />
-                        )}
+                        ) : <div />}
                         {next ? (
-                            <Link
-                                to={`/lesson/${next.id}`}
-                                className="flex items-center gap-2 text-primary-600 hover:text-primary-700"
-                            >
+                            <Link to={`/lesson/${next.id}`} className="flex items-center gap-2 text-primary-600 hover:text-primary-700">
                                 <div className="text-right">
                                     <p className="text-sm text-gray-500">Next</p>
                                     <p className="font-medium">Day {next.day}: {next.title}</p>
                                 </div>
                                 <ChevronRight className="w-5 h-5" />
                             </Link>
-                        ) : (
-                            <div />
-                        )}
+                        ) : <div />}
                     </div>
                 </div>
 
+                {/* Sidebar Navigation */}
                 <div className="lg:col-span-1">
                     <div className="card sticky top-24">
                         <h3 className="font-semibold text-gray-900 dark:text-white mb-3">On This Page</h3>
@@ -179,15 +211,11 @@ export default function LessonPage() {
                                             href={`#${heading.id}`}
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                const element = document.getElementById(heading.id);
-                                                if (element) {
-                                                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                }
+                                                document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                             }}
                                             className={`block py-1 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${heading.level === 1 ? 'font-medium' :
                                                 heading.level === 2 ? 'pl-2' :
-                                                    heading.level === 3 ? 'pl-4' :
-                                                        'pl-6'
+                                                    heading.level === 3 ? 'pl-4' : 'pl-6'
                                                 }`}
                                         >
                                             {heading.text}
@@ -199,15 +227,13 @@ export default function LessonPage() {
                             )}
                         </div>
 
-                        {lesson.topics.length > 0 && (
+                        {/* Topics */}
+                        {lesson.topics?.length > 0 && (
                             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <h4 className="font-medium text-gray-900 dark:text-white mb-2">Topics</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {lesson.topics.map(topic => (
-                                        <span
-                                            key={topic}
-                                            className="px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs rounded"
-                                        >
+                                        <span key={topic} className="px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs rounded">
                                             {topic}
                                         </span>
                                     ))}
@@ -215,18 +241,13 @@ export default function LessonPage() {
                             </div>
                         )}
 
-                        {lesson.resources.length > 0 && (
+                        {/* Resources */}
+                        {lesson.resources?.length > 0 && (
                             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                 <h4 className="font-medium text-gray-900 dark:text-white mb-2">Resources</h4>
                                 <div className="space-y-2">
                                     {lesson.resources.map((resource, idx) => (
-                                        <a
-                                            key={idx}
-                                            href={resource.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block text-sm text-primary-600 hover:text-primary-700"
-                                        >
+                                        <a key={idx} href={resource.url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary-600 hover:text-primary-700">
                                             {resource.title}
                                         </a>
                                     ))}

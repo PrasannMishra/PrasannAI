@@ -18,6 +18,25 @@ export interface Lesson {
     filePath: string;
 }
 
+export interface FrontMatter {
+    id: string;
+    day: number;
+    title: string;
+    description: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+    estimatedTime: string;
+    status: 'not-started' | 'in-progress' | 'completed';
+    topics: string[];
+    prerequisites: string[];
+    resources: Resource[];
+    assignment?: Assignment;
+    project?: string;
+    interviewLevel?: string;
+    tags: string[];
+    summary: string;
+    filePath: string;
+}
+
 export interface Resource {
     title: string;
     url: string;

@@ -1,0 +1,656 @@
+{
+  "roadmap.day-001-ai-engineering-overview.lesson": {
+    "id": "roadmap.day-001-ai-engineering-overview.lesson",
+    "day": 1,
+    "title": "AI Engineering Roadmap",
+    "description": "Introduction to AI Engineering, understanding the modern AI ecosystem, selecting a technology stack, and preparing the development environment for the upcoming 100-day learning roadmap.",
+    "difficulty": "Beginner",
+    "estimatedTime": "2 Hours",
+    "status": "completed",
+    "topics": [
+      "AI Engineering",
+      "LLMs",
+      "Learning Roadmap",
+      "AI Stack",
+      "Local AI",
+      "Ollama"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "ai",
+      "llm",
+      "roadmap",
+      "anthropic",
+      "claude",
+      "ollama"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-001-ai-engineering-overview/lesson.mdx"
+  },
+  "roadmap.day-002-llms-and-provider-landscape.lesson": {
+    "id": "roadmap.day-002-llms-and-provider-landscape.lesson",
+    "day": 2,
+    "title": "Large Language Models & Provider Landscape",
+    "description": "Learn what Large Language Models are, how they work at a high level, compare major AI providers, understand tokens and context windows, and choose the right model for different use cases.",
+    "difficulty": "Beginner",
+    "estimatedTime": "2 Hours",
+    "status": "completed",
+    "topics": [
+      "LLM",
+      "Tokens",
+      "Context Window",
+      "Anthropic",
+      "OpenAI",
+      "Ollama",
+      "Claude"
+    ],
+    "prerequisites": [
+      "day-001-ai-engineering-overview"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "llm",
+      "ai",
+      "claude",
+      "openai",
+      "ollama",
+      "providers"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-002-llms-and-provider-landscape/lesson.mdx"
+  },
+  "roadmap.day-003-prompt-engineering.lesson": {
+    "id": "roadmap.day-003-prompt-engineering.lesson",
+    "day": 3,
+    "title": "Prompt Engineering",
+    "description": "Learn what prompt engineering is, why prompts are one of the most important components of AI applications, and how to write prompts that are reusable, maintainable and production-ready.",
+    "difficulty": "Beginner",
+    "estimatedTime": "2 Hours",
+    "status": "completed",
+    "topics": [
+      "Prompt Engineering",
+      "Prompt Structure",
+      "System Prompt",
+      "User Prompt",
+      "Role Prompting",
+      "Prompt Design"
+    ],
+    "prerequisites": [
+      "day-001-ai-engineering-overview",
+      "day-002-llms-and-provider-landscape"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "prompt",
+      "ai",
+      "llm",
+      "claude",
+      "prompting"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-003-prompt-engineering/lesson.mdx"
+  },
+  "roadmap.day-004-prompt-templates.lesson": {
+    "id": "roadmap.day-004-prompt-templates.lesson",
+    "day": 4,
+    "title": "Prompt Templates & PromptBuilder",
+    "description": "Learn why production AI applications never hardcode prompts. Understand prompt templates, parameter substitution, PromptBuilder architecture, and prompt versioning.",
+    "difficulty": "Beginner",
+    "estimatedTime": "2 Hours",
+    "status": "completed",
+    "topics": [
+      "Prompt Templates",
+      "PromptBuilder",
+      "Variables",
+      "Prompt Versioning",
+      "Maintainability"
+    ],
+    "prerequisites": [
+      "day-003-prompt-engineering"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "prompt",
+      "template",
+      "architecture",
+      "ai"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-004-prompt-templates/lesson.mdx"
+  },
+  "roadmap.day-005-context-engineering.lesson": {
+    "id": "roadmap.day-005-context-engineering.lesson",
+    "day": 5,
+    "title": "Context Engineering",
+    "description": "Learn why prompts alone are not enough for production AI applications. Understand Context Engineering, ContextBuilder, context assembly, conversation history, retrieved knowledge, and scalable AI architecture.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "2.5 Hours",
+    "status": "completed",
+    "topics": [
+      "Context Engineering",
+      "ContextBuilder",
+      "Conversation History",
+      "Memory",
+      "Retrieved Knowledge",
+      "AI Architecture"
+    ],
+    "prerequisites": [
+      "day-004-prompt-templates"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "context",
+      "llm",
+      "architecture",
+      "ai-core",
+      "prompt"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-005-context-engineering/lesson.mdx"
+  },
+  "roadmap.day-006-streaming-fundamentals.lesson": {
+    "id": "roadmap.day-006-streaming-fundamentals.lesson",
+    "day": 6,
+    "title": "Streaming Fundamentals",
+    "description": "Learn why modern AI applications stream responses instead of waiting for completion. Understand token streaming, perceived performance, streaming architecture, and how streaming improves user experience.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "2 Hours",
+    "status": "completed",
+    "topics": [
+      "Streaming",
+      "Token Streaming",
+      "AI Chat",
+      "UX",
+      "SSE"
+    ],
+    "prerequisites": [
+      "day-005-context-engineering"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "streaming",
+      "llm",
+      "ai-chat",
+      "ux"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-006-streaming-fundamentals/lesson.mdx"
+  },
+  "roadmap.day-007-production-streaming-architecture.lesson": {
+    "id": "roadmap.day-007-production-streaming-architecture.lesson",
+    "day": 7,
+    "title": "Production Streaming Architecture",
+    "description": "Learn how modern AI applications implement streaming using Server-Sent Events (SSE), provider abstraction, ReadableStream, buffer management, async generators, AbortController, and production-grade UX patterns.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "3 Hours",
+    "status": "completed",
+    "topics": [
+      "SSE",
+      "Streaming",
+      "Provider Abstraction",
+      "ReadableStream",
+      "AbortController",
+      "AI Chat",
+      "Async Generators"
+    ],
+    "prerequisites": [
+      "day-006-streaming-fundamentals"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "streaming",
+      "architecture",
+      "sse",
+      "ai-chat",
+      "frontend",
+      "backend"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-007-production-streaming-architecture/lesson.mdx"
+  },
+  "roadmap.day-008-ai-application-architecture.lesson": {
+    "id": "roadmap.day-008-ai-application-architecture.lesson",
+    "day": 8,
+    "title": "AI Application Architecture",
+    "description": "Learn how PromptBuilder, ContextBuilder, AI Core, AI SDK, AI Backend, Provider Adapters, and React applications fit together into a scalable production architecture.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "3 Hours",
+    "status": "completed",
+    "topics": [
+      "AI Architecture",
+      "AI Core",
+      "AI SDK",
+      "AI Backend",
+      "Provider Adapter",
+      "Layered Architecture"
+    ],
+    "prerequisites": [
+      "day-007-production-streaming-architecture"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "architecture",
+      "ai-core",
+      "ai-sdk",
+      "backend",
+      "frontend"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-008-ai-application-architecture/lesson.mdx"
+  },
+  "roadmap.day-009-building-ai-core.lesson": {
+    "id": "roadmap.day-009-building-ai-core.lesson",
+    "day": 9,
+    "title": "Building AI Core",
+    "description": "Design and implement AI Core—the reusable heart of your AI platform. Learn its modules, responsibilities, extension points, and how it powers multiple AI applications.",
+    "difficulty": "Intermediate",
+    "estimatedTime": "3 Hours",
+    "status": "completed",
+    "topics": [
+      "AI Core",
+      "Architecture",
+      "Modules",
+      "Framework Design",
+      "Extensibility"
+    ],
+    "prerequisites": [
+      "day-008-ai-application-architecture"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "ai-core",
+      "architecture",
+      "framework",
+      "reusable"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/day-009-building-ai-core/lesson.mdx"
+  },
+  "handbook.streaming.provider-abstraction": {
+    "id": "handbook.streaming.provider-abstraction",
+    "day": 999,
+    "title": "Provider Abstraction for Streaming",
+    "description": "Understanding provider abstraction in streaming, how to normalize different provider APIs, and build provider-independent streaming architectures.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Provider Abstraction",
+      "Streaming Normalization",
+      "Multi-Provider",
+      "Stream Events",
+      "AI Core"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/streaming/provider-abstraction.mdx"
+  },
+  "handbook.streaming.readable-stream": {
+    "id": "handbook.streaming.readable-stream",
+    "day": 999,
+    "title": "ReadableStream and Stream Parsing",
+    "description": "Understanding the browser's ReadableStream API, how to parse streaming data, handle buffers, and build robust frontend streaming implementations.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "ReadableStream",
+      "Stream Parsing",
+      "Buffer Management",
+      "TextDecoder",
+      "Frontend Streaming"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/streaming/readable-stream.mdx"
+  },
+  "handbook.streaming.sse": {
+    "id": "handbook.streaming.sse",
+    "day": 999,
+    "title": "Server-Sent Events (SSE)",
+    "description": "Understanding Server-Sent Events, how they enable streaming in AI applications, implementation patterns, and best practices for production streaming.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "SSE",
+      "Server-Sent Events",
+      "Streaming Protocol",
+      "Backend Streaming",
+      "Real-time Data"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/streaming/sse.mdx"
+  },
+  "handbook.streaming.streaming-basics": {
+    "id": "handbook.streaming.streaming-basics",
+    "day": 999,
+    "title": "Streaming Fundamentals",
+    "description": "Understanding token streaming, why it matters for AI applications, how it improves user experience, and the fundamentals of streaming architecture.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Streaming",
+      "Token Streaming",
+      "User Experience",
+      "AI Chat",
+      "Real-time Responses"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/streaming/streaming-basics.mdx"
+  },
+  "handbook.prompting.prompt-engineering": {
+    "id": "handbook.prompting.prompt-engineering",
+    "day": 999,
+    "title": "Prompt Engineering",
+    "description": "Comprehensive guide to prompt engineering, including prompt anatomy, design principles, best practices, and treating prompts as production software artifacts.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Prompt Engineering",
+      "Prompt Design",
+      "System Prompt",
+      "User Prompt",
+      "Prompt Structure",
+      "Production Prompts"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/prompting/prompt-engineering.mdx"
+  },
+  "handbook.prompting.prompt-templates": {
+    "id": "handbook.prompting.prompt-templates",
+    "day": 999,
+    "title": "Prompt Templates",
+    "description": "Understanding prompt templates, variable substitution, template design patterns, and how to build reusable prompt systems for production AI applications.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Prompt Templates",
+      "Template Variables",
+      "Prompt Reusability",
+      "Template Design",
+      "Production Prompts"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/prompting/prompt-templates.mdx"
+  },
+  "handbook.prompting.role-prompting": {
+    "id": "handbook.prompting.role-prompting",
+    "day": 999,
+    "title": "Role Prompting",
+    "description": "Understanding role prompting techniques, how assigning expertise to AI models improves response quality, and best practices for role-based prompt design.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Role Prompting",
+      "Persona",
+      "Expertise Assignment",
+      "Prompt Techniques",
+      "Response Quality"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/prompting/role-prompting.mdx"
+  },
+  "handbook.llms.context-window": {
+    "id": "handbook.llms.context-window",
+    "day": 999,
+    "title": "Context Window",
+    "description": "Understanding context windows, their impact on AI applications, strategies for context management, and how to work within model limitations.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Context Window",
+      "Context Management",
+      "Token Limits",
+      "Long Context",
+      "Context Optimization"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/llms/context-window.mdx"
+  },
+  "handbook.llms.llm-basics": {
+    "id": "handbook.llms.llm-basics",
+    "day": 999,
+    "title": "Large Language Model Fundamentals",
+    "description": "Understanding what Large Language Models are, how they work at a high level, and their role in modern AI applications.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "LLM",
+      "Neural Networks",
+      "Token Prediction",
+      "AI Models",
+      "Foundation Models"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/llms/llm-basics.mdx"
+  },
+  "handbook.llms.provider-comparison": {
+    "id": "handbook.llms.provider-comparison",
+    "day": 999,
+    "title": "AI Provider Comparison",
+    "description": "Comprehensive comparison of major AI providers including Anthropic, OpenAI, Ollama, and Google, covering strengths, weaknesses, pricing, and use cases.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "AI Providers",
+      "Anthropic",
+      "OpenAI",
+      "Ollama",
+      "Google Gemini",
+      "Provider Selection"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/llms/provider-comparison.mdx"
+  },
+  "handbook.llms.tokens": {
+    "id": "handbook.llms.tokens",
+    "day": 999,
+    "title": "Understanding Tokens",
+    "description": "Comprehensive guide to tokens, tokenization, token counting, and how tokens affect LLM interactions, costs, and context limits.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Tokens",
+      "Tokenization",
+      "Token Counting",
+      "Cost Calculation",
+      "Context Management"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/llms/tokens.mdx"
+  },
+  "handbook.fundamentals.ai-engineering-philosophy": {
+    "id": "handbook.fundamentals.ai-engineering-philosophy",
+    "day": 999,
+    "title": "AI Engineering Philosophy",
+    "description": "Understanding the role of an AI Engineer, how it differs from traditional software engineering and machine learning engineering, and the mindset required for production AI systems.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "AI Engineering",
+      "Career Path",
+      "Software Engineering",
+      "Machine Learning"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/fundamentals/ai-engineering-philosophy.mdx"
+  },
+  "handbook.fundamentals.local-ai": {
+    "id": "handbook.fundamentals.local-ai",
+    "day": 999,
+    "title": "Local AI Development",
+    "description": "Setting up and using local AI tools like Ollama for cost-effective experimentation, offline development, and learning AI concepts without API costs.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Local AI",
+      "Ollama",
+      "Offline Development",
+      "Privacy",
+      "Cost Optimization"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/fundamentals/local-ai.mdx"
+  },
+  "handbook.context.context-builder": {
+    "id": "handbook.context.context-builder",
+    "day": 999,
+    "title": "ContextBuilder Architecture",
+    "description": "Understanding ContextBuilder architecture, responsibilities, implementation patterns, and how to build production-grade context assembly systems.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "ContextBuilder",
+      "Context Assembly",
+      "Architecture",
+      "Context Providers",
+      "Production Context"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/context/context-builder.mdx"
+  },
+  "handbook.context.context-engineering": {
+    "id": "handbook.context.context-engineering",
+    "day": 999,
+    "title": "Context Engineering",
+    "description": "Understanding context engineering, the difference between prompts and context, context assembly strategies, and why context quality often matters more than prompt quality.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Context Engineering",
+      "Context Assembly",
+      "Context Sources",
+      "Context Optimization",
+      "Production Context"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/context/context-engineering.mdx"
+  },
+  "glossary.glossary": {
+    "id": "glossary.glossary",
+    "day": 999,
+    "title": "AI Engineering Glossary",
+    "description": "Comprehensive glossary of AI Engineering terms, concepts, and definitions used throughout the 100-day learning roadmap.",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "topics": [
+      "Glossary",
+      "Definitions",
+      "AI Terms",
+      "Reference"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/glossary/glossary.mdx"
+  }
+}

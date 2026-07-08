@@ -1,0 +1,436 @@
+---
+id: day-004-prompt-templates
+
+type: roadmap
+
+day: 4
+
+slug: prompt-templates
+
+title: Prompt Templates & PromptBuilder
+
+subtitle: Building Reusable and Maintainable AI Applications
+
+description: >
+  Learn why production AI applications never hardcode prompts.
+  Understand prompt templates, parameter substitution,
+  PromptBuilder architecture, and prompt versioning.
+
+version: 1.0.0
+
+status: completed
+
+difficulty: Beginner
+
+estimatedTime: 2 Hours
+
+readingTime: 55 min
+
+category:
+  - Prompt Engineering
+
+topics:
+  - Prompt Templates
+  - PromptBuilder
+  - Variables
+  - Prompt Versioning
+  - Maintainability
+
+tags:
+  - prompt
+  - template
+  - architecture
+  - ai
+
+prerequisites:
+  - day-003-prompt-engineering
+
+learningObjectives:
+  - Understand prompt templates
+  - Learn PromptBuilder architecture
+  - Avoid hardcoded prompts
+  - Design reusable prompt systems
+  - Prepare for production AI applications
+
+projects:
+  - ai-chat
+  - ai-learning-portal
+  - pr-reviewer
+
+assignment: true
+
+quiz: true
+
+pdf: true
+
+searchable: true
+
+related:
+  - handbook/prompting/prompt-templates
+  - handbook/architecture/prompt-builder
+
+lastUpdated: 2026-07-05
+---
+
+# Day 4 — Prompt Templates & PromptBuilder
+
+---
+
+# Overview
+
+As AI applications grow, prompts become one of the largest pieces of business logic.
+
+Hardcoding prompts directly inside source code quickly leads to duplication, inconsistent behavior, and difficult maintenance.
+
+Today's lesson introduces prompt templates and the PromptBuilder pattern, which separates prompt definition from application logic.
+
+This architectural approach allows prompts to evolve independently from the code that uses them.
+
+---
+
+# Learning Objectives
+
+By the end of today's lesson, you should be able to:
+
+- Explain why hardcoded prompts are a bad practice.
+- Design reusable prompt templates.
+- Understand placeholder substitution.
+- Explain the role of PromptBuilder.
+- Prepare prompts for versioning and testing.
+
+---
+
+# The Problem with Hardcoded Prompts
+
+Many first AI applications look like this:
+
+```ts
+const prompt = `
+You are a senior software engineer.
+
+Review this pull request.
+
+Focus on performance.
+
+Return markdown.
+`;
+```
+
+Although simple, this approach becomes difficult to maintain as the number of prompts grows.
+
+Common problems include:
+
+- Prompt duplication.
+- Difficult updates.
+- Inconsistent wording.
+- Limited reuse.
+- Poor scalability.
+
+---
+
+# Prompt Templates
+
+Instead of embedding values directly into the prompt, create reusable templates with placeholders.
+
+Example:
+
+```text
+Role:
+{{role}}
+
+Experience:
+{{experience}}
+
+Task:
+{{task}}
+
+Language:
+{{language}}
+
+Output:
+{{format}}
+```
+
+Before sending the request, the application replaces each placeholder with runtime values.
+
+For example:
+
+```text
+Role:
+Senior Frontend Engineer
+
+Experience:
+10 years
+
+Task:
+Review this Pull Request
+
+Language:
+English
+
+Output:
+Markdown
+```
+
+This keeps prompt definitions independent from business logic.
+
+📖 Handbook Reference:
+
+- handbook/prompting/prompt-templates.mdx
+
+---
+
+# Why Prompt Templates Matter
+
+Templates provide several important advantages:
+
+- Reusability
+- Readability
+- Easier maintenance
+- Better testing
+- Consistency across applications
+
+Updating a template updates every feature that depends on it.
+
+---
+
+# PromptBuilder
+
+A PromptBuilder is responsible for assembling the final prompt.
+
+Its responsibilities include:
+
+- Loading prompt templates.
+- Replacing variables.
+- Applying defaults.
+- Validating required placeholders.
+- Producing the final prompt.
+
+Applications should interact with PromptBuilder rather than constructing prompts manually.
+
+---
+
+# PromptBuilder Architecture
+
+```mermaid
+flowchart TD
+
+Application
+
+↓
+
+PromptBuilder
+
+↓
+
+Prompt Template
+
+↓
+
+Placeholder Replacement
+
+↓
+
+Final Prompt
+
+↓
+
+Claude / Ollama / OpenAI
+```
+
+Notice that the application does not know how prompts are assembled.
+
+---
+
+# Separation of Responsibilities
+
+| Component | Responsibility |
+|-----------|----------------|
+| Application | User interaction and business logic |
+| PromptBuilder | Assemble prompts |
+| Template | Define prompt structure |
+| Provider | Send prompt to the LLM |
+
+Keeping these concerns separate improves maintainability.
+
+---
+
+# Prompt Versioning
+
+Prompts evolve over time.
+
+Treat prompts like source code:
+
+- Store them in version control.
+- Review changes.
+- Document improvements.
+- Test new versions.
+
+Versioning helps teams understand why prompt behavior changes.
+
+---
+
+# Testing Prompt Changes
+
+Changing a prompt can alter AI responses significantly.
+
+Before releasing updates:
+
+- Test with multiple inputs.
+- Compare outputs.
+- Measure consistency.
+- Validate against expected behavior.
+
+Prompt testing should become part of your development workflow.
+
+---
+
+# Real-World Example
+
+Imagine three different features:
+
+- PR Review
+- Code Explanation
+- Documentation Generation
+
+Without templates, each feature might define its own role prompt.
+
+With PromptBuilder:
+
+```
+role.md
+
+↓
+
+PromptBuilder
+
+↓
+
+Feature-specific variables
+
+↓
+
+Final Prompt
+```
+
+Shared instructions remain centralized and consistent.
+
+---
+
+# Best Practices
+
+- Store templates outside application code.
+- Use descriptive placeholder names.
+- Keep templates focused on one responsibility.
+- Validate required variables.
+- Review prompt changes during code reviews.
+
+---
+
+# Anti-Patterns
+
+❌ Hardcoded prompts in components.
+
+❌ String concatenation for prompt construction.
+
+❌ Mixing application logic with prompt definitions.
+
+❌ Copy-pasting prompts across features.
+
+These practices make applications difficult to scale.
+
+---
+
+# Assignment
+
+Design a prompt template for an AI Documentation Assistant.
+
+Include placeholders for:
+
+- Role
+- Task
+- Language
+- Audience
+- Output Format
+
+Document how PromptBuilder would replace these values.
+
+---
+
+# Mini Project
+
+Refactor the PR Reviewer prompt from Day 3 into a reusable template.
+
+Identify:
+
+- Static sections.
+- Dynamic variables.
+- Required placeholders.
+
+---
+
+# Key Takeaways
+
+- Hardcoded prompts do not scale.
+- Prompt templates improve maintainability.
+- PromptBuilder separates prompt construction from application logic.
+- Prompt versioning should follow software engineering practices.
+- Reusable prompts reduce duplication across applications.
+
+---
+
+# Revision Notes
+
+- Templates contain placeholders.
+- PromptBuilder assembles prompts.
+- Applications should not build prompts directly.
+- Treat prompts as version-controlled assets.
+
+---
+
+# Knowledge Graph
+
+## Concepts Introduced
+
+- Prompt Template
+- Placeholder
+- PromptBuilder
+- Prompt Versioning
+
+## Builds Upon
+
+- Day 3 — Prompt Engineering
+
+## Enables Future Topics
+
+- ContextBuilder
+- AI Core
+- AI SDK
+- Provider Abstraction
+- AI Agents
+
+---
+
+# Discussion Notes
+
+During our discussions, we concluded that prompt construction should never be embedded inside UI components or backend controllers.
+
+Instead, PromptBuilder becomes a reusable service within AI Core.
+
+This architectural decision allows:
+
+- Multiple applications to share prompts.
+- Easier prompt evolution.
+- Cleaner business logic.
+- Better testing.
+- Provider-independent prompt generation.
+
+This pattern will become a foundational component of the AI Platform we build throughout the roadmap.
+
+---
+
+# Next Lesson
+
+**Day 5 — Context Engineering**
+
+We'll learn why prompts alone are insufficient for production AI systems and how ContextBuilder assembles conversation history, retrieved knowledge, user preferences, and application state into an effective context for the model.

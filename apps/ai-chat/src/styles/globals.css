@@ -1,0 +1,9 @@
+/**
+ * Main entry point CSS
+ * Imports all global and component styles
+ */
+
+/* Global styles */
+@import './variables.css';
+@import './animations.css';
+@import './layout.css';

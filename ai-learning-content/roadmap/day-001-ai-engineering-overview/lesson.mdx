@@ -1,0 +1,384 @@
+---
+id: day-001-ai-engineering-overview
+
+type: roadmap
+
+day: 1
+
+slug: ai-engineering-overview
+
+title: AI Engineering Roadmap
+
+subtitle: Becoming an AI Engineer from an Experienced Frontend Developer
+
+description: >
+  Introduction to AI Engineering, understanding the modern AI ecosystem,
+  selecting a technology stack, and preparing the development environment
+  for the upcoming 100-day learning roadmap.
+
+version: 1.0.0
+
+status: completed
+
+difficulty: Beginner
+
+estimatedTime: 2 Hours
+
+readingTime: 35 min
+
+category:
+  - Fundamentals
+
+topics:
+  - AI Engineering
+  - LLMs
+  - Learning Roadmap
+  - AI Stack
+  - Local AI
+  - Ollama
+
+tags:
+  - ai
+  - llm
+  - roadmap
+  - anthropic
+  - claude
+  - ollama
+
+prerequisites: []
+
+learningObjectives:
+  - Understand the role of an AI Engineer
+  - Learn how AI Engineering differs from traditional software engineering
+  - Understand the modern AI ecosystem
+  - Select a practical technology stack
+  - Prepare for the 100-day learning roadmap
+
+projects:
+  - ai-chat
+  - ai-learning-portal
+
+assignment: true
+
+quiz: false
+
+pdf: true
+
+searchable: true
+
+related:
+  - handbook/fundamentals/ai-engineer-roadmap
+  - handbook/fundamentals/local-ai
+  - handbook/llms/provider-comparison
+
+lastUpdated: 2026-07-05
+---
+
+# Day 1 — AI Engineering Overview
+
+---
+
+# Overview
+
+Software engineering has evolved significantly with the emergence of Large Language Models (LLMs). Modern software engineers are increasingly expected to integrate AI capabilities into applications rather than treating AI as a completely separate domain.
+
+This roadmap is designed specifically for an experienced frontend engineer who wants to transition into AI Engineering by building production-grade AI applications rather than focusing on machine learning research.
+
+The emphasis throughout this roadmap is on practical engineering skills, including architecture, APIs, streaming, retrieval, context engineering, agents, and reusable AI platforms.
+
+---
+
+# Why AI Engineering?
+
+Traditionally, software engineers built applications by writing business logic directly.
+
+Today, many applications combine:
+
+- Traditional business logic
+- LLM capabilities
+- Retrieval systems
+- AI agents
+- Tool calling
+- Workflow automation
+
+The role of an AI Engineer is to design and build these intelligent systems while maintaining software engineering best practices.
+
+---
+
+# AI Engineer vs Machine Learning Engineer
+
+| AI Engineer | Machine Learning Engineer |
+|-------------|---------------------------|
+| Integrates LLMs into products | Trains machine learning models |
+| Designs AI applications | Designs training pipelines |
+| Works with APIs and prompts | Works with datasets and algorithms |
+| Builds user-facing AI features | Optimizes models |
+| Focuses on architecture and product integration | Focuses on model performance |
+
+For most product companies, AI Engineering is the faster and more practical path for experienced software developers.
+
+---
+
+# Why Your Existing Experience Matters
+
+With over a decade of frontend experience, you already possess many transferable skills:
+
+- System design
+- Component architecture
+- API integration
+- TypeScript
+- Performance optimization
+- Debugging
+- User experience
+
+The primary additions are understanding LLM behavior, AI-specific architecture, prompt design, context management, and orchestration.
+
+---
+
+# The AI Engineering Stack
+
+```mermaid
+flowchart TD
+
+User
+
+↓
+
+React Application
+
+↓
+
+AI SDK
+
+↓
+
+AI Backend
+
+↓
+
+AI Core
+
+↓
+
+Provider
+
+↓
+
+Claude / Ollama / OpenAI
+```
+
+Each layer has a distinct responsibility:
+
+- **Frontend**: User experience and interaction.
+- **AI SDK**: Client-side abstraction for communication and streaming.
+- **AI Backend**: Authentication, orchestration, persistence, and APIs.
+- **AI Core**: Prompt construction, provider abstraction, context management, and AI workflows.
+- **Provider**: Claude, Ollama, OpenAI, or other LLMs.
+
+---
+
+# Technology Stack for This Roadmap
+
+This course focuses on technologies commonly used in production AI systems.
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+
+## Backend
+
+- Python
+- FastAPI
+
+Although you have experience with Node.js, Python is widely adopted across AI tooling and aligns well with the ecosystems of Anthropic, OpenAI, LangChain, LlamaIndex, and many research libraries.
+
+## Local AI
+
+- Ollama
+
+## LLM Providers
+
+- Anthropic Claude
+- OpenAI
+- Ollama (local)
+
+---
+
+# Why Start with Anthropic?
+
+Your organization already uses Claude extensively, making it valuable to learn Anthropic's ecosystem first. The concepts learned throughout this roadmap are provider-independent, allowing you to switch providers with minimal architectural changes.
+
+---
+
+# Local AI with Ollama
+
+To reduce API costs while learning, we chose to use Ollama for local experimentation.
+
+Benefits include:
+
+- No API costs
+- Offline development
+- Faster iteration
+- Safe experimentation
+- Local privacy
+
+This enables hands-on practice without consuming paid API credits.
+
+---
+
+# Course Philosophy
+
+This roadmap emphasizes:
+
+- Building applications
+- Understanding architecture
+- Writing maintainable code
+- Designing reusable systems
+- Thinking like an AI platform engineer
+
+Rather than memorizing APIs, the goal is to understand the principles that apply across providers and frameworks.
+
+---
+
+# Learning Strategy
+
+Each day follows a consistent structure:
+
+1. Learn the theory.
+2. Examine practical examples.
+3. Apply the concept through an assignment.
+4. Integrate the knowledge into ongoing projects.
+5. Summarize key takeaways for long-term retention.
+
+This incremental approach ensures that each lesson builds upon previous concepts.
+
+---
+
+# Assignment
+
+## Objective
+
+Define your personal AI Engineering goals.
+
+Document:
+
+- Why you want to become an AI Engineer.
+- The types of AI applications you want to build.
+- Skills you expect to gain by the end of the roadmap.
+- Three real-world problems you hope to solve using AI.
+
+Store this document in your personal notes. It will serve as a reference point for measuring your progress throughout the course.
+
+---
+
+# Mini Project
+
+Create a Git repository named:
+
+```
+ai-engineering-learning
+```
+
+This repository will eventually contain:
+
+- AI Chat Application
+- Learning Portal
+- AI Core
+- AI SDK
+- Practice projects
+- Notes
+- Architecture diagrams
+
+---
+
+# Best Practices
+
+- Focus on understanding concepts before frameworks.
+- Prefer clean architecture over quick implementations.
+- Build reusable components and abstractions.
+- Keep learning materials organized and version-controlled.
+
+---
+
+# Common Misconceptions
+
+❌ AI Engineers need to train models from scratch.
+
+Reality: Most AI Engineers integrate existing foundation models into products.
+
+---
+
+❌ Learning one provider locks you into that ecosystem.
+
+Reality: Well-designed abstractions allow switching providers with minimal effort.
+
+---
+
+# Key Takeaways
+
+- AI Engineering focuses on integrating AI into products.
+- Existing software engineering experience provides a strong foundation.
+- Clean architecture is essential for scalable AI systems.
+- Local AI tools enable cost-effective experimentation.
+- This roadmap emphasizes practical, production-ready engineering.
+
+---
+
+# Revision Notes
+
+- AI Engineering is application-focused.
+- LLMs are integrated through APIs and abstractions.
+- Ollama enables local AI development.
+- Python is the primary backend language for this roadmap.
+- Reusable architecture is a recurring theme.
+
+---
+
+# Knowledge Graph
+
+## Concepts Introduced
+
+- AI Engineer
+- LLM
+- Provider
+- AI SDK
+- AI Backend
+- AI Core
+- Local AI
+
+## Enables Future Topics
+
+- Prompt Engineering
+- Streaming
+- Context Engineering
+- RAG
+- Agents
+- MCP
+- Tool Calling
+
+---
+
+# Discussion Notes
+
+Key decisions made during planning:
+
+- Prioritize Anthropic concepts due to workplace adoption.
+- Use Ollama for local experimentation to avoid API costs.
+- Build reusable AI platform components rather than isolated applications.
+- Create a Learning Portal that evolves into an AI-powered tutor backed by your own course material.
+
+---
+
+# Next Lesson
+
+**Day 2 — LLMs and the AI Provider Landscape**
+
+We'll explore:
+
+- What is a Large Language Model?
+- Tokens and context windows.
+- How providers such as Anthropic, OpenAI, and Ollama differ.
+- Choosing the right model for different use cases.

@@ -1,0 +1,366 @@
+---
+id: day-002-llms-and-provider-landscape
+
+type: roadmap
+
+day: 2
+
+slug: llms-and-provider-landscape
+
+title: Large Language Models & Provider Landscape
+
+subtitle: Understanding the AI Ecosystem
+
+description: >
+  Learn what Large Language Models are, how they work at a high level,
+  compare major AI providers, understand tokens and context windows,
+  and choose the right model for different use cases.
+
+version: 1.0.0
+
+status: completed
+
+difficulty: Beginner
+
+estimatedTime: 2 Hours
+
+readingTime: 40 min
+
+category:
+  - LLM Fundamentals
+
+topics:
+  - LLM
+  - Tokens
+  - Context Window
+  - Anthropic
+  - OpenAI
+  - Ollama
+  - Claude
+
+tags:
+  - llm
+  - ai
+  - claude
+  - openai
+  - ollama
+  - providers
+
+prerequisites:
+  - day-001-ai-engineering-overview
+
+learningObjectives:
+  - Understand what an LLM is
+  - Learn how LLMs generate text
+  - Understand tokens
+  - Understand context windows
+  - Compare major AI providers
+  - Choose the right provider for different scenarios
+
+projects:
+  - ai-chat
+
+assignment: true
+
+quiz: true
+
+pdf: true
+
+searchable: true
+
+related:
+  - handbook/llms/llm-basics
+  - handbook/llms/tokens
+  - handbook/llms/context-window
+  - handbook/llms/provider-comparison
+
+lastUpdated: 2026-07-05
+---
+
+# Day 2 — Large Language Models & Provider Landscape
+
+---
+
+# Overview
+
+Today's lesson introduces the foundation of modern AI applications: the Large Language Model (LLM).
+
+Rather than learning provider-specific APIs, we focus on understanding the common concepts shared across all modern LLMs. This knowledge will make it easier to work with Anthropic, OpenAI, Ollama, Gemini, and future providers.
+
+---
+
+# Learning Objectives
+
+By the end of today's lesson, you should be able to:
+
+- Explain what a Large Language Model is.
+- Understand the concept of tokens.
+- Describe the purpose of a context window.
+- Compare local and cloud-hosted models.
+- Select the right provider for a given application.
+
+---
+
+# What is a Large Language Model?
+
+A Large Language Model is a neural network trained to predict the next token in a sequence.
+
+Although the underlying mathematics is complex, AI engineers primarily interact with LLMs through APIs, prompts, and structured outputs rather than training models directly.
+
+📖 **Handbook Reference**: [Tokens](/content/handbook/llms/tokens.mdx)
+
+
+---
+
+# Tokens
+
+LLMs do not process complete words or sentences.
+
+Instead, they process **tokens**, which are smaller pieces of text.
+
+Token usage affects:
+
+- Cost
+- Context length
+- Performance
+- Memory usage
+
+📖 **Handbook Reference**
+
+- `handbook/llms/tokens.mdx`
+
+---
+
+# Context Window
+
+Every LLM has a maximum amount of information it can consider during a single request.
+
+This limit is called the **context window**.
+
+A larger context window enables:
+
+- Longer conversations
+- Larger documents
+- More code analysis
+- Better retrieval workflows
+
+📖 **Handbook Reference**
+
+- `handbook/llms/context-window.mdx`
+
+---
+
+# Cloud Models vs Local Models
+
+## Cloud Models
+
+Examples:
+
+- Claude
+- OpenAI
+- Gemini
+
+Advantages:
+
+- Highest quality
+- Regular updates
+- Large context windows
+- Advanced reasoning
+
+Trade-offs:
+
+- API cost
+- Internet dependency
+- Data leaves your machine
+
+---
+
+## Local Models
+
+Examples:
+
+- Ollama
+- Qwen
+- Llama
+- Mistral
+
+Advantages:
+
+- Free after download
+- Offline
+- Full privacy
+- Fast experimentation
+
+Trade-offs:
+
+- Hardware limitations
+- Smaller models
+- Lower reasoning capability compared to flagship cloud models
+
+📖 **Handbook Reference**
+
+- `handbook/fundamentals/local-ai.mdx`
+
+---
+
+# Provider Landscape
+
+During this roadmap we focus primarily on:
+
+| Provider | Primary Use |
+|-----------|-------------|
+| Anthropic | Production applications and reasoning |
+| Ollama | Local experimentation and learning |
+| OpenAI | Cross-provider understanding |
+
+The goal is to learn provider-independent architecture so applications can switch models with minimal changes.
+
+📖 **Handbook Reference**
+
+- `handbook/llms/provider-comparison.mdx`
+
+---
+
+# Why We Chose Claude
+
+Your workplace has adopted Claude, making it valuable to understand its capabilities and workflows early.
+
+However, all architectural concepts introduced in this roadmap are designed to work across providers through abstraction.
+
+---
+
+# Practical Exercise
+
+Experiment with:
+
+- ChatGPT
+- Claude
+- Ollama (Qwen)
+
+Ask each model the same question.
+
+Observe differences in:
+
+- Style
+- Detail
+- Reasoning
+- Response speed
+
+Document your findings.
+
+---
+
+# Best Practices
+
+- Learn concepts before SDKs.
+- Design provider-independent applications.
+- Separate application logic from provider implementations.
+- Use local models for experimentation when possible.
+
+---
+
+# Common Misconceptions
+
+❌ "One provider is the best for every task."
+
+Different providers excel in different areas. Architecture should allow flexibility.
+
+---
+
+❌ "Switching providers requires rewriting the application."
+
+Well-designed abstractions isolate provider-specific code.
+
+---
+
+# Assignment
+
+Create a comparison table for:
+
+- Claude
+- ChatGPT
+- Ollama
+
+Include:
+
+- Strengths
+- Weaknesses
+- Pricing
+- Offline support
+- Ideal use cases
+
+---
+
+# Mini Project
+
+Extend your learning repository with a document summarizing:
+
+- LLM terminology
+- Provider ecosystem
+- Local AI workflow
+
+This will become part of your personal handbook.
+
+---
+
+# Key Takeaways
+
+- LLMs generate text token by token.
+- Tokens influence cost and context.
+- Context windows determine how much information a model can process.
+- Cloud and local models serve different purposes.
+- Provider abstraction is essential for maintainable AI systems.
+
+---
+
+# Revision Notes
+
+- LLM = Large Language Model.
+- Tokens are the unit of processing.
+- Context windows limit request size.
+- Local models reduce costs.
+- Provider independence is a recurring architectural goal.
+
+---
+
+# Knowledge Graph
+
+## Concepts Introduced
+
+- Large Language Model
+- Token
+- Context Window
+- Local Model
+- Cloud Model
+- Provider
+
+## Builds Upon
+
+- Day 1 — AI Engineering Overview
+
+## Enables Future Topics
+
+- Prompt Engineering
+- Context Engineering
+- RAG
+- Provider Abstraction
+- AI SDK
+
+---
+
+# Discussion Notes
+
+Key decisions made during our learning journey:
+
+- Start with Anthropic concepts due to workplace adoption.
+- Use Ollama for local experimentation to avoid API costs.
+- Focus on architecture rather than provider-specific implementations.
+- Design future projects to support multiple providers from the beginning.
+
+---
+
+# Next Lesson
+
+**Day 3 — Prompt Engineering**
+
+We'll learn how prompts influence model behavior, why prompt design matters, and how to write reusable, maintainable prompts that scale across AI applications.

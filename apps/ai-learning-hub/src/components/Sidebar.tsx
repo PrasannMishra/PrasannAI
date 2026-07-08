@@ -57,6 +57,9 @@ export default function Sidebar() {
         const keywords = categoryMap[categoryId] || [];
         if (keywords.length === 0) return [];
 
+        if (!lessons || lessons.length === 0) {
+            return;
+        }
         return lessons.filter(lesson => {
             const searchText = `${lesson.title} ${lesson.description} ${lesson.topics.join(' ')} ${lesson.tags.join(' ')}`.toLowerCase();
             return keywords.some(keyword => searchText.includes(keyword));
@@ -109,7 +112,7 @@ export default function Sidebar() {
                                     <Icon className="w-5 h-5" />
                                     <span className="font-medium">{category.name}</span>
                                 </div>
-                                {categoryLessons.length > 0 && (
+                                {categoryLessons && categoryLessons.length > 0 && (
                                     <div className="ml-8 mt-1 space-y-1">
                                         {categoryLessons.slice(0, 5).map(lesson => (
                                             <Link

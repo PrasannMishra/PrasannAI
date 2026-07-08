@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { Lesson, UserProgress, AppSettings, Theme } from '@/types';
-import { loadLessonsFromContent } from '@/utils/contentLoader';
+import ContentApi from "../service/ContentApi";
 
 interface LessonStore {
     lessons: Lesson[];
     isLoading: boolean;
     error: string | null;
     loadLessons: () => Promise<void>;
+    loadContentById: (id: string) => Promise<void>;
     getLessonById: (id: string) => Lesson | undefined;
     getAdjacentLessons: (currentId: string) => { previous?: Lesson; next?: Lesson };
 }
@@ -19,7 +20,7 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
     loadLessons: async () => {
         set({ isLoading: true, error: null });
         try {
-            const lessons = await loadLessonsFromContent();
+            const lessons = await ContentApi.getContentIndex();
             console.log('Store - Loaded lessons:', lessons.length);
             set({ lessons, isLoading: false });
         } catch (error) {
@@ -30,6 +31,25 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
 
     getLessonById: (id: string) => {
         return get().lessons.find(lesson => lesson.id === id);
+    },
+
+    loadContentById: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+            const lessonContent = await ContentApi.getContentById(id, true);
+            console.log('Store - Loaded lessons:', lessonContent);
+            //find the lesson in the store and update its content
+            const lessons = get().lessons.map(lesson => {
+                if (lesson.id === id) {
+                    lesson.content = lessonContent;
+                }
+                return lesson;
+            });
+            set({ lessons, isLoading: false });
+        } catch (error) {
+            console.error('Store - Failed to load lessons:', error);
+            set({ error: 'Failed to load lessons', isLoading: false });
+        }
     },
 
     getAdjacentLessons: (currentId: string) => {

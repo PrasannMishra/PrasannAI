@@ -1,0 +1,615 @@
+---
+id: handbook-llms-provider-comparison
+
+title: AI Provider Comparison
+
+description: Comprehensive comparison of major AI providers including Anthropic, OpenAI, Ollama, and Google, covering strengths, weaknesses, pricing, and use cases.
+
+category: LLM Fundamentals
+
+topics:
+  - AI Providers
+  - Anthropic
+  - OpenAI
+  - Ollama
+  - Google Gemini
+  - Provider Selection
+
+related:
+  - roadmap/day-002-llms-and-provider-landscape
+  - handbook/llms/llm-basics
+  - handbook/fundamentals/local-ai
+  - handbook/architecture/provider-adapters
+---
+
+# AI Provider Comparison
+
+## Purpose
+
+This handbook document provides a comprehensive comparison of major AI providers to help you make informed decisions about which provider to use for different scenarios. Understanding provider strengths and weaknesses is essential for building production AI applications.
+
+---
+
+# Provider Landscape Overview
+
+## Major Providers
+
+### Cloud Providers
+- **Anthropic** (Claude)
+- **OpenAI** (GPT-4, GPT-3.5)
+- **Google** (Gemini)
+- **Meta** (Llama via APIs)
+- **Mistral AI** (Mistral)
+
+### Local Providers
+- **Ollama** (Local inference for open models)
+- **llama.cpp** (Local inference)
+- **LocalAI** (Open-source alternative)
+
+## Provider Comparison Matrix
+
+| Provider | Best For | Strengths | Weaknesses | Pricing Model |
+|----------|----------|-----------|------------|---------------|
+| **Anthropic** | Production apps, reasoning | Long context, safety, reasoning | Higher cost | Pay per token |
+| **OpenAI** | General purpose, ecosystem | Mature API, wide adoption | Cost, rate limits | Pay per token |
+| **Ollama** | Learning, development | Free, private, offline | Quality, hardware needs | Free (hardware cost) |
+| **Google** | Long context, multimodal | 1M context, vision, speed | Newer, less mature | Pay per token |
+| **Mistral** | European, open models | Good quality, open weights | Smaller ecosystem | Pay per token |
+
+---
+
+# Anthropic (Claude)
+
+## Overview
+
+Anthropic is an AI safety company founded by former OpenAI researchers. Their Claude models are known for:
+- Strong reasoning capabilities
+- Long context windows (200K tokens)
+- Safety and alignment
+- Constitutional AI approach
+
+## Models
+
+### Claude 3.5 Sonnet
+- **Context**: 200K tokens
+- **Best for**: Production applications, complex reasoning
+- **Strengths**: Best balance of quality and speed
+- **Pricing**: $3/1M input, $15/1M output
+
+### Claude 3 Opus
+- **Context**: 200K tokens
+- **Best for**: Most complex tasks
+- **Strengths**: Highest quality, best reasoning
+- **Pricing**: $15/1M input, $75/1M output
+
+### Claude 3 Sonnet
+- **Context**: 200K tokens
+- **Best for**: Good quality at lower cost
+- **Strengths**: Fast, capable
+- **Pricing**: $3/1M input, $15/1M output
+
+### Claude 3 Haiku
+- **Context**: 200K tokens
+- **Best for**: Speed, simple tasks
+- **Strengths**: Very fast, cheap
+- **Pricing**: $0.25/1M input, $1.25/1M output
+
+## Strengths
+
+✅ Excellent reasoning capabilities
+✅ Long context window (200K tokens)
+✅ Strong safety features
+✅ Good at following complex instructions
+✅ Large context doesn't degrade quality
+✅ Vision capabilities (Claude 3+)
+✅ Tool use / function calling
+
+## Weaknesses
+
+❌ Higher cost than some competitors
+❌ Rate limits on free tier
+❌ No open-source models
+❌ Smaller ecosystem than OpenAI
+
+## Best Use Cases
+
+- Production AI applications
+- Complex reasoning tasks
+- Long document analysis
+- Code generation and review
+- Customer support at scale
+- Research and analysis
+
+## API Example
+
+```typescript
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic();
+
+const message = await anthropic.messages.create({
+  model: 'claude-3-5-sonnet-20241022',
+  max_tokens: 1024,
+  messages: [
+    { role: 'user', content: 'Explain quantum computing' }
+  ]
+});
+```
+
+---
+
+# OpenAI (GPT)
+
+## Overview
+
+OpenAI is the company behind ChatGPT and the GPT model series. They pioneered modern LLM APIs and have the most mature ecosystem.
+
+## Models
+
+### GPT-4 Turbo
+- **Context**: 128K tokens
+- **Best for**: General purpose, high quality
+- **Strengths**: Versatile, well-tested
+- **Pricing**: $10/1M input, $30/1M output
+
+### GPT-4
+- **Context**: 8K tokens (older version)
+- **Best for**: Legacy applications
+- **Strengths**: Proven quality
+- **Pricing**: $30/1M input, $60/1M output
+
+### GPT-3.5 Turbo
+- **Context**: 16K tokens
+- **Best for**: Simple tasks, cost savings
+- **Strengths**: Very fast, cheap
+- **Pricing**: $0.50/1M input, $1.50/1M output
+
+## Strengths
+
+✅ Most mature API ecosystem
+✅ Wide adoption and community
+✅ Extensive documentation
+✅ Plugin ecosystem
+✅ Function calling
+✅ Vision capabilities (GPT-4V)
+✅ DALL-E for image generation
+✅ Whisper for speech
+
+## Weaknesses
+
+❌ Can be expensive for high volume
+❌ Rate limits
+❌ Context window smaller than Claude (128K vs 200K)
+❌ Quality can vary between model versions
+
+## Best Use Cases
+
+- General-purpose AI applications
+- Chatbots and assistants
+- Content generation
+- Code assistance
+- Image generation (DALL-E)
+- Speech recognition (Whisper)
+
+## API Example
+
+```typescript
+import OpenAI from 'openai';
+
+const openai = new OpenAI();
+
+const completion = await openai.chat.completions.create({
+  model: 'gpt-4-turbo-preview',
+  messages: [
+    { role: 'user', content: 'Explain quantum computing' }
+  ]
+});
+```
+
+---
+
+# Ollama (Local AI)
+
+## Overview
+
+Ollama is not a cloud provider but a tool for running open-source LLMs locally. It's essential for development, learning, and privacy-sensitive applications.
+
+## Supported Models
+
+### General Purpose
+- **Llama 3.2** (7B, 13B, 70B, 405B)
+- **Qwen 2.5** (0.5B, 1.5B, 3B, 7B, 14B, 32B, 72B)
+- **Mistral** (7B)
+- **Gemma 2** (2B, 9B, 27B)
+
+### Code-Specific
+- **Code Llama**
+- **DeepSeek Coder**
+- **Qwen Coder**
+
+## Strengths
+
+✅ **Free** (after hardware cost)
+✅ **Private** - data never leaves your machine
+✅ **Offline** - no internet required
+✅ **Fast iteration** - no network latency
+✅ **Customizable** - run any open model
+✅ **OpenAI-compatible API**
+
+## Weaknesses
+
+❌ Quality lower than Claude/GPT-4 (for 7B-13B models)
+❌ Requires powerful hardware
+❌ Setup and maintenance required
+❌ No built-in scaling
+❌ Limited to open models
+
+## Hardware Requirements
+
+```
+Minimum (7B models):
+- RAM: 8GB
+- CPU: Modern multi-core
+
+Recommended (13B+ models):
+- RAM: 16GB+
+- GPU: NVIDIA 8GB+ VRAM
+- Storage: 50GB+ SSD
+```
+
+## Best Use Cases
+
+✅ Learning and experimentation
+✅ Development and testing
+✅ Privacy-sensitive applications
+✅ Offline work
+✅ Cost optimization
+✅ Rapid prototyping
+✅ Testing prompts before cloud deployment
+
+## API Example
+
+```typescript
+// Ollama provides OpenAI-compatible API
+const response = await fetch('http://localhost:11434/v1/chat/completions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'llama3.2',
+    messages: [{ role: 'user', content: 'Explain quantum computing' }]
+  })
+});
+```
+
+---
+
+# Google (Gemini)
+
+## Overview
+
+Google's Gemini models offer the largest context windows available and strong multimodal capabilities.
+
+## Models
+
+### Gemini 1.5 Pro
+- **Context**: 1M tokens (largest available)
+- **Best for**: Long documents, video analysis
+- **Strengths**: Massive context, vision, speed
+- **Pricing**: $7/1M input, $21/1M output (up to 128K)
+
+### Gemini 1.5 Flash
+- **Context**: 1M tokens
+- **Best for**: Speed, cost savings
+- **Strengths**: Fast, cheap, large context
+- **Pricing**: $0.35/1M input, $1.05/1M output
+
+### Gemini 1.0 Pro
+- **Context**: 32K tokens
+- **Best for**: General purpose
+- **Strengths**: Solid performance
+- **Pricing**: Competitive
+
+## Strengths
+
+✅ **Largest context window** (1M tokens)
+✅ Strong multimodal capabilities (text, image, video, audio)
+✅ Fast inference
+✅ Competitive pricing
+✅ Good at long-context tasks
+✅ Google ecosystem integration
+
+## Weaknesses
+
+❌ Newer than Anthropic/OpenAI
+❌ Smaller community and ecosystem
+❌ Less battle-tested in production
+❌ Documentation still maturing
+
+## Best Use Cases
+
+- Very long document analysis
+- Video understanding
+- Multimodal applications
+- Cost-sensitive applications (Flash)
+- Long-context tasks
+
+## API Example
+
+```typescript
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+
+const result = await model.generateContent('Explain quantum computing');
+```
+
+---
+
+# Provider Selection Guide
+
+## Decision Matrix
+
+### For Production Applications
+
+```
+Priority: Quality + Reliability + Support
+
+1. Anthropic Claude 3.5 Sonnet
+   - Best balance of quality and cost
+   - Excellent for most production apps
+   
+2. OpenAI GPT-4 Turbo
+   - Mature ecosystem
+   - Wide adoption
+   
+3. Google Gemini 1.5 Pro
+   - If you need 1M context
+   - If multimodal is important
+```
+
+### For Learning & Development
+
+```
+Priority: Cost + Privacy + Speed
+
+1. Ollama (local)
+   - Free
+   - No API costs
+   - Fast iteration
+   
+2. Anthropic Claude 3 Haiku
+   - Cheap cloud option
+   - Good quality
+   
+3. OpenAI GPT-3.5 Turbo
+   - Very cheap
+   - Fast
+```
+
+### For Cost Optimization
+
+```
+Priority: Price
+
+1. Ollama (local)
+   - Free after hardware
+   
+2. Google Gemini 1.5 Flash
+   - $0.35/1M input
+   - Very cheap
+   
+3. OpenAI GPT-3.5 Turbo
+   - $0.50/1M input
+   - Proven quality
+   
+4. Anthropic Claude 3 Haiku
+   - $0.25/1M input
+   - Excellent quality for price
+```
+
+### For Long Context
+
+```
+Priority: Context window size
+
+1. Google Gemini 1.5 Pro/Flash
+   - 1M tokens
+   - Best for very long documents
+   
+2. Anthropic Claude 3.5 Sonnet
+   - 200K tokens
+   - Excellent quality at long context
+   
+3. OpenAI GPT-4 Turbo
+   - 128K tokens
+   - Good for most long-context needs
+```
+
+### For Code
+
+```
+Priority: Code understanding
+
+1. OpenAI GPT-4
+   - Excellent code generation
+   - Strong ecosystem
+   
+2. Anthropic Claude 3.5 Sonnet
+   - Excellent code understanding
+   - Large context for codebases
+   
+3. Ollama + Code Llama / DeepSeek Coder
+   - Free local option
+   - Specialized for code
+```
+
+---
+
+# Multi-Provider Strategy
+
+## Why Use Multiple Providers?
+
+1. **Cost optimization**: Use cheaper models for simple tasks
+2. **Redundancy**: Fallback if one provider fails
+3. **Capabilities**: Different providers excel at different tasks
+4. **Testing**: Compare outputs during development
+
+## Implementation
+
+```typescript
+interface ProviderStrategy {
+  primary: Provider;
+  fallback: Provider;
+  routing: (task: Task) => Provider;
+}
+
+// Example routing logic
+const strategy: ProviderStrategy = {
+  primary: 'anthropic',
+  fallback: 'openai',
+  routing: (task) => {
+    if (task.type === 'simple') return 'ollama';
+    if (task.type === 'complex') return 'anthropic';
+    if (task.needsVision) return 'openai';
+    return 'anthropic';
+  }
+};
+```
+
+## Provider Abstraction
+
+Our AI Core architecture supports multiple providers:
+
+```typescript
+// Application code is provider-agnostic
+const response = await aiCore.generate({
+  prompt: userMessage,
+  provider: 'anthropic', // Can be changed without code changes
+  model: 'claude-3-5-sonnet-20241022'
+});
+```
+
+---
+
+# Cost Comparison
+
+## Real-World Example
+
+### Scenario: Customer Support Chatbot
+
+**Volume**: 10,000 queries/month
+**Average request**: 5K input tokens, 1K output tokens
+
+### Anthropic Claude 3.5 Sonnet
+```
+Input: 10K queries × 5K tokens × $3/1M = $150
+Output: 10K queries × 1K tokens × $15/1M = $150
+Total: $300/month
+```
+
+### OpenAI GPT-4 Turbo
+```
+Input: 10K queries × 5K tokens × $10/1M = $500
+Output: 10K queries × 1K tokens × $30/1M = $300
+Total: $800/month
+```
+
+### Google Gemini 1.5 Flash
+```
+Input: 10K queries × 5K tokens × $0.35/1M = $17.50
+Output: 10K queries × 1K tokens × $1.05/1M = $10.50
+Total: $28/month
+```
+
+### Ollama (Local)
+```
+Cost: $0 (API)
+But: Hardware + electricity + maintenance
+```
+
+**Note**: These are approximate prices. Check provider websites for current pricing.
+
+---
+
+# Performance Comparison
+
+## Speed (Time to First Token)
+
+```
+Fastest:
+1. Ollama (local) - No network latency
+2. Google Gemini 1.5 Flash - Optimized for speed
+3. Anthropic Claude 3 Haiku - Fast cloud option
+4. OpenAI GPT-3.5 Turbo - Fast but slower than above
+5. Anthropic Claude 3.5 Sonnet - Balanced
+6. OpenAI GPT-4 Turbo - Quality over speed
+7. Anthropic Claude 3 Opus - Maximum quality
+```
+
+## Quality (Reasoning & Coherence)
+
+```
+Highest Quality:
+1. Anthropic Claude 3 Opus - Best reasoning
+2. OpenAI GPT-4 Turbo - Excellent general quality
+3. Anthropic Claude 3.5 Sonnet - Best balance
+4. Google Gemini 1.5 Pro - Very good
+5. OpenAI GPT-3.5 Turbo - Good for simple tasks
+6. Ollama (Llama 3.2 70B) - Good for local
+7. Ollama (Llama 3.2 7B) - Decent for learning
+```
+
+---
+
+# Migration Between Providers
+
+## Easy Migration
+
+Good architecture makes provider switching simple:
+
+```typescript
+// Configuration-driven provider selection
+const config = {
+  provider: process.env.AI_PROVIDER || 'anthropic',
+  model: process.env.AI_MODEL || 'claude-3-5-sonnet-20241022'
+};
+
+// Same code works with any provider
+const response = await aiCore.generate({
+  prompt: userMessage,
+  provider: config.provider,
+  model: config.model
+});
+```
+
+## What Changes When Switching Providers
+
+### Minimal Changes
+- Provider name in config
+- Model name
+- API key
+
+### May Need Adjustment
+- Prompt formatting (some providers prefer different formats)
+- Parameter names (temperature, max_tokens, etc.)
+- Error handling (different error formats)
+- Rate limiting (different limits)
+
+### Should Not Change
+- Application logic
+- UI components
+- Business rules
+- User experience
+
+---
+
+# Interview Questions
+
+## Q: What factors should you consider when choosing an AI provider?
+
+**A**: Key factors include: quality requirements, cost constraints, context window needs, latency requirements, privacy concerns, offline capability, multimodal needs, ecosystem and tooling, and team familiarity.
+
+## Q: What are the trade-offs between cloud and local AI?
+
+**A**: Cloud AI offers better quality, larger models, and no maintenance but

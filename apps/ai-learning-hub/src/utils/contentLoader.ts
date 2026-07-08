@@ -1,77 +1,49 @@
-import { Lesson } from '@/types';
+import { FrontMatter, Lesson } from '@/types';
 
-export async function loadLessonsFromContent(): Promise<Lesson[]> {
-    const lessons: Lesson[] = [];
+// Use import.meta.glob to dynamically discover all lesson files
+export const lessonFiles = import.meta.glob('/content/**/*.mdx', { as: 'raw' });
+
+export default async function loadFrontMattersFromContent(): Promise<FrontMatter[]> {
+    const frontMatters: FrontMatter[] = [];
 
     try {
-        // Use import.meta.glob to dynamically discover all lesson files
-        const lessonFiles = import.meta.glob('/content/**/lesson.mdx', { as: 'raw' });
 
         for (const filePath in lessonFiles) {
             try {
                 const content = await lessonFiles[filePath]() as string;
-                const lesson = parseLessonFromMDX(filePath, content);
-                if (lesson) {
-                    lessons.push(lesson);
+                const frontMatter = parseLessonFromMDX(filePath, content, null);
+                if (frontMatter) {
+                    frontMatters.push(frontMatter);
                 }
             } catch (error) {
                 console.warn(`Failed to load ${filePath}:`, error);
             }
         }
 
-        if (lessons.length === 0) {
-            console.warn('No lessons found, using sample data');
-            return getSampleLessons();
+        if (frontMatters.length === 0) {
+            console.warn('No frontMatters found');
         }
 
-        lessons.sort((a, b) => a.day - b.day);
+        frontMatters.sort((a, b) => a.day - b.day);
     } catch (error) {
-        console.error('Error loading lessons:', error);
-        return getSampleLessons();
+        console.error('Error loading frontMatters:', error);
     }
+    //write this frontmatters array into a content-index.json file in the public folder of the project. 
+    // The content-index.json file should be structured as an array of objects, 
+    // where each object represents a lesson's front matter. Each object should include the following properties:
+    //  id, day, title, description, difficulty, estimatedTime, status, topics, prerequisites, resources,
+    //  assignment (if available), project (if available), interviewLevel (if available), tags, summary, 
+    // and filePath. 
 
-    return lessons;
+    // await writeToFile('/content/build/content-index.json', frontMatters, 2)
+    //     .then(() => {
+    //         console.log('FrontMatters written to public/content-index.json');
+    //     });
+
+    return frontMatters;
 }
 
-function getSampleLessons(): Lesson[] {
-    // Return sample lessons if content loading fails
-    return [
-        {
-            id: 'day-001',
-            day: 1,
-            title: 'Introduction to AI Engineering',
-            description: 'Learn the fundamentals of AI engineering and understand the landscape of modern AI technologies',
-            difficulty: 'Beginner',
-            estimatedTime: '2 Hours',
-            status: 'not-started',
-            topics: ['AI Fundamentals', 'Machine Learning Basics', 'AI Engineering Overview'],
-            prerequisites: [],
-            resources: [],
-            tags: ['introduction', 'ai', 'fundamentals'],
-            summary: 'This lesson introduces you to the world of AI engineering.',
-            content: '# Introduction to AI Engineering\n\nWelcome to the AI Engineering Learning Hub!',
-            filePath: '/src/content/day-001/lesson.mdx',
-        },
-        {
-            id: 'day-002',
-            day: 2,
-            title: 'Understanding Large Language Models',
-            description: 'Deep dive into how LLMs work, the transformer architecture, and tokenization',
-            difficulty: 'Intermediate',
-            estimatedTime: '3 Hours',
-            status: 'not-started',
-            topics: ['LLMs', 'Transformer Architecture', 'Tokenization'],
-            prerequisites: ['day-001'],
-            resources: [],
-            tags: ['llm', 'transformers', 'architecture'],
-            summary: 'Learn how Large Language Models work under the hood.',
-            content: '# Understanding Large Language Models\n\nIn this lesson, we will explore LLMs.',
-            filePath: '/src/content/day-002/lesson.mdx',
-        },
-    ];
-}
-
-function parseLessonFromMDX(filePath: string, content: string): Lesson | null {
+export function parseLessonFromMDX(filePath: string, content: string, linkedDay): FrontMatter | null {
     // Match front matter between --- markers
     const frontMatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
 
@@ -82,7 +54,7 @@ function parseLessonFromMDX(filePath: string, content: string): Lesson | null {
 
     const frontMatter = frontMatterMatch[1];
     // Get everything after the closing ---
-    const lessonContent = content.slice(frontMatterMatch[0].length).trim();
+    // const lessonContent = content.slice(frontMatterMatch[0].length).trim();
 
     const parseArray = (str: string): string[] => {
         return str
@@ -91,7 +63,7 @@ function parseLessonFromMDX(filePath: string, content: string): Lesson | null {
             .filter(line => line && !line.startsWith('#'));
     };
 
-    const dayMatch = frontMatter.match(/day:\s*(\d+)/);
+    const dayMatch = frontMatter.match(/day:\s*(\d+)/) || linkedDay || 9999;
     const titleMatch = frontMatter.match(/title:\s*["']?([^"'\n]+)["']?/);
     const difficultyMatch = frontMatter.match(/difficulty:\s*["']?([^"'\n]+)["']?/);
     const estimatedTimeMatch = frontMatter.match(/estimatedTime:\s*["']?([^"'\n]+)["']?/);
@@ -165,7 +137,7 @@ function parseLessonFromMDX(filePath: string, content: string): Lesson | null {
         interviewLevel,
         tags,
         summary,
-        content: lessonContent,
+        // content: lessonContent,
         filePath,
     };
 }
