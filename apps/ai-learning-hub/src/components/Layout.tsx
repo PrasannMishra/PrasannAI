@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import Sidebar from './Sidebar';
+import { Sidebar } from './sidebar/Sidebar';
 import Header from './Header';
 
 interface LayoutProps {
@@ -11,7 +11,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <div className="flex">
                 <Sidebar />
-                <div className="flex-1 ml-64">
+                <div className="flex-1 ml-72">
                     <Header />
                     <main className="p-6">
                         {children}

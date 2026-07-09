@@ -16,6 +16,8 @@ export interface Lesson {
     summary: string;
     content: string;
     filePath: string;
+    phase?: string;
+    categories: string[];
 }
 
 export interface FrontMatter {
@@ -35,6 +37,8 @@ export interface FrontMatter {
     tags: string[];
     summary: string;
     filePath: string;
+    phase?: string;
+    categories: string[];
 }
 
 export interface Resource {
@@ -135,6 +139,7 @@ export interface LessonMetadata {
     pdf: boolean;
     related: string[];
     lastUpdated: string;
+    phase?: string;
 }
 
 export interface AppSettings {

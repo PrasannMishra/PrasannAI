@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, BookOpen, Clock, CheckCircle2, Circle, Share
 import { useLessonStore, useProgressStore } from '@/stores/useLessonStore';
 import MDXContent from '@/components/MDXContent';
 import { extractHeadings } from '@/utils/tableOfContents';
-import { lessonFiles, parseLessonFromMDX } from '@/utils/contentLoader';
 
 export default function LessonPage() {
     const { id } = useParams<{ id: string }>();
@@ -65,19 +64,6 @@ export default function LessonPage() {
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, [id, updateReadingProgress]);
-
-    // 7. Handlers & Derived Values
-    const openLinkedLesson = async (path: string) => {
-        if (typeof lessonFiles[path] !== 'function') return;
-        const content = await lessonFiles[path]() as string;
-        const linkedLesson = parseLessonFromMDX(path, content, day);
-
-        // Update store dynamic layout/state logic here if linkedLesson replaces current layout
-        if (linkedLesson?.id) {
-            // Recommendation: Navigate to the new lesson link instead of hard-setting state
-            // e.g., navigate(`/lesson/${linkedLesson.id}`);
-        }
-    };
 
     const isCompleted = lesson ? progress.completedLessons.includes(lesson.id) : false;
     const readingProgress = lesson ? (progress.readingProgress[lesson.id] || 0) : 0;
@@ -172,7 +158,7 @@ export default function LessonPage() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
                     <div className="card prose-content">
-                        <MDXContent content={lesson.content || ''} openMdx={openLinkedLesson} />
+                        <MDXContent content={lesson.content || ''} />
                     </div>
 
                     {/* Prev / Next Pagination */}

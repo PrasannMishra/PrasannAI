@@ -5,10 +5,9 @@ import rehypeHighlight from 'rehype-highlight';
 
 interface MDXContentProps {
     content: string;
-    openMdx: (path: string) => void;
 }
 
-export default function MDXContent({ content, openMdx }: MDXContentProps) {
+export default function MDXContent({ content }: MDXContentProps) {
     const processedContent = useMemo(() => {
         // Fix mermaid diagrams by ensuring arrows are on separate lines
         return content.replace(/```mermaid\n([\s\S]*?)```/g, (match, mermaidContent) => {
@@ -95,7 +94,6 @@ export default function MDXContent({ content, openMdx }: MDXContentProps) {
                             return (
                                 <button
                                     className="text-blue-600 underline"
-                                    onClick={() => openMdx(href)}
                                 >
                                     {children}
                                 </button>

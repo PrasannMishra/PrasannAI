@@ -12,7 +12,12 @@
         "dev:frontend": "npm run dev --workspace=prasannai-ai-ui",
         "dev:learning-hub": "npm run dev --workspace=ai-learning-hub",
         "build:packages": "npm run build --workspace=@ai-platform/shared-types && npm run build --workspace=@ai-platform/shared-utils && npm run build --workspace=@ai-platform/ai-core && npm run build --workspace=@ai-platform/ai-sdk",
-        "test": "npm run test --workspace=claude-day1 && npm run test --workspace=@ai-platform/ai-core"
+        "test": "npm run test --workspace=claude-day1 && npm run test --workspace=@ai-platform/ai-core",
+        "services:start": "concurrently \"node ai-learning-content/app.js\" \"npm run start --prefix ai-content-service\" \"npm run dev --workspace=ai-learning-hub\"",
+        "services:stop": "npx kill-port 3000 5173",
+        "services:content": "node ai-learning-content/app.js",
+        "services:backend": "npm run start --prefix ai-content-service",
+        "services:frontend": "npm run dev --workspace=ai-learning-hub"
     },
     "keywords": [
         "ai",
@@ -21,5 +26,9 @@
         "chat"
     ],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^8.2.2",
+        "kill-port": "^2.0.1"
+    }
 }
