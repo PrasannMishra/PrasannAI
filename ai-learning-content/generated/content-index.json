@@ -365,6 +365,34 @@
     "summary": "",
     "filePath": "/roadmap/Day-010-Embedding/lesson.mdx"
   },
+  "roadmap.Day-011-chunking-strategies.lesson": {
+    "id": "roadmap.Day-011-chunking-strategies.lesson",
+    "day": 11,
+    "title": "Chunking Strategies for Production Retrieval-Augmented Generation",
+    "description": "Learn why chunking is one of the most important components of a RAG pipeline, how production systems chunk documents, and how our AI Learning Platform will implement intelligent chunking.",
+    "phase": "Foundation",
+    "difficulty": "Intermediate",
+    "estimatedTime": "75 minutes",
+    "status": "not-started",
+    "categories": [],
+    "topics": [],
+    "prerequisites": [
+      "roadmap.day-010.embeddings"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "rag",
+      "chunking",
+      "embeddings",
+      "vector-search",
+      "ai-engineering",
+      "production"
+    ],
+    "summary": "",
+    "filePath": "/roadmap/Day-011-chunking-strategies/lesson.mdx"
+  },
   "handbook.streaming.provider-abstraction": {
     "id": "handbook.streaming.provider-abstraction",
     "day": 999,
