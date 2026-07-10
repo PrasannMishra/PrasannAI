@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Search, Settings, Moon, Sun } from 'lucide-react';
+import { Search, Settings, Moon, Sun, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useSettingsStore } from '@/stores/useLessonStore';
 
-export default function Header() {
+interface HeaderProps {
+    onToggleSidebar?: () => void;
+    isSidebarCollapsed?: boolean;
+}
+
+export default function Header({ onToggleSidebar, isSidebarCollapsed }: HeaderProps) {
     const settings = useSettingsStore(state => state.settings);
     const setTheme = useSettingsStore(state => state.setTheme);
 
@@ -28,6 +33,19 @@ export default function Header() {
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {onToggleSidebar && (
+                        <button
+                            onClick={onToggleSidebar}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            aria-label="Toggle sidebar"
+                        >
+                            {isSidebarCollapsed ? (
+                                <PanelLeftOpen className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                            ) : (
+                                <PanelLeftClose className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                            )}
+                        </button>
+                    )}
                     <button
                         onClick={toggleTheme}
                         className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

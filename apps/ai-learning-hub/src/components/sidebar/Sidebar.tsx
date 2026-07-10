@@ -7,7 +7,7 @@ import { SidebarItem } from './SidebarItem';
 import { RoadmapSection } from './RoadmapSection';
 import { ConceptSection } from './ConceptSection';
 
-export function Sidebar() {
+export function Sidebar({ isCollapsed = false }: { isCollapsed?: boolean }) {
     const location = useLocation();
     const lessons = useLessonStore(state => state.lessons) || [];
     const completedLessons = useProgressStore(state => state.progress.completedLessons);
@@ -22,8 +22,8 @@ export function Sidebar() {
     const progressPercentage = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
 
     return (
-        <aside className="fixed left-0 top-0 h-screen w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
-            <div className="p-4">
+        <aside className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto transition-all duration-300 ${isCollapsed ? 'w-0 -translate-x-full' : 'w-72'}`}>
+            <div className={`p-4 ${isCollapsed ? 'hidden' : 'block'}`}>
                 {/* Logo */}
                 <Link to="/" className="flex items-center gap-2 mb-6">
                     <GraduationCap className="w-8 h-8 text-primary-600" />

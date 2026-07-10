@@ -21,7 +21,10 @@ export function extractHeadings(content: string): Heading[] {
                 .replace(/-+/g, '-')
                 .trim();
 
-            headings.push({ id, text, level });
+            // Only include h1 headings (level 1) for "On This Page"
+            if (level === 1) {
+                headings.push({ id, text, level });
+            }
         }
     }
 
