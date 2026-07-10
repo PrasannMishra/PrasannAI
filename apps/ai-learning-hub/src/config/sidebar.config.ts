@@ -1,6 +1,5 @@
 import {
     LayoutDashboard,
-    BookOpen,
     Search,
     Settings,
     FolderOpen,

@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { GraduationCap } from 'lucide-react';
-import { Lesson } from '@/types';
 import { useLessonStore } from '@/stores/useLessonStore';
 import { useProgressStore } from '@/stores/useLessonStore';
 import { SidebarItem } from './SidebarItem';
@@ -21,10 +20,6 @@ export function Sidebar() {
     const totalCompleted = completedLessons.length;
     const totalLessons = lessons.length;
     const progressPercentage = totalLessons > 0 ? Math.round((totalCompleted / totalLessons) * 100) : 0;
-
-    // Check if we have metadata-driven lessons
-    const hasPhaseData = useMemo(() => lessons.some(lesson => lesson.phase), [lessons]);
-    const hasCategoryData = useMemo(() => lessons.some(lesson => lesson.categories && lesson.categories.length > 0), [lessons]);
 
     return (
         <aside className="fixed left-0 top-0 h-screen w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">

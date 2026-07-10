@@ -9,11 +9,6 @@ interface ConceptSectionProps {
     currentLessonId?: string;
 }
 
-interface ConceptGroup {
-    category: string;
-    lessons: Lesson[];
-}
-
 export function ConceptSection({ lessons, currentLessonId }: ConceptSectionProps) {
     const { isExpanded, toggleSection } = useSidebarState();
 

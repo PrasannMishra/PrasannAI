@@ -5,10 +5,9 @@ interface SidebarGroupProps {
     title: string;
     children: ReactNode;
     defaultExpanded?: boolean;
-    sectionId: string;
 }
 
-export function SidebarGroup({ title, children, defaultExpanded = false, sectionId }: SidebarGroupProps) {
+export function SidebarGroup({ title, children, defaultExpanded = false }: SidebarGroupProps) {
     return (
         <div className="space-y-1">
             <SidebarItem

@@ -9,11 +9,6 @@ interface RoadmapSectionProps {
     currentLessonId?: string;
 }
 
-interface PhaseGroup {
-    phase: string;
-    lessons: Lesson[];
-}
-
 export function RoadmapSection({ lessons, currentLessonId }: RoadmapSectionProps) {
     const { isExpanded, toggleSection } = useSidebarState();
     const sectionId = 'roadmap-section';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search as SearchIcon, X } from 'lucide-react';
 import { useLessonStore } from '@/stores/useLessonStore';
-import { Lesson, SearchResult } from '@/types';
+import { SearchResult } from '@/types';
 import { Link } from 'react-router-dom';
 
 export default function SearchPage() {

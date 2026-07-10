@@ -1,11 +1,11 @@
-import { Moon, Sun, Monitor, Type, AlignLeft, AlignCenter, AlignRight, RotateCcw } from 'lucide-react';
-import { useSettingsStore } from '@/stores/useLessonStore';
+import { Moon, Sun, Monitor, AlignLeft, AlignCenter, AlignRight, RotateCcw } from 'lucide-react';
+import { useSettingsStore, useProgressStore } from '@/stores/useLessonStore';
 import { Theme } from '@/types';
 
 export default function SettingsPage() {
     const settings = useSettingsStore(state => state.settings);
     const updateSettings = useSettingsStore(state => state.updateSettings);
-    const resetProgress = useSettingsStore(state => state.resetProgress);
+    const resetProgress = useProgressStore(state => state.resetProgress);
 
     const themes: { value: Theme; label: string; icon: typeof Sun }[] = [
         { value: 'light', label: 'Light', icon: Sun },
@@ -46,8 +46,8 @@ export default function SettingsPage() {
                                             key={theme.value}
                                             onClick={() => updateSettings({ theme: theme.value })}
                                             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${settings.theme === theme.value
-                                                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                                ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                                 }`}
                                         >
                                             <Icon className="w-5 h-5" />
@@ -68,8 +68,8 @@ export default function SettingsPage() {
                                         key={size.value}
                                         onClick={() => updateSettings({ fontSize: size.value as 'small' | 'medium' | 'large' })}
                                         className={`px-4 py-2 rounded-lg border-2 transition-colors ${settings.fontSize === size.value
-                                                ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                            ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                             }`}
                                     >
                                         <span className="text-sm font-medium">{size.label}</span>
@@ -90,8 +90,8 @@ export default function SettingsPage() {
                                             key={width.value}
                                             onClick={() => updateSettings({ readingWidth: width.value as 'narrow' | 'medium' | 'wide' })}
                                             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${settings.readingWidth === width.value
-                                                    ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                                                ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                                 }`}
                                         >
                                             <Icon className="w-5 h-5" />

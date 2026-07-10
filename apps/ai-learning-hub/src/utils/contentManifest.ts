@@ -144,6 +144,7 @@ function parseLessonFromMDX(filePath: string, content: string): Lesson | null {
         summary,
         content: lessonContent,
         filePath,
+        categories: [],
     };
 }
 

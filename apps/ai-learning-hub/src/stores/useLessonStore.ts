@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Lesson, UserProgress, AppSettings, Theme } from '@/types';
+// @ts-ignore - ContentApi is a JS module without TypeScript declarations
 import ContentApi from "../service/ContentApi";
 
 interface LessonStore {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Circle, BookOpen } from 'lucide-react';
+import { CheckCircle2, Circle } from 'lucide-react';
 import { Lesson } from '@/types';
 import { useProgressStore } from '@/stores/useLessonStore';
 
