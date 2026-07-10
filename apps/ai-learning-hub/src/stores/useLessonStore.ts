@@ -48,7 +48,7 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
 
     loadLessons: async () => {
         set({ isLoading: true, error: null });
-        const lessons = (await loadFromApi()) ?? (await loadIndexFromGit('generated/content-index.json'));
+        const lessons = (import.meta.env.CONTENT_SERVICE_ENABLED && await loadFromApi()) ?? (await loadIndexFromGit('generated/content-index.json'));
 
         if (!lessons?.length) {
             set({
@@ -73,19 +73,14 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
     loadContentById: async (id) => {
         set({ isLoading: true, error: null });
         try {
-            const res = await ContentApi.getContentById(id, true);
-            console.log('res =', res);
-            console.log('type =', typeof res);
-            const lessonContent = res ?? (await getContentByIdFromGit(id));
-            console.log('Store - Loaded lessons:', lessonContent);
+            const lessonContent = (import.meta.env.CONTENT_SERVICE_ENABLED && await ContentApi.getContentById(id, true)) ?? (await getContentByIdFromGit(id));
             //find the lesson in the store and update its content
             if (lessonContent) {
-                const lessons = get().lessons.map(lesson => {
-                    if (lesson.id === id) {
-                        lesson.content = lessonContent;
-                    }
-                    return lesson;
-                });
+                const lessons = get().lessons.map(lesson =>
+                    lesson.id === id
+                        ? { ...lesson, content: lessonContent }
+                        : lesson
+                )
                 set({ lessons });
             }
 
