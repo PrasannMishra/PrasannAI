@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -7,10 +7,10 @@ interface MDXContentProps {
     content: string;
 }
 
-export default function MDXContent({ content }: MDXContentProps) {
+const MDXContentComponent = ({ content }: MDXContentProps) => {
     const processedContent = useMemo(() => {
         // Fix mermaid diagrams by ensuring arrows are on separate lines
-        return content.replace(/```mermaid\n([\s\S]*?)```/g, (match, mermaidContent) => {
+        return content.replace(/```mermaid\n([\s\S]*?)```/g, (_match, mermaidContent) => {
             // Split into lines and process
             const lines = mermaidContent.split('\n');
             const cleaned = lines.map((line: string) => line.trim()).filter((line: string) => line.length > 0);
@@ -113,3 +113,6 @@ export default function MDXContent({ content }: MDXContentProps) {
         </div>
     );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(MDXContentComponent);

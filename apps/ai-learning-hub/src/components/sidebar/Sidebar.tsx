@@ -10,7 +10,7 @@ import { ConceptSection } from './ConceptSection';
 
 export function Sidebar() {
     const location = useLocation();
-    const lessons = useLessonStore(state => state.lessons);
+    const lessons = useLessonStore(state => state.lessons) || [];
     const completedLessons = useProgressStore(state => state.progress.completedLessons);
 
     const currentLessonId = useMemo(() => {

@@ -12,6 +12,34 @@ interface LessonStore {
     getAdjacentLessons: (currentId: string) => { previous?: Lesson; next?: Lesson };
 }
 
+const loadFromApi = async () => {
+    try {
+        return await ContentApi.getContentIndex();
+    } catch (error) {
+        console.error('Store - Failed to load lessons from content service:', error);
+        //return null;
+    }
+};
+
+
+const loadIndexFromGit = async (filePath: string) => {
+    try {
+        return await ContentApi.getContentIndexByPathFromGit(filePath);
+    } catch (error) {
+        console.error('Store - Failed to load lessons from GitHub:', error);
+        return null;
+    }
+};
+
+const getContentByIdFromGit = async (id: string) => {
+    try {
+        return await ContentApi.getContentByIdFromGit(id);
+    } catch (error) {
+        console.error('Store - Failed to load lessons from GitHub:', error);
+        return null;
+    }
+};
+
 export const useLessonStore = create<LessonStore>((set, get) => ({
     lessons: [],
     isLoading: false,
@@ -19,14 +47,22 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
 
     loadLessons: async () => {
         set({ isLoading: true, error: null });
-        try {
-            const lessons = await ContentApi.getContentIndex();
-            console.log('Store - Loaded lessons:', lessons.length);
-            set({ lessons, isLoading: false });
-        } catch (error) {
-            console.error('Store - Failed to load lessons:', error);
-            set({ error: 'Failed to load lessons', isLoading: false });
+        const lessons = (await loadFromApi()) ?? (await loadIndexFromGit('generated/content-index.json'));
+
+        if (!lessons?.length) {
+            set({
+                error: 'Failed to load lessons.',
+                isLoading: false,
+            });
+            return;
         }
+
+        console.log('Store - Loaded lessons:', lessons.length);
+
+        set({
+            lessons,
+            isLoading: false,
+        });
     },
 
     getLessonById: (id: string) => {
@@ -36,19 +72,27 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
     loadContentById: async (id) => {
         set({ isLoading: true, error: null });
         try {
-            const lessonContent = await ContentApi.getContentById(id, true);
+            const res = await ContentApi.getContentById(id, true);
+            console.log('res =', res);
+            console.log('type =', typeof res);
+            const lessonContent = res ?? (await getContentByIdFromGit(id));
             console.log('Store - Loaded lessons:', lessonContent);
             //find the lesson in the store and update its content
-            const lessons = get().lessons.map(lesson => {
-                if (lesson.id === id) {
-                    lesson.content = lessonContent;
-                }
-                return lesson;
-            });
-            set({ lessons, isLoading: false });
+            if (lessonContent) {
+                const lessons = get().lessons.map(lesson => {
+                    if (lesson.id === id) {
+                        lesson.content = lessonContent;
+                    }
+                    return lesson;
+                });
+                set({ lessons });
+            }
+
         } catch (error) {
             console.error('Store - Failed to load lessons:', error);
-            set({ error: 'Failed to load lessons', isLoading: false });
+            set({ error: 'Failed to load lessons' });
+        } finally {
+            set({ isLoading: false });
         }
     },
 

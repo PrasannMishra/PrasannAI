@@ -1,15 +1,21 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, BookOpen, Clock, CheckCircle2, Circle, Share2, Bookmark } from 'lucide-react';
 import { useLessonStore, useProgressStore } from '@/stores/useLessonStore';
 import MDXContent from '@/components/MDXContent';
 import { extractHeadings } from '@/utils/tableOfContents';
+import Loader from '@/components/loader/Loader.jsx';
+
+// Lazy load non-critical sidebar components to reduce initial JS payload
+const RoadmapSection = lazy(() => import('@/components/sidebar/RoadmapSection').then(module => ({ default: module.RoadmapSection })));
+const ConceptSection = lazy(() => import('@/components/sidebar/ConceptSection').then(module => ({ default: module.ConceptSection })));
 
 export default function LessonPage() {
     const { id } = useParams<{ id: string }>();
 
     // 1. Store Selectors
     const lessons = useLessonStore(state => state.lessons);
+    const isLoading = useLessonStore(state => state.isLoading);
     const getAdjacentLessons = useLessonStore(state => state.getAdjacentLessons);
     const loadContentById = useLessonStore(state => state.loadContentById);
 
@@ -23,17 +29,16 @@ export default function LessonPage() {
         return lessons.find(l => l.id === id) || null;
     }, [lessons, id]);
 
-    const day = lesson ? String(lesson.day) : '';
-
     // 3. Isolated Fetch: Trigger asynchronous loading ONLY when ID actually shifts
     const prevIdRef = useRef<string | undefined>(id);
     useEffect(() => {
+        if (!id) return;
         const currentLesson = lessons.find(l => l.id === id);
         if (currentLesson && !currentLesson.content) {
             loadContentById(id);
         }
         prevIdRef.current = id;
-    }, [id, lessons, loadContentById]);
+    }, [id, lessons]);
 
     // 4. Adjacent Navigation Optimization
     const { previous, next } = useMemo(() => {
@@ -158,7 +163,7 @@ export default function LessonPage() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-3">
                     <div className="card prose-content">
-                        <MDXContent content={lesson.content || ''} />
+                        {isLoading ? <Loader message="Loading lesson..." /> : <MDXContent content={lesson.content || ''} />}
                     </div>
 
                     {/* Prev / Next Pagination */}
@@ -186,61 +191,83 @@ export default function LessonPage() {
 
                 {/* Sidebar Navigation */}
                 <div className="lg:col-span-1">
-                    <div className="card sticky top-24">
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-3">On This Page</h3>
-                        <div className="space-y-2 text-sm">
-                            {headings.length > 0 ? (
-                                <nav>
-                                    {headings.map((heading, idx) => (
-                                        <a
-                                            key={idx}
-                                            href={`#${heading.id}`}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                            }}
-                                            className={`block py-1 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${heading.level === 1 ? 'font-medium' :
-                                                heading.level === 2 ? 'pl-2' :
-                                                    heading.level === 3 ? 'pl-4' : 'pl-6'
-                                                }`}
-                                        >
-                                            {heading.text}
-                                        </a>
-                                    ))}
-                                </nav>
-                            ) : (
-                                <p className="text-gray-500 dark:text-gray-400 text-sm">No headings found in this lesson.</p>
+                    <Suspense fallback={<div className="card sticky top-24 animate-pulse bg-gray-100 dark:bg-gray-700 h-96" />}>
+                        <div className="card sticky top-24">
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">On This Page</h3>
+                            <div className="space-y-2 text-sm">
+                                {headings.length > 0 ? (
+                                    <nav>
+                                        {headings.map((heading, idx) => (
+                                            <a
+                                                key={idx}
+                                                href={`#${heading.id}`}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                }}
+                                                className={`block py-1 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ${heading.level === 1 ? 'font-medium' :
+                                                    heading.level === 2 ? 'pl-2' :
+                                                        heading.level === 3 ? 'pl-4' : 'pl-6'
+                                                    }`}
+                                            >
+                                                {heading.text}
+                                            </a>
+                                        ))}
+                                    </nav>
+                                ) : (
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">No headings found in this lesson.</p>
+                                )}
+                            </div>
+
+                            {/* Topics */}
+                            {lesson.topics?.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Topics</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {lesson.topics.map(topic => (
+                                            <span key={topic} className="px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs rounded">
+                                                {topic}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Resources */}
+                            {lesson.resources?.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <h4 className="font-medium text-gray-900 dark:text-white mb-2">Resources</h4>
+                                    <div className="space-y-2">
+                                        {lesson.resources.map((resource, idx) => (
+                                            <a key={idx} href={resource.url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary-600 hover:text-primary-700">
+                                                {resource.title}
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Learning Path Section */}
+                            {lessons.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <RoadmapSection
+                                        lessons={lessons}
+                                        currentLessonId={id}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Concepts Section */}
+                            {lessons.length > 0 && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <ConceptSection
+                                        lessons={lessons}
+                                        currentLessonId={id}
+                                    />
+                                </div>
                             )}
                         </div>
-
-                        {/* Topics */}
-                        {lesson.topics?.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Topics</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {lesson.topics.map(topic => (
-                                        <span key={topic} className="px-2 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs rounded">
-                                            {topic}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Resources */}
-                        {lesson.resources?.length > 0 && (
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Resources</h4>
-                                <div className="space-y-2">
-                                    {lesson.resources.map((resource, idx) => (
-                                        <a key={idx} href={resource.url} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary-600 hover:text-primary-700">
-                                            {resource.title}
-                                        </a>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                    </Suspense>
                 </div>
             </div>
         </div>
