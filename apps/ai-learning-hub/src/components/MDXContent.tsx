@@ -8,15 +8,6 @@ interface MDXContentProps {
 }
 
 const MDXContentComponent = ({ content }: MDXContentProps) => {
-    const processedContent = useMemo(() => {
-        // Fix mermaid diagrams by ensuring arrows are on separate lines
-        return content.replace(/```mermaid\n([\s\S]*?)```/g, (_match, mermaidContent) => {
-            // Split into lines and process
-            const lines = mermaidContent.split('\n');
-            const cleaned = lines.map((line: string) => line.trim()).filter((line: string) => line.length > 0);
-            return `\`\`\`mermaid\n${cleaned.join('\n')}\`\`\``;
-        });
-    }, [content]);
 
     if (!content || content.trim().length === 0) {
         return (
@@ -103,7 +94,7 @@ const MDXContentComponent = ({ content }: MDXContentProps) => {
                     }
                 }}
             >
-                {processedContent}
+                {content}
             </ReactMarkdown>
         </div>
     );
