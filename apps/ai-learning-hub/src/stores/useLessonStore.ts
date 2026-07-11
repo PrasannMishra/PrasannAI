@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Lesson, UserProgress, AppSettings, Theme } from '@/types';
 // @ts-ignore - ContentApi is a JS module without TypeScript declarations
 import ContentApi from "../service/ContentApi";
+const shouldCallContentService = import.meta.env.VITE_CONTENT_SERVICE_ENABLED === 'true';
 
 interface LessonStore {
     lessons: Lesson[];
@@ -48,7 +49,7 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
 
     loadLessons: async () => {
         set({ isLoading: true, error: null });
-        const lessons = (import.meta.env.CONTENT_SERVICE_ENABLED && await loadFromApi()) ?? (await loadIndexFromGit('generated/content-index.json'));
+        const lessons = shouldCallContentService ? await loadFromApi() : await loadIndexFromGit('generated/content-index.json');
 
         if (!lessons?.length) {
             set({
@@ -73,7 +74,10 @@ export const useLessonStore = create<LessonStore>((set, get) => ({
     loadContentById: async (id) => {
         set({ isLoading: true, error: null });
         try {
-            const lessonContent = (import.meta.env.CONTENT_SERVICE_ENABLED && await ContentApi.getContentById(id, true)) ?? (await getContentByIdFromGit(id));
+            console.log('Store - Loading content for lesson ID:', id, 'Using content service:', shouldCallContentService, typeof shouldCallContentService);
+            const lessonContent = shouldCallContentService
+                ? await ContentApi.getContentById(id, true)
+                : await getContentByIdFromGit(id);
             //find the lesson in the store and update its content
             if (lessonContent) {
                 const lessons = get().lessons.map(lesson =>

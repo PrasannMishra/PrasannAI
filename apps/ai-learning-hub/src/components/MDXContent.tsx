@@ -59,14 +59,9 @@ const MDXContentComponent = ({ content }: MDXContentProps) => {
                         // For mermaid blocks, render as pre-formatted text
                         if (language === 'mermaid') {
                             return (
-                                <div className="my-4 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-mono">
-                                        Mermaid Diagram
-                                    </div>
-                                    <pre className="text-sm font-mono text-gray-700 dark:text-gray-300 overflow-x-auto">
-                                        {String(children).replace(/\n$/, '')}
-                                    </pre>
-                                </div>
+                                <pre className="text-sm font-mono text-gray-700 dark:text-gray-300 overflow-x-auto">
+                                    {String(children).replace(/\n$/, '')}
+                                </pre>
                             );
                         }
 
