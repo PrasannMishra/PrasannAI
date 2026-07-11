@@ -99,7 +99,7 @@ export default function TableOfContents({ headings }: TableOfContentsProps) {
     };
 
     // Get heading styles based on state
-    const getHeadingStyles = (headingId: string, level: number) => {
+    const getHeadingStyles = (headingId: string, _level: number) => {
         const isActive = activeId === headingId;
         const isVisited = visitedIds.has(headingId);
 
