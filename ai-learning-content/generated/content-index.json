@@ -393,6 +393,28 @@
     "summary": "",
     "filePath": "/roadmap/Day-011-chunking-strategies/lesson.mdx"
   },
+  "roadmap.day-012-Vector_DB.lesson": {
+    "id": "roadmap.day-012-Vector_DB.lesson",
+    "day": 999,
+    "title": "Vector Databases",
+    "description": "Understand why vector databases exist, how they store embeddings, and how they enable efficient semantic retrieval in production AI systems.",
+    "phase": "Foundation",
+    "difficulty": "Intermediate",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "categories": [],
+    "topics": [],
+    "prerequisites": [
+      "Day 10 - Embeddings",
+      "Day 11 - Chunking"
+    ],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/roadmap/day-012-Vector_DB/lesson.mdx"
+  },
   "handbook.streaming.provider-abstraction": {
     "id": "handbook.streaming.provider-abstraction",
     "day": 999,
