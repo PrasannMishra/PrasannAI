@@ -330,8 +330,8 @@
     "summary": "",
     "filePath": "/roadmap/day-009-building-ai-core/lesson.mdx"
   },
-  "roadmap.Day-010-Embedding.lesson": {
-    "id": "roadmap.Day-010-Embedding.lesson",
+  "roadmap.day-010-Embedding.lesson": {
+    "id": "roadmap.day-010-Embedding.lesson",
     "day": 10,
     "title": "Embeddings & Semantic Search",
     "description": "Learn how modern AI systems retrieve information using semantic similarity instead of keyword matching. Understand embeddings, vector spaces, similarity search and their role in Retrieval-Augmented Generation (RAG).",
@@ -363,10 +363,10 @@
       "Embeddings"
     ],
     "summary": "",
-    "filePath": "/roadmap/Day-010-Embedding/lesson.mdx"
+    "filePath": "/roadmap/day-010-Embedding/lesson.mdx"
   },
-  "roadmap.Day-011-chunking-strategies.lesson": {
-    "id": "roadmap.Day-011-chunking-strategies.lesson",
+  "roadmap.day-011-chunking-strategies.lesson": {
+    "id": "roadmap.day-011-chunking-strategies.lesson",
     "day": 11,
     "title": "Chunking Strategies for Production Retrieval-Augmented Generation",
     "description": "Learn why chunking is one of the most important components of a RAG pipeline, how production systems chunk documents, and how our AI Learning Platform will implement intelligent chunking.",
@@ -391,11 +391,11 @@
       "production"
     ],
     "summary": "",
-    "filePath": "/roadmap/Day-011-chunking-strategies/lesson.mdx"
+    "filePath": "/roadmap/day-011-chunking-strategies/lesson.mdx"
   },
   "roadmap.day-012-Vector_DB.lesson": {
     "id": "roadmap.day-012-Vector_DB.lesson",
-    "day": 999,
+    "day": 12,
     "title": "Vector Databases",
     "description": "Understand why vector databases exist, how they store embeddings, and how they enable efficient semantic retrieval in production AI systems.",
     "phase": "Foundation",
@@ -514,6 +514,65 @@
     "tags": [],
     "summary": "",
     "filePath": "/handbook/streaming/streaming-basics.mdx"
+  },
+  "handbook.retrieval.chunking-pipeline": {
+    "id": "handbook.retrieval.chunking-pipeline",
+    "day": 999,
+    "title": "Production Chunking Pipeline",
+    "description": "Learn how to design and implement a scalable chunking pipeline for production RAG systems.",
+    "phase": "Foundation",
+    "difficulty": "Beginner",
+    "estimatedTime": "1 Hour",
+    "status": "not-started",
+    "categories": [],
+    "topics": [
+      "Chunking Pipeline",
+      "Document Processing",
+      "Incremental Indexing",
+      "Parallel Processing",
+      "Metadata Enrichment"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [],
+    "summary": "",
+    "filePath": "/handbook/retrieval/chunking-pipeline.mdx"
+  },
+  "handbook.retrieval.embedding-basics": {
+    "id": "handbook.retrieval.embedding-basics",
+    "day": 999,
+    "title": "Embedding Fundamentals",
+    "description": "Learn what embeddings are, why they exist, how they represent meaning, and why they form the foundation of semantic search, Retrieval-Augmented Generation (RAG), recommendation systems, clustering, and modern AI applications.",
+    "phase": "Foundation",
+    "difficulty": "Intermediate",
+    "estimatedTime": "90 minutes",
+    "status": "stable",
+    "categories": [
+      "Retrieval",
+      "Embeddings",
+      "Semantic Search"
+    ],
+    "topics": [
+      "Embedding Models",
+      "Vector Spaces",
+      "Semantic Representations",
+      "Dense Vectors"
+    ],
+    "prerequisites": [],
+    "resources": [],
+    "project": null,
+    "interviewLevel": null,
+    "tags": [
+      "embeddings",
+      "vectors",
+      "rag",
+      "semantic-search",
+      "ai-engineering"
+    ],
+    "summary": "",
+    "filePath": "/handbook/retrieval/embedding-basics.mdx"
   },
   "handbook.prompting.prompt-engineering": {
     "id": "handbook.prompting.prompt-engineering",

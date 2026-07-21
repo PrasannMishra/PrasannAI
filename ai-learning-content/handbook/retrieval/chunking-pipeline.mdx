@@ -1,0 +1,282 @@
+---
+id: handbook.retrieval.chunking-pipeline
+title: "Production Chunking Pipeline"
+description: "Learn how to design and implement a scalable chunking pipeline for production RAG systems."
+category: "Retrieval-Augmented Generation"
+topics:
+  - "Chunking Pipeline"
+  - "Document Processing"
+  - "Incremental Indexing"
+  - "Parallel Processing"
+  - "Metadata Enrichment"
+related:
+  - "roadmap/day-011-chunking-strategies"
+  - "handbook.retrieval.chunking-strategies"
+  - "handbook.retrieval.vector-databases"
+---
+
+# Production Chunking Pipeline
+
+## Purpose
+
+This document explains how to design a scalable chunking pipeline for production RAG systems. You will learn about content discovery, validation, parsing, metadata enrichment, incremental indexing, and parallel processing.
+
+---
+
+# The Complete Pipeline
+
+A production chunking pipeline transforms raw documents into searchable chunks:
+````
+
+Git Repository ↓ Content Discovery Service ↓ MDX Validation Service ↓ Markdown AST Parser ↓ Intelligent Chunk Generator ↓ Metadata Enrichment ↓ Embedding Generation ↓ Vector Database ↓ Retrieval API / AI Tutor
+
+```javascript
+
+Each stage has a single responsibility, making the system easier to scale, test, and maintain.
+
+---
+
+# Step 1: Content Discovery
+
+The pipeline begins by discovering content automatically.
+```
+
+content/ ├── roadmap/ ├── handbook/ ├── architecture/ ├── projects/ └── glossary/
+
+```javascript
+
+Every discovered MDX file becomes a processing candidate.
+
+**Key Principle:** Zero-code-change content additions. Adding a new lesson should require only a new MDX file - no routing logic, no registration, no configuration changes.
+
+---
+
+# Step 2: Validation
+
+Before generating chunks, every document must be validated:
+
+- Valid frontmatter
+- Unique identifier
+- Title exists
+- Required metadata
+- Supported MDX syntax
+- Valid internal links
+- Image references
+- Heading hierarchy
+
+Invalid content should fail before indexing begins. Indexing broken content pollutes the vector database and reduces retrieval quality.
+
+---
+
+# Step 3: Parsing
+
+Never process raw Markdown using regular expressions. Instead, parse the document into an Abstract Syntax Tree (AST).
+```
+
+lesson.mdx → Markdown Parser → AST
+
+```javascript
+
+The AST understands document structure:
+- Headings
+- Paragraphs
+- Code blocks
+- Callouts
+- Tables
+- Lists
+- Images
+- JSX components
+
+This structural awareness allows the chunker to make intelligent decisions.
+
+---
+
+# Step 4: Intelligent Chunk Generation
+
+Instead of splitting every 500 tokens, the chunk generator analyzes document structure.
+
+**Example:**
+```
+
+# Embeddings
+
+... → Chunk 1
+
+# Cosine Similarity
+
+... → Chunk 2
+
+# Vector Normalization
+
+... → Chunk 3
+
+````javascript
+
+Each heading becomes a natural candidate for a chunk boundary. If a section exceeds the target chunk size, it can be further divided using paragraph boundaries.
+
+---
+
+# Step 5: Metadata Enrichment
+
+Each generated chunk receives descriptive metadata:
+
+```json
+{
+  "chunkId": "roadmap.day011.chunk003",
+  "lesson": "day-011",
+  "title": "Heading-Based Chunking",
+  "section": "Chunking Strategies",
+  "difficulty": "Intermediate",
+  "category": "Roadmap",
+  "tags": ["chunking", "rag", "retrieval"]
+}
+````
+
+Metadata enables:
+
+- Breadcrumbs
+- Lesson navigation
+- Filtering
+- Related content
+- Source attribution
+- AI citations
+
+---
+
+# Step 6: Embedding Generation
+
+Once chunks are finalized, each chunk is converted into an embedding:
+
+```javascript
+Chunk → Embedding Model → Vector
+```
+
+Each chunk receives exactly one embedding. The entire lesson is never embedded as a single vector.
+
+__Critical:__ The same embedding model must be used for both document indexing and query embedding.
+
+---
+
+# Step 7: Storage
+
+The resulting data is stored in two separate systems:
+
+### Metadata Database
+
+Stores titles, paths, tags, lesson numbers, relationships (e.g., PostgreSQL)
+
+### Vector Database
+
+Stores chunk identifier and embedding vector (e.g., Qdrant)
+
+Separating metadata from vector storage keeps each system optimized for its specific purpose.
+
+---
+
+# Incremental Indexing
+
+Rebuilding embeddings for an entire knowledge base after every edit is impractical. Instead, use incremental indexing.
+
+```javascript
+Current Checksum → Compare → Previous Checksum → Changed?
+```
+
+If unchanged: Skip processing If changed: Delete old chunks → Generate new chunks → Generate new embeddings → Update vector database
+
+Only modified files are reprocessed, dramatically reducing indexing time.
+
+---
+
+# Parallel Processing
+
+For one million documents, processing sequentially is prohibitively slow. Instead:
+
+```javascript
+Discovery Service → Message Queue → Worker 1, Worker 2, ... Worker N → Embedding Service → Vector Database
+```
+
+Each worker processes an independent subset of files. The architecture scales horizontally by simply adding more workers.
+
+---
+
+# Error Handling
+
+Every stage should operate independently. Failures should not terminate the entire indexing process:
+
+__Validation fails:__ Log error → Skip file → Continue processing __Embedding API unavailable:__ Retry → Queue request → Resume later __Vector database unavailable:__ Retry with exponential backoff → Persist failed jobs → Resume automatically
+
+Reliable indexing pipelines prioritize resilience over immediate completion.
+
+---
+
+# Evaluating Chunk Quality
+
+Chunk quality cannot be measured by chunk size alone. Instead, evaluate using retrieval performance.
+
+## Semantic Cohesion
+
+A chunk should represent one primary concept. If a chunk cannot be summarized in a single sentence, it is probably too broad.
+
+## Context Independence
+
+Each chunk should contain enough information to be understood on its own. A retrieved chunk should not require three previous chunks to become meaningful.
+
+## Retrieval Accuracy
+
+Evaluate using benchmark questions:
+
+- Did it retrieve the correct chunks?
+- Were irrelevant chunks included?
+
+__Metrics:__ Recall@K, Precision@K, Mean Reciprocal Rank (MRR), nDCG
+
+## Token Efficiency
+
+Maximize useful information while minimizing irrelevant context. Sending 1000 tokens when only 200 are relevant wastes context window and increases inference cost.
+
+---
+
+# Production Best Practices
+
+1. __Preserve Semantic Boundaries__ - Split at headings and paragraphs, not inside code blocks or tables
+2. __Use Stable Chunk Identifiers__ - Deterministic IDs simplify incremental indexing
+3. __Keep Metadata Rich__ - Include all fields needed for filtering and navigation
+4. __Benchmark Retrieval Regularly__ - Maintain a benchmark dataset of user questions
+5. __Version Your Index__ - Never overwrite production index without versioning
+
+---
+
+# Common Mistakes
+
+❌ __Embedding Entire Documents__ - Large documents reduce retrieval precision ❌ __Splitting Purely by Token Count__ - Ignoring document structure ❌ __Excessive Overlap__ - Creates duplicate embeddings ❌ __Ignoring Metadata__ - Makes filtering and attribution impossible ❌ __Rebuilding Everything__ - Use incremental indexing instead
+
+---
+
+# Performance Considerations
+
+- __Memory:__ Smaller chunks increase total embeddings
+- __Embedding Cost:__ Each additional chunk has a direct financial cost
+- __Latency:__ Very large chunks increase retrieval payload size
+- __Scalability:__ Support parallel workers and distributed indexing
+
+---
+
+# Key Takeaways
+
+- Chunking determines retrieval quality
+- Semantic boundaries are more important than fixed token counts
+- Heading-based chunking works well for MDX
+- Hybrid chunking provides the best balance
+- Metadata is as important as embeddings
+- Incremental indexing avoids unnecessary reprocessing
+- Retrieval quality should be measured using benchmark queries
+- A scalable pipeline is essential for enterprise knowledge bases
+
+---
+
+# Related Documents
+
+- [Chunking Strategies](handbook.retrieval.chunking-strategies)
+- [Vector Databases](handbook.retrieval.vector-databases)
+- [Day 11 - Chunking Strategies](roadmap/day-011-chunking-strategies)
+

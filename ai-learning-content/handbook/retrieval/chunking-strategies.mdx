@@ -1,0 +1,273 @@
+```markdown
+---
+id: handbook.retrieval.chunking-strategies
+title: "Chunking Strategies for RAG"
+description: "Learn different chunking strategies to optimize document retrieval in production RAG systems."
+category: "Retrieval-Augmented Generation"
+topics:
+  - "Chunking"
+  - "Document Processing"
+  - "RAG"
+  - "Semantic Chunking"
+related:
+  - "roadmap/day-011-chunking-strategies"
+  - "handbook.retrieval.chunking-pipeline"
+  - "handbook.retrieval.embeddings-basics"
+---
+
+# Chunking Strategies for RAG
+
+## Purpose
+
+This document explains different chunking strategies for dividing documents into meaningful retrieval units. You will learn when to use each strategy and how to choose the right approach for your use case.
+
+---
+
+# What is Chunking?
+
+Chunking is the process of dividing a document into smaller, meaningful sections before generating embeddings.
+
+Instead of embedding an entire document:
+```
+
+Document → Single Vector
+
+```javascript
+
+We transform it into:
+```
+
+Document → Chunk 1 → Embedding → Chunk 2 → Embedding → Chunk 3 → Embedding
+
+```javascript
+
+Each chunk becomes an independent unit of retrieval.
+
+---
+
+# Why Chunking Matters
+
+If we generate one embedding for an entire 20-page lesson covering multiple topics, the retrieval engine cannot distinguish which specific section answers the user's question.
+
+Chunking solves this by dividing documents into smaller, semantically meaningful units, dramatically improving retrieval precision.
+
+---
+
+# Chunking Strategies
+
+## Strategy 1: Fixed-Size Chunking
+
+The simplest approach divides text after a fixed number of tokens or characters.
+
+**Advantages:**
+- Extremely easy to implement
+- Fast and parallelizable
+- Works on any text format
+
+**Limitations:**
+- Chunk boundaries may occur in the middle of sentences
+- Ignores document structure
+- Can split code blocks, tables, and lists
+
+**Production Use:** Rarely used alone. Serves as a fallback when semantic structure is unavailable.
+
+---
+
+## Strategy 2: Paragraph Chunking
+
+Every paragraph becomes a chunk.
+
+**Advantages:**
+- Preserves readability
+- Natural boundaries
+- Easy implementation
+
+**Limitations:**
+- Paragraph lengths vary significantly (30 to 900 tokens)
+- Embedding quality becomes inconsistent
+
+**Production Use:** Works reasonably well for blogs, documentation, and articles.
+
+---
+
+## Strategy 3: Heading-Based Chunking
+
+Each heading naturally defines a semantic boundary. This is one of the best strategies for Markdown and MDX content.
+
+**Advantages:**
+- High semantic quality
+- Preserves author intent
+- Easy navigation
+- Excellent for technical documentation
+
+**Why This Works Well:** When an author writes documentation, headings already separate concepts. Instead of inventing chunk boundaries, we reuse existing semantic divisions.
+
+**Production Use:** Ideal for documentation, MDX, books, tutorials, and knowledge bases. This is the primary strategy for our AI Learning Platform.
+
+---
+
+## Strategy 4: Semantic Chunking
+
+Semantic chunking detects changes in meaning rather than relying on formatting.
+
+**Advantages:**
+- Highest retrieval quality
+- Better context preservation
+- Natural knowledge boundaries
+
+**Disadvantages:**
+- More expensive
+- Requires additional processing
+- Harder to implement correctly
+- Less deterministic
+
+**Production Use:** Enterprise RAG systems increasingly use semantic chunking because retrieval quality improves substantially.
+
+---
+
+## Strategy 5: Hybrid Chunking
+
+Most production systems combine multiple techniques.
+
+**Example Workflow:**
+```
+
+Markdown → Parse AST → Split by Headings → Check Chunk Size → Too Large? → Split by Paragraph → Still Too Large? → Split by Sentences
+
+```javascript
+
+This combines heading awareness, paragraph boundaries, and token limits.
+
+**Production Use:** Hybrid chunking usually provides the best balance between simplicity and retrieval quality.
+
+---
+
+# Choosing Chunk Size
+
+There is no universal chunk size. Choose based on:
+- Document type
+- Embedding model
+- LLM context window
+- Expected user queries
+
+## Typical Recommendations
+
+| Content | Chunk Size |
+|---------|-----------:|
+| FAQ | 150-300 tokens |
+| API Docs | 250-450 tokens |
+| Tutorials | 350-600 tokens |
+| Technical Books | 500-800 tokens |
+| Legal Documents | 700-1000 tokens |
+
+## The Chunk Size Trade-off
+
+**Extremely Small Chunks:**
+- Very precise retrieval
+- Low irrelevant context
+- Problems: Insufficient information, missing context, increased storage
+
+**Extremely Large Chunks:**
+- Rich context
+- Fewer embeddings
+- Problems: Poor retrieval precision, higher token usage, increased LLM cost
+
+**Objective:** Maximize useful context while minimizing irrelevant information.
+
+---
+
+# Chunk Overlap
+
+Chunk overlap preserves context across chunk boundaries.
+
+**Without Overlap:**
+```
+
+Chunk A: Sentence 1, 2, 3 Chunk B: Sentence 4, 5, 6
+
+```javascript
+If Sentence 4 depends on Sentence 3, Chunk B loses context.
+
+**With Overlap:**
+```
+
+Chunk A: Sentence 1, 2, 3, 4 Chunk B: Sentence 3, 4, 5, 6
+
+````javascript
+Both chunks remain understandable.
+
+## How Much Overlap?
+
+| Chunk Size | Overlap |
+|------------|---------:|
+| 300 tokens | 40-60 |
+| 500 tokens | 60-100 |
+| 800 tokens | 80-150 |
+
+Most systems use roughly **10-20% overlap**.
+
+---
+
+# Chunk Metadata
+
+Every chunk should include metadata describing its origin:
+
+```json
+{
+  "id": "roadmap.day011.chunk005",
+  "title": "Chunk Overlap",
+  "lesson": 11,
+  "section": "Chunk Overlap",
+  "difficulty": "Intermediate",
+  "tags": ["rag", "chunking", "retrieval"]
+}
+````
+
+Metadata enables:
+
+- Source attribution
+- Filtering
+- Ranking
+- Breadcrumbs
+- Citation generation
+
+---
+
+# Production Best Practices
+
+1. __Preserve Semantic Boundaries__ - Split at headings, paragraphs, section transitions
+2. __Avoid Splitting Structures__ - Don't split code blocks, tables, lists, diagrams
+3. __Use Stable Chunk Identifiers__ - Deterministic IDs simplify indexing and versioning
+4. __Keep Metadata Rich__ - Include title, lesson, section, tags, difficulty
+5. __Benchmark Retrieval__ - Evaluate using real user queries
+
+---
+
+# Common Mistakes
+
+❌ __Embedding Entire Documents__ - Large documents reduce retrieval precision ❌ __Splitting Purely by Token Count__ - Ignores document structure ❌ __Excessive Overlap__ - Creates duplicate embeddings and increases costs ❌ __Ignoring Metadata__ - Makes filtering and attribution difficult ❌ __One Size Fits All__ - Different content types need different strategies
+
+---
+
+# Key Takeaways
+
+- Chunking determines retrieval quality
+- Semantic boundaries are more important than fixed token counts
+- Heading-based chunking works well for MDX documentation
+- Hybrid chunking provides the best balance
+- Overlap preserves context but increases storage
+- Metadata is as important as embeddings
+- Different content types require different strategies
+
+---
+
+# Related Documents
+
+- [Chunking Pipeline](handbook.retrieval.chunking-pipeline)
+- [Embeddings Fundamentals](handbook.retrieval.embeddings-basics)
+- [Day 11 - Chunking Strategies](roadmap/day-011-chunking-strategies)
+
+```javascript
+
+---
+```

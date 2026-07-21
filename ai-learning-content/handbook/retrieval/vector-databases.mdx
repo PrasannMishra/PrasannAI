@@ -1,0 +1,182 @@
+````javascript
+```markdown
+---
+id: handbook.retrieval.vector-databases
+title: "Vector Databases for RAG"
+description: "Understand why vector databases exist, how they store embeddings, and how they enable efficient semantic retrieval in production AI systems."
+category: "Retrieval-Augmented Generation"
+topics:
+  - "Vector Database"
+  - "ANN"
+  - "HNSW"
+  - "Qdrant"
+  - "Semantic Search"
+related:
+  - "roadmap/day-012-vector-db"
+  - "handbook.retrieval.vector-db-architecture"
+  - "handbook.retrieval.embeddings-basics"
+---
+
+# Vector Databases for RAG
+
+## Purpose
+
+This document explains why vector databases are required for AI applications, how they differ from traditional databases, and how they enable efficient semantic retrieval at scale.
+
+---
+
+# Why Vector Databases Exist
+
+Embeddings become useful only when they can be searched efficiently. Generating embeddings for millions of documents is straightforward. Retrieving the most relevant embedding in milliseconds is the real engineering challenge.
+
+Traditional databases excel at exact matching:
+- Primary key lookup
+- Equality filters
+- Range queries
+- Sorting
+- Transactions
+
+AI applications require a different capability: **Find information that is semantically similar, even when the wording is completely different.**
+
+This requires searching high-dimensional vectors instead of text, making traditional indexing techniques such as B-Trees or Hash Indexes ineffective.
+
+---
+
+# The Retrieval Problem
+
+Assume our learning platform contains:
+- 100 days of lessons
+- Handbook chapters
+- Architecture documents
+- Interview questions
+- Projects
+- Glossary
+
+After chunking, this may become hundreds of thousands of vectors.
+
+When a student asks: "Explain cosine similarity."
+
+The database cannot compare that sentence with every stored vector efficiently. Even if a single comparison required only a few microseconds, millions of comparisons per request would quickly become impractical.
+
+The challenge is not storing vectors—it is retrieving the nearest vectors with low latency while maintaining high accuracy.
+
+---
+
+# Exact Nearest Neighbor Search (ENN)
+
+The most straightforward approach is brute-force search:
+````
+
+Query Vector → Compare with Vector 1, 2, 3, ... N → Sort by Similarity → Return Top-K
+
+```javascript
+
+This method guarantees the correct result because every vector is examined. However, its computational cost grows linearly with the number of stored vectors.
+
+For small datasets this is acceptable. For production systems containing millions of vectors, it becomes prohibitively expensive.
+
+---
+
+# Approximate Nearest Neighbor Search (ANN)
+
+Instead of examining every vector, ANN algorithms attempt to identify only the most promising regions of the vector space.
+
+Rather than guaranteeing the mathematically perfect answer, ANN aims to return a result that is almost identical while reducing search time by several orders of magnitude.
+
+This trade-off is acceptable for semantic retrieval because AI applications rarely require perfect mathematical precision. They require:
+- Low latency
+- High recall
+- Scalable indexing
+- Predictable performance
+
+Modern vector databases therefore use ANN algorithms rather than brute-force search.
+
+---
+
+# Why HNSW Became the Industry Standard
+
+Among several ANN algorithms, Hierarchical Navigable Small World (HNSW) has become the preferred choice because it provides an excellent balance between:
+- Retrieval accuracy
+- Search latency
+- Dynamic insertion
+- Scalability
+- Memory efficiency
+
+Instead of comparing every vector, HNSW organizes vectors into a navigable graph where semantically similar vectors are connected together. Searching becomes a graph traversal problem rather than a database scan.
+```
+
+Layer 2: ●────────────● \ / \ / Layer 1: ●────●────●────●────● \ / \ / Layer 0: ●──●──●──●──●──●──●──●──●──●
+
+```javascript
+
+The algorithm rapidly moves through the graph until it reaches the neighborhood most likely to contain the nearest vectors.
+
+---
+
+# Production Architecture
+
+A vector database is only one component of a RAG system:
+```
+
+User → React Frontend → NestJS Backend ↓ Embedding Service → Vector Database (Qdrant) → Retrieved Chunks ↓ Prompt Builder → LLM → AI Response
+
+```javascript
+
+Each component has a single responsibility:
+- **Frontend:** User interaction
+- **Backend:** Orchestrates the workflow
+- **Embedding Service:** Converts text into vectors
+- **Vector Database:** Stores and retrieves embeddings
+- **Prompt Builder:** Builds context for the LLM
+- **LLM:** Generates the final response
+
+---
+
+# Best Practices
+
+1. **Keep One Embedding Model Per Collection** - Vectors from different models should not be mixed
+2. **Store Rich Metadata** - Include lesson number, section, tags, difficulty
+3. **Design for Incremental Updates** - New lessons should be indexed independently
+4. **Batch Large Imports** - Chunk, generate embeddings, and insert vectors in batches
+5. **Monitor Retrieval Quality** - Poor results often caused by poor chunking or inconsistent embeddings
+
+---
+
+# Common Mistakes
+
+❌ **Treating the Vector Database as an LLM** - It performs retrieval, not generation
+❌ **Storing Entire Documents** - Always chunk before embedding
+❌ **Ignoring Metadata** - Semantic similarity alone is rarely sufficient
+❌ **Rebuilding the Entire Index** - Use incremental updates
+❌ **Multiple Embedding Models in One Collection** - Creates incompatible vector spaces
+
+---
+
+# Performance Considerations
+
+- **Embedding dimension:** Higher dimensions increase memory usage
+- **Number of vectors:** HNSW provides fast retrieval by avoiding exhaustive comparisons
+- **HNSW parameters:** Affect memory usage and retrieval speed
+- **Hardware:** More memory allows larger indexes
+- **Query concurrency:** Affects throughput
+
+---
+
+# Key Takeaways
+
+- Vector databases are designed for semantic retrieval, not exact matching
+- Exact Nearest Neighbor guarantees perfect results but doesn't scale
+- Approximate Nearest Neighbor sacrifices small accuracy for massive performance gains
+- HNSW is the industry-standard ANN algorithm
+- A Collection is the logical container for vectors
+- A vector database retrieves relevant context; the LLM generates the answer
+- Retrieval quality depends on chunking, embeddings, indexing, and metadata
+
+---
+
+# Related Documents
+
+- [Vector Database Architecture](handbook.retrieval.vector-db-architecture)
+- [Embeddings Fundamentals](handbook.retrieval.embeddings-basics)
+- [Day 12 - Vector Databases](roadmap/day-012-vector-db)
+```
